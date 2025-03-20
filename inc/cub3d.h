@@ -6,25 +6,25 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/18 16:16:06 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/20 17:51:20 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CUB3D_H
 # define CUB3D_H
 
-# include <stdbool.h>
-# include <unistd.h>
-# include <math.h>
-// # include "./libft/libft.h"
-// # include "./gnl/get_next_line.h"
+# include "../gnl/get_next_line.h"
+# include "../libft/libft.h"
 # include "../mlx/mlx.h"
 # include <X11/X.h>
 # include <X11/keysym.h>
+# include <math.h>
 # include <signal.h>
+# include <stdbool.h>
 # include <stdlib.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <unistd.h>
 
 # ifndef BONUS
 #  define BONUS 0
@@ -32,7 +32,7 @@
 
 # define WIDTH 1200
 # define HEIGHT 800
-# define IMAGE_SIZE	20
+# define IMAGE_SIZE 20
 # define PI 3.14159265359
 # define MOVE_SPEED 0.2
 # define ROT_SPEED 0.1
@@ -42,9 +42,10 @@ typedef struct s_vector	t_vector;
 typedef struct s_rgb	t_rgb;
 typedef struct s_image	t_image;
 typedef struct s_var	t_var;
+typedef struct s_player	t_player;
+typedef struct s_win	t_win;
 
-
-enum	e_key
+enum					e_key
 {
 	UP = XK_w,
 	DOWN = XK_s,
@@ -53,7 +54,7 @@ enum	e_key
 	ROT_L = XK_Left,
 	ROT_R = XK_Right,
 	LOOK_U = XK_Up,
-	LOOK_D = XK_Down,
+	LOOK_D = XK_Down
 };
 
 typedef enum e_cell
@@ -66,7 +67,6 @@ typedef enum e_cell
 	p_e = 'E',
 	p_w = 'W',
 }						t_cell;
-
 
 struct					s_vector
 {
@@ -91,50 +91,53 @@ struct					s_text
 	t_rgb				f;
 	char				*ceiling;
 	char				*floor;
-	char				p;
+	t_cell				p;
+	char				**map;
 	bool				error;
 };
-
 
 struct					s_image
 {
 	void				*img_ptr;
 	char				*addr;
 	int					bpp;
-	int					size_len;
+	int					size_line;
 	int					endian;
 };
 
-typedef struct s_base_vector
+struct					s_player
 {
-	t_vector e_x;
-	t_vector e_y;
-} t_base_vector;
-
-struct s_player
-{
-	t_vector	pos;
-	t_vector	dir;
+	t_vector			pos;
+	t_vector			dir;
+	t_vector			plan;
 };
 
-
-struct s_var
+struct					s_var
 {
-	void	*mlx;
-	void	*win;
+	void				*mlx;
+	void				*win;
 };
 
-struct s_window
+typedef struct s_game
 {
-	t_var	var;
-	t_image	mini_map;
-};
+	t_player			player;
+	t_text				txt;
+	char				**map;
+	t_var				var;
+	t_image				img;
+}						t_game;
 
-typedef struct s_cub
-{
-	t_parse	parse;
-	t_cell	**map;
-	t_window window;
-}	t_cub;
+// PARSE
+t_text					ft_parsing(char *path_map);
 
+// PARSE UTILS
+int						ft_ispace(char c);
+int						ft_skip_space(char *s);
+int						ft_array_lenght(char **arr);
+
+// FREE_UTILS
+void					*ft_free(void *param);
+void					ft_free_arr(void **arr);
+void					ft_free_txt(t_text *txt);
+void					init_player(t_game *game);
 #endif
