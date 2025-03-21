@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/20 17:51:20 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/21 12:05:14 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef struct s_image	t_image;
 typedef struct s_var	t_var;
 typedef struct s_player	t_player;
 typedef struct s_win	t_win;
+typedef struct s_vect	t_vect;
 
 enum					e_key
 {
@@ -67,6 +68,12 @@ typedef enum e_cell
 	p_e = 'E',
 	p_w = 'W',
 }						t_cell;
+
+struct					s_vect
+{
+	int				x;
+	int				y;
+};
 
 struct					s_vector
 {
