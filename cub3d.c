@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/21 15:26:55 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/22 11:28:18 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,42 @@ void	dda_algorithm(t_game *game, double x0, double y0, double x1, double y1)
 	}
 }
 
+void	move_player(t_game *game)
+{
+	if (game->player.key.key_up == true)
+	{
+		if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x + game->player.dir.x * MOVE_SPEED)] == '0')
+			game->player.pos.x += game->player.dir.x * MOVE_SPEED;
+		if (game->map[(int)(game->player.pos.y + game->player.dir.y * MOVE_SPEED)][(int)game->player.pos.x] == '0')
+			game->player.pos.y += game->player.dir.y * MOVE_SPEED;
+	}
+	if (game->player.key.key_down == true)
+	{
+		if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x - game->player.dir.x * MOVE_SPEED)] == '0')
+			game->player.pos.x -= game->player.dir.x * MOVE_SPEED;
+		if (game->map[(int)(game->player.pos.y - game->player.dir.y * MOVE_SPEED)][(int)game->player.pos.x] == '0')
+			game->player.pos.y -= game->player.dir.y * MOVE_SPEED;
+	}
+}
+
+void	clear_image(t_image *img, int width, int height)
+{
+	int	x;
+	int	y;
+	
+	y = 0;
+	while (y < height)
+	{
+		x = 0;
+		while (x < width)
+		{
+			put_pixel(img, x, y, 0x333333);
+			x++;
+		}
+		y++;
+	}
+}
+
 int	game_loop(t_game *game)
 {
 	int			x;
@@ -113,6 +149,8 @@ int	game_loop(t_game *game)
 	// dda_algorithm(game, game->player.pos.x, game->player.pos.y, 0, 15);
 	// mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr,
 	x = 0;
+	clear_image(&game->img, WIDTH, HEIGHT);
+	mlx_clear_window(game->var.mlx, game->var.win);
 	while (x < WIDTH)
 	{
 		cam.x = ((2 * x) / (double)WIDTH) - 1;
@@ -198,6 +236,7 @@ int	game_loop(t_game *game)
 	}
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
+	move_player(game);
 	return (0);
 }
 
@@ -208,6 +247,40 @@ int	init_image(t_game *game, t_image *image)
 		return (1);
 	image->addr = mlx_get_data_addr(image->img_ptr, &image->bpp,
 			&image->size_line, &image->endian);
+	return (0);
+}
+
+int	ft_key_press(int keysym, t_game *game)
+{
+	if (keysym == XK_w)
+		game->player.key.key_up = true;
+	if (keysym == XK_s)
+		game->player.key.key_down = true;
+	if (keysym == XK_d)
+		game->player.key.key_right = true;
+	if (keysym == XK_a)
+		game->player.key.key_left = true;
+	if (keysym == XK_Left)
+		game->player.key.rot_l = true;
+	if (keysym == XK_Right)
+		game->player.key.rot_r = true;
+	return (0);
+}
+
+int	ft_key_release(int keysym, t_game *game)
+{
+	if (keysym == XK_w)
+		game->player.key.key_up = false;
+	if (keysym == XK_s)
+		game->player.key.key_down = false;
+	if (keysym == XK_d)
+		game->player.key.key_right = false;
+	if (keysym == XK_a)
+		game->player.key.key_left = false;
+	if (keysym == XK_Left)
+		game->player.key.rot_l = false;
+	if (keysym == XK_Right)
+		game->player.key.rot_r = false;
 	return (0);
 }
 
@@ -236,6 +309,8 @@ int	main(int ac, char **av)
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - 120,
 	// 0xFF0000, "PRESS THE START TO BEGIN");
+	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
+	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);
 	mlx_loop_hook(game.var.mlx, game_loop, &game);
 	// game_loop(&game);
 	mlx_loop(game.var.mlx);

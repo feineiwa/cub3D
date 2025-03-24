@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/21 12:05:14 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/22 11:30:39 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@
 # define HEIGHT 800
 # define IMAGE_SIZE 20
 # define PI 3.14159265359
-# define MOVE_SPEED 0.2
-# define ROT_SPEED 0.1
+# define MOVE_SPEED 0.05
+# define ROT_SPEED 0.01
 
 typedef struct s_text	t_text;
 typedef struct s_vector	t_vector;
@@ -45,6 +45,7 @@ typedef struct s_var	t_var;
 typedef struct s_player	t_player;
 typedef struct s_win	t_win;
 typedef struct s_vect	t_vect;
+typedef struct s_key	t_key;
 
 enum					e_key
 {
@@ -112,11 +113,23 @@ struct					s_image
 	int					endian;
 };
 
+struct					s_key
+{
+	bool	key_up;	
+	bool	key_down;	
+	bool	key_left;
+	bool	key_right;	
+	bool	rot_l;
+	bool	rot_r;	
+};
+
+
 struct					s_player
 {
 	t_vector			pos;
 	t_vector			dir;
 	t_vector			plan;
+	t_key				key;
 };
 
 struct					s_var

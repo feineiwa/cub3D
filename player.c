@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/21 15:55:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/22 08:41:31 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,4 +92,10 @@ void	init_player(t_game *game)
         game->player.plan.y = -0.66;
 		// game->angle = (3 * MYPI) / 2;
 	}
+	game->player.key.key_up = false;
+	game->player.key.key_down = false;
+	game->player.key.key_right = false;
+	game->player.key.key_left = false;
+	game->player.key.rot_l = false;
+	game->player.key.rot_r = false;
 }
