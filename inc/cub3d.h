@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/22 11:30:39 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/29 10:47:01 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,19 @@
 #  define BONUS 0
 # endif
 
-# define WIDTH 1200
-# define HEIGHT 800
-# define IMAGE_SIZE 20
+// # define WIDTH 1200
+// # define HEIGHT 800
 # define PI 3.14159265359
-# define MOVE_SPEED 0.05
+# define MOVE_SPEED 0.01
 # define ROT_SPEED 0.01
+# define RES	4
+# define TILE_SIZE 64
+# define ROWS 7
+# define COLS 16
+# define WIDTH (COLS * TILE_SIZE)
+# define HEIGHT (ROWS * TILE_SIZE)
+# define FOV 60 * (PI / 180)
+# define R_NB	(WIDTH / RES)
 
 typedef struct s_text	t_text;
 typedef struct s_vector	t_vector;
@@ -72,8 +79,8 @@ typedef enum e_cell
 
 struct					s_vect
 {
-	int				x;
-	int				y;
+	int					x;
+	int					y;
 };
 
 struct					s_vector
@@ -115,14 +122,13 @@ struct					s_image
 
 struct					s_key
 {
-	bool	key_up;	
-	bool	key_down;	
-	bool	key_left;
-	bool	key_right;	
-	bool	rot_l;
-	bool	rot_r;	
+	bool				key_up;
+	bool				key_down;
+	bool				key_left;
+	bool				key_right;
+	bool				rot_l;
+	bool				rot_r;
 };
-
 
 struct					s_player
 {
