@@ -1,8 +1,8 @@
 NAME = cub3d
 
-CC = gcc
+CC = cc
 
-CFLAGS = -Wall -Wextra -Wextra -g
+CFLAGS = -g
 
 INCS = -I./inc/ -I$(LIBFT) $(LIBMLX)
 

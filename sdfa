@@ -1,0 +1,98 @@
+	while (x < WIDTH)
+	{
+		cam.x = (2 * x) / (double)WIDTH - 1;
+		// printf("cam.x -> %f\n", cam.x);
+		ray_dir.x = game->player.dir.x + game->player.plan.x * cam.x;
+		ray_dir.y = game->player.dir.y + game->player.plan.y * cam.x;
+		// printf("raydir y is %f\n", ray_dir.y);
+		// printf("raydir x is %f\n", ray_dir.x);
+		// mlx_pixel_put(game->var.mlx, game->var.win, (game->player.pos.x - ray_dir.x) * 32, (game->player.pos.y - ray_dir.y) * 32, color);
+		map.x = (int)game->player.pos.x;
+		map.y = (int)game->player.pos.y;
+		// printf("map.x [%d] et map.y [%d]\n", map.x, map.y);
+		hit = false;
+		if (ray_dir.x == 0)
+			delta.x = 1e30;
+		else
+			delta.x = fabs(1 / ray_dir.x);
+		if (ray_dir.y == 0)
+			delta.y = 1e30;
+		else
+			delta.y = fabs(1 / ray_dir.y);
+		// printf("delta.x est [%f]\n", delta.x);
+		// printf("delta.y est [%f]\n", delta.y);
+		// mlx_pixel_put(game->var.mlx, game->var.win, ((int)game->player.pos.x + ray_dir.x) * 32, ((int)game->player.pos.y + ray_dir.y) * 32, color);
+		// draw_line(game, game->player.pos.x, game->player.pos.y, game->player.pos.x + ray_dir.x, game->player.pos.y + ray_dir.y);
+		// mlx_pixel_put(game->var.mlx, game->var.win, map.x * 32, map.y * 32, 0x00FF00);
+		if (ray_dir.x < 0)
+		{
+			step.x = -1;
+			side.x = (game->player.pos.x - map.x) * delta.x;
+		}
+		else
+		{
+			step.x = 1;
+			side.x = (map.x + 1.0 - game->player.pos.x) * delta.x;
+		}
+		if (ray_dir.y < 0)
+		{
+			step.y = -1;
+			side.y = (game->player.pos.y - map.y) * delta.y;
+		}
+		else
+		{
+			step.y = 1;
+			side.y = (map.y + 1.0 - game->player.pos.y) * delta.y;
+		}
+		// mlx_pixel_put(game->var.mlx, game->var.win, (game->player.pos.x + side.x) * 32, (game->player.pos.y + side.y) * 32, 0x0000FF);
+		// printf("side.x-> [%f], et side.y-> [%f]\n", side.x, side.y);
+		while (hit != true)
+		{
+			if (side.x < side.y)
+			{
+				side.x += delta.x;
+				map.x += (int)step.x;
+				s = 0;
+			}
+			else
+			{
+				side.y += delta.y;
+				map.y += (int)step.y;
+				s = 1;
+			}
+			// put_pixel(&game->img, (game->player.pos.x - side.x) * 32, (game->player.pos.y - side.y) * 32, 0xFF0000);
+			// mlx_pixel_put(game->var.mlx, game->var.win, (game->player.pos.x - side.x) * 64, (game->player.pos.y - side.y) * 64, 0xFF0000);
+			if (map.x < 0 || map.x >= WIDTH || map.y < 0 || map.y >= HEIGHT)
+				hit == true;
+			if (game->map[map.y][map.x] == wall)
+				hit = true;
+		}
+		// draw_line(game, game->player.pos.x, game->player.pos.y, side.y, side.y);
+		if (s == 0)
+			wall_perp = (side.x - delta.x);
+		else
+			wall_perp = (side.y - delta.y);
+		// if (s == 0)
+		// 	wall_perp = (map.x - game->player.pos.x + (1 - step.x) / 2)
+		// 			/ ray_dir.x;
+		// else
+		// 	wall_perp = (map.y - game->player.pos.y + (1 - step.y) / 2)
+		// 			/ ray_dir.y;
+		line_h = (int)(HEIGHT / wall_perp);
+		printf("line_h is [%d]\n", line_h);
+		draw_s = -line_h / 2 + HEIGHT / 2;
+		draw_s = fmax(0, draw_s);
+		draw_e = line_h / 2 + HEIGHT / 2;
+		draw_e = fmin(HEIGHT - 1, draw_e);
+		// printf("draw_s is %d et draw_e is %d\n", draw_s, draw_e);
+		// if (s == 1)
+		// 	color = color / 2;
+		// printf("draw s %d et draw e %d\n", draw_s, draw_e);
+		while (draw_s < draw_e)
+		{
+			mlx_pixel_put(game->var.mlx, game->var.win, x, draw_s, 0x0000FF);
+			// put_pixel(&game->img, x, draw_s, color);
+			draw_s++;
+		}
+		x++;
+	}

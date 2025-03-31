@@ -6,11 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/22 08:41:31 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/31 10:08:03 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./cub3d.h"
+#include "./inc/cub3d.h"
 
 void	get_axis(char **map, char tile, double *x, double *y)
 {
@@ -41,6 +41,8 @@ t_cell	get_player_cell(char **map)
 	int	j;
 
 	j = 0;
+	if (!map || !*map)
+		return (0);
 	while (map[j])
 	{
 		i = 0;
@@ -62,35 +64,35 @@ void	init_player(t_game *game)
 	get_axis(game->map, game->txt.p, &game->player.pos.x, &game->player.pos.y);
 	if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_n)
 	{
-		game->player.dir.y = -1;
-		game->player.dir.x = 0;
+		// game->player.dir.y = 1;
+		// game->player.dir.x = 0;
 		game->player.plan.x = 0.66;
 		game->player.plan.y = 0;
-		// game->angle = MYPI;
+		game->player.angle = 3 * PI / 2;
 	}
 	else if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_s)
 	{
-		game->player.dir.y = 1;
-		game->player.dir.x = 0;
+		// game->player.dir.y = 1;
+		// game->player.dir.x = 0;
 		game->player.plan.x = -0.66;
 		game->player.plan.y = 0;
-		// game->angle = MYPI / 2;
+		game->player.angle = PI / 2;
 	}
 	else if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_e)
 	{
-		game->player.dir.y = 0;
-        game->player.dir.x = 1;
-        game->player.plan.x = 0;
-        game->player.plan.y = 0.66;
-		// game->angle = 0;
+		// game->player.dir.y = 0;
+		// game->player.dir.x = 1;
+		game->player.plan.x = 0;
+		game->player.plan.y = -0.66;
+		game->player.angle = 0;
 	}
 	else if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_w)
 	{
-		game->player.dir.y = 0;
-        game->player.dir.x = -1;
-        game->player.plan.x = 0;
-        game->player.plan.y = -0.66;
-		// game->angle = (3 * MYPI) / 2;
+		// game->player.dir.y = 0;
+		// game->player.dir.x = -1;
+		game->player.plan.x = 0;
+		game->player.plan.y = 0.66;
+		game->player.angle = PI;
 	}
 	game->player.key.key_up = false;
 	game->player.key.key_down = false;
@@ -98,4 +100,6 @@ void	init_player(t_game *game)
 	game->player.key.key_left = false;
 	game->player.key.rot_l = false;
 	game->player.key.rot_r = false;
+	game->player.turn_dir = 0;
+	game->player.walk_dir = 0;
 }

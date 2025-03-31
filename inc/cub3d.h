@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/29 10:47:01 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/31 15:16:13 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,15 +33,15 @@
 // # define WIDTH 1200
 // # define HEIGHT 800
 # define PI 3.14159265359
-# define MOVE_SPEED 0.01
-# define ROT_SPEED 0.01
+# define MOVE_SPEED 0.005
+# define ROT_SPEED ((0.5  * PI)/ 180)
 # define RES	4
 # define TILE_SIZE 64
 # define ROWS 7
 # define COLS 16
 # define WIDTH (COLS * TILE_SIZE)
 # define HEIGHT (ROWS * TILE_SIZE)
-# define FOV 60 * (PI / 180)
+# define FOV (PI / 2)
 # define R_NB	(WIDTH / RES)
 
 typedef struct s_text	t_text;
@@ -133,9 +133,12 @@ struct					s_key
 struct					s_player
 {
 	t_vector			pos;
-	t_vector			dir;
+	t_vect			dir;
 	t_vector			plan;
 	t_key				key;
+	double				angle;
+	int					turn_dir;
+	int					walk_dir;
 };
 
 struct					s_var

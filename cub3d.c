@@ -6,11 +6,13 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/22 11:28:18 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/03/31 15:34:20 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./inc/cub3d.h"
+
+bool	g_updated = false;
 
 void	put_pixel(t_image *img, int x, int y, int color)
 {
@@ -66,7 +68,7 @@ int	leave_windows(t_game *game)
 	exit(0);
 }
 
-void	dda_algorithm(t_game *game, double x0, double y0, double x1, double y1)
+void	draw_line(t_image *img, t_vector a, t_vector b, int color)
 {
 	double	dx;
 	double	dy;
@@ -75,47 +77,96 @@ void	dda_algorithm(t_game *game, double x0, double y0, double x1, double y1)
 	double	yinc;
 	int		i;
 
-	dx = x1 - x0;
-	dy = y1 - y0;
-	if (dx > dy)
-		steps = dx;
-	else
-		steps = dy;
-	xinc = dx / (double)steps;
-	yinc = dy / (double)steps;
+	dx = (b.x - a.x);
+	dy = (b.y - a.y);
+	steps = fmax(fabs(dx), fabs(dy));
+	xinc = dx / steps;
+	yinc = dy / steps;
 	i = 0;
 	while (i <= steps)
 	{
-		put_pixel(&game->img, x0 * 32, y0 * 32, 0XFF0000);
-		x0 += xinc;
-		y0 += yinc;
+		a.x += xinc;
+		a.y += yinc;
+		put_pixel(img, a.x, a.y, color);
 		i++;
 	}
 }
 
+double	normalize_angle(double angle)
+{
+	angle = fmod(angle, 2 * PI);
+	if (angle < 0)
+		angle += 2 * PI;
+	return (angle);
+}
+
 void	move_player(t_game *game)
 {
+	if (game->player.key.rot_l == true)
+		game->player.angle += game->player.turn_dir * ROT_SPEED;
+	if (game->player.key.rot_r == true)
+		game->player.angle += game->player.turn_dir * ROT_SPEED;
+	// game->player.angle = normalize_angle(game->player.angle);
 	if (game->player.key.key_up == true)
 	{
-		if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x + game->player.dir.x * MOVE_SPEED)] == '0')
-			game->player.pos.x += game->player.dir.x * MOVE_SPEED;
-		if (game->map[(int)(game->player.pos.y + game->player.dir.y * MOVE_SPEED)][(int)game->player.pos.x] == '0')
-			game->player.pos.y += game->player.dir.y * MOVE_SPEED;
+	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
+	// // 			+ game->player.dir.x * MOVE_SPEED)] == '0')
+	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
+	// // 	if (game->map[(int)(game->player.pos.y + game->player.dir.y
+	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
+	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
+		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+		// printf("cos is %f\n", cos(game->player.angle));
+		// printf("sin is %f\n", sin(game->player.angle));
+		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+		// printf("player angle is '%f'\n", (game->player.angle * 180) / PI);
 	}
 	if (game->player.key.key_down == true)
 	{
-		if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x - game->player.dir.x * MOVE_SPEED)] == '0')
-			game->player.pos.x -= game->player.dir.x * MOVE_SPEED;
-		if (game->map[(int)(game->player.pos.y - game->player.dir.y * MOVE_SPEED)][(int)game->player.pos.x] == '0')
-			game->player.pos.y -= game->player.dir.y * MOVE_SPEED;
+	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
+	// // 			- game->player.dir.x * MOVE_SPEED)] == '0')
+	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
+	// // 	if (game->map[(int)(game->player.pos.y - game->player.dir.y
+	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
+	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
+		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
 	}
+	if (game->player.key.key_left == true)
+	{
+	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
+	// // 			- game->player.dir.x * MOVE_SPEED)] == '0')
+	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
+	// // 	if (game->map[(int)(game->player.pos.y - game->player.dir.y
+	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
+	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
+		game->player.angle += PI / 2;
+		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+		game->player.angle -= PI / 2;
+	}
+	if (game->player.key.key_right == true)
+	{
+	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
+	// // 			- game->player.dir.x * MOVE_SPEED)] == '0')
+	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
+	// // 	if (game->map[(int)(game->player.pos.y - game->player.dir.y
+	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
+	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
+		game->player.angle += PI / 2;
+		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+		game->player.angle -= PI / 2;
+	}
+	// game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
+	// game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
 }
 
 void	clear_image(t_image *img, int width, int height)
 {
 	int	x;
 	int	y;
-	
+
 	y = 0;
 	while (y < height)
 	{
@@ -127,117 +178,6 @@ void	clear_image(t_image *img, int width, int height)
 		}
 		y++;
 	}
-}
-
-int	game_loop(t_game *game)
-{
-	int			x;
-	t_vector	cam;
-	t_vector	ray_dir;
-	t_vect		map;
-	t_vector	side;
-	t_vector	delta;
-	t_vect		step;
-	bool		hit;
-	int			s;
-	double		wall_perp;
-	int			line_h;
-	int			draw_s;
-	int			draw_e;
-	int			color = 0x0000FF;
-
-	// dda_algorithm(game, game->player.pos.x, game->player.pos.y, 0, 15);
-	// mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr,
-	x = 0;
-	clear_image(&game->img, WIDTH, HEIGHT);
-	mlx_clear_window(game->var.mlx, game->var.win);
-	while (x < WIDTH)
-	{
-		cam.x = ((2 * x) / (double)WIDTH) - 1;
-		ray_dir.x = game->player.dir.x + game->player.plan.x * cam.x;
-		ray_dir.y = game->player.dir.y + game->player.plan.y * cam.x;
-		map.x = (int)game->player.pos.x;
-		map.y = (int)game->player.pos.y;
-		// printf("map.x [%d] et map.y [%d]\n", map.x, map.y);
-		hit = false;
-		if (ray_dir.x == 0)
-			delta.x = 1e30;
-		else
-			delta.x = fabs(1 / ray_dir.x);
-		if (ray_dir.y == 0)
-			delta.y = 1e30;
-		else
-			delta.y = fabs(1 / ray_dir.y);
-		if (ray_dir.x < 0)
-		{
-			step.x = -1;
-			side.x = (game->player.pos.x - map.x) * delta.x;
-		}
-		else
-		{
-			step.x = 1;
-			side.x = (map.x + 1.0 - game->player.pos.x) * delta.x;
-		}
-		if (ray_dir.y < 0)
-		{
-			step.y = -1;
-			side.y = (game->player.pos.y - map.y) * delta.y;
-		}
-		else
-		{
-			step.y = 1;
-			side.y = (map.y + 1.0 - game->player.pos.y) * delta.y;
-		}
-		while (hit == false)
-		{
-			if (side.x < side.y)
-			{
-				side.x += delta.x;
-				map.x += step.x;
-				s = 0;
-			}
-			else
-			{
-				side.y += delta.y;
-				map.y += step.y;
-				s = 1;
-			}
-			// put_pixel(&game->img, map.x * 30, map.y * 30, 0xFF0000);
-			if (game->map[map.y][map.x] == wall)
-				hit = true;
-		}
-		// 	wall_perp = (side.x - delta.x);
-		// else
-		// 	wall_perp = (side.y - delta.y);
-		if (s == 0)
-			wall_perp = (map.x - game->player.pos.x + (1 - step.x) / 2)
-					/ ray_dir.x;
-		else
-			wall_perp = (map.y - game->player.pos.y + (1 - step.y) / 2)
-					/ ray_dir.y;
-		line_h = (int)(HEIGHT / wall_perp);
-		draw_s = -line_h / 2 + HEIGHT / 2;
-		// printf("line h is %d\n", line_h);
-		if (draw_s < 0)
-			draw_s = 0;
-		draw_e = line_h / 2 + HEIGHT / 2;
-		if (draw_e >= HEIGHT)
-			draw_e = HEIGHT - 1;
-		// if (s == 1)
-		// 	color = color / 2;
-		// printf("draw s %d et draw e %d\n", draw_s, draw_e);
-		while (draw_s <= draw_e)
-		{
-			// mlx_pixel_put(game->var.mlx, game->var.win, draw_s, x, 0x0000FF);
-			put_pixel(&game->img, x, draw_s, color);
-			draw_s++;
-		}
-		x++;
-	}
-	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
-		0);
-	move_player(game);
-	return (0);
 }
 
 int	init_image(t_game *game, t_image *image)
@@ -252,23 +192,53 @@ int	init_image(t_game *game, t_image *image)
 
 int	ft_key_press(int keysym, t_game *game)
 {
+	if (g_updated == true)
+		return (0);
 	if (keysym == XK_w)
+	{
 		game->player.key.key_up = true;
+		game->player.walk_dir = 1;
+		game->player.dir.y = -1;
+		game->player.dir.x = 0;
+	}
 	if (keysym == XK_s)
+	{
 		game->player.key.key_down = true;
+		game->player.walk_dir = -1;
+		game->player.dir.y = 1;
+		game->player.dir.x = 0;
+	}
 	if (keysym == XK_d)
+	{
 		game->player.key.key_right = true;
+		game->player.dir.y = 0;
+		game->player.dir.x = 1;
+		game->player.walk_dir = 1;
+	}
 	if (keysym == XK_a)
+	{
 		game->player.key.key_left = true;
+		game->player.dir.y = 0;
+		game->player.dir.x = -1;
+		game->player.walk_dir = -1;
+	}
 	if (keysym == XK_Left)
+	{
 		game->player.key.rot_l = true;
+		game->player.turn_dir = -1;
+	}
 	if (keysym == XK_Right)
+	{
 		game->player.key.rot_r = true;
+		game->player.turn_dir = 1;
+	}
 	return (0);
 }
 
 int	ft_key_release(int keysym, t_game *game)
 {
+	if (g_updated == true)
+		return (1);
 	if (keysym == XK_w)
 		game->player.key.key_up = false;
 	if (keysym == XK_s)
@@ -278,9 +248,135 @@ int	ft_key_release(int keysym, t_game *game)
 	if (keysym == XK_a)
 		game->player.key.key_left = false;
 	if (keysym == XK_Left)
+	{
 		game->player.key.rot_l = false;
+		game->player.turn_dir = 0;
+	}
 	if (keysym == XK_Right)
+	{
 		game->player.key.rot_r = false;
+		game->player.turn_dir = 0;
+	}
+	game->player.walk_dir = 0;
+	game->player.dir.x = 0;
+	game->player.dir.y = 0;
+	return (0);
+}
+
+void	draw_square(t_image *img, int x, int y, int size, int color)
+{
+	int	j;
+	int	i;
+
+	j = 0;
+	while (j < size)
+	{
+		i = 0;
+		while (i < size)
+		{
+			put_pixel(img, i + x, j + y, color);
+			i++;
+		}
+		j++;
+	}
+}
+
+bool	is_wall(int x, int y, char **map)
+{
+	if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT)
+		return (false);
+	if (map[(int)(y / TILE_SIZE)][(int)(x / TILE_SIZE)] == wall)
+		return (true);
+	return (false);
+}
+
+void	draw_circle(t_image *img, t_vector p, int radius, int color)
+{
+	int	i;
+	int	j;
+	int	dist_squared;
+
+	j = -radius;
+	put_pixel(img, p.x, p.y, color);
+	while (j <= radius)
+	{
+		i = -radius;
+		while (i <= radius)
+		{
+			dist_squared = (i * i) + (j * j);
+			if ((dist_squared >= ((radius * radius) - radius)) && (dist_squared <= ((radius * radius) + radius)))
+				put_pixel(img, p.x + i, p.y + j, color);
+			i++;
+		}
+		j++;
+	}
+	// double	angle;
+
+	// angle = 0;
+	// put_pixel(img, p.x, p.y, 0xFF0000);
+	// printf("px {%f} and py {%f}\n", p.x, p.y);
+	// while (angle <= 360)
+	// {
+	// 	p.x += cos(angle) * radius;
+	// 	p.y += sin(angle) * radius;
+	// 	printf("px [%f] and py [%f]\n", p.x, p.y);
+	// 	put_pixel(img, p.x, p.y, color);
+	// 	angle += 1;
+	// }
+}
+
+void	draw_map(t_image *img, char **map)
+{
+	int	x;
+	int	y;
+
+	y = 0;
+	while (map[y])
+	{
+		x = 0;
+		while (map[y][x])
+		{
+			if (map[y][x] == wall)
+				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE - 1,
+					0x000000);
+			if (map[y][x] != wall)
+				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
+					0xFFFFFF);
+			x++;
+		}
+		y++;
+	}
+}
+
+int	game_loop(t_game *game)
+{
+	t_vector	a;
+	t_vector	b;
+
+	g_updated = true;
+	move_player(game);
+	mlx_clear_window(game->var.mlx, game->var.win);
+	clear_image(&game->img, WIDTH, HEIGHT);
+	int	ray = 0;
+	double	ray_angle;
+	draw_map(&game->img, game->map);
+	a.x = game->player.pos.x * TILE_SIZE;
+	a.y = game->player.pos.y * TILE_SIZE;
+	ray_angle = game->player.angle - (FOV / 2);
+	// printf("%f\n", ray_angle * 180 / PI);
+	while (ray <= (int)R_NB)
+	{
+		b.x = a.x + cos(ray_angle) * 50;
+		b.y = a.y + sin(ray_angle) * 50;
+		draw_line(&game->img, a, b, 0xFF00FF);
+		ray_angle += FOV / R_NB;
+		ray++;
+	}
+	// printf("player x %f and player y %f\n", game->player.pos.x, game->player.pos.y);
+	draw_circle(&game->img, a, 10, 0x00FF00);
+	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
+		0);
+	g_updated = false;
 	return (0);
 }
 
@@ -305,14 +401,16 @@ int	main(int ac, char **av)
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
-	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0, 0);
-	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
-	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - 120,
+	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
+		0);
+	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
 	// 0xFF0000, "PRESS THE START TO BEGIN");
+	g_updated = false;
+	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
 	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);
-	mlx_loop_hook(game.var.mlx, game_loop, &game);
-	// game_loop(&game);
+	// mlx_loop_hook(game.var.mlx, game_loop, &game);
+	game_loop(&game);
 	mlx_loop(game.var.mlx);
 	return (0);
 }
