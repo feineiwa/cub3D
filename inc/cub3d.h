@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/01 19:11:36 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/02 00:59:56 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,10 @@
 # define COLS 33
 # define WIDTH (COLS * TILE_SIZE)
 # define HEIGHT (ROWS * TILE_SIZE)
-# define FOV 1.0471975512
-# define R_NB WIDTH
+// # define FOV 1.0471975512
+# define FOV (60 * PI) / 180
+// # define R_ANGLE	1
+# define R_NB (WIDTH / RES)
 
 typedef struct s_text	t_text;
 typedef struct s_vector	t_vector;
@@ -127,6 +129,7 @@ struct					s_key
 	bool				key_right;
 	bool				rot_l;
 	bool				rot_r;
+	bool				speed;
 };
 
 struct					s_player

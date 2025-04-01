@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/01 19:13:43 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/02 02:36:25 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,34 +101,44 @@ double	normalize_angle(double angle)
 	return (angle);
 }
 
+bool is_exceeded(int x, int y, t_player player)
+{
+	if (x < 0 || y < 0 || x >= player.w || y >= player.h)
+		return (true);
+	return(false);
+}
+
 void	move_player(t_game *game)
 {
+	t_vector move;
+	double	move_speed;
+
 	if (game->player.key.rot_l == true)
 		game->player.angle += game->player.turn_dir * ROT_SPEED;
 	if (game->player.key.rot_r == true)
 		game->player.angle += game->player.turn_dir * ROT_SPEED;
-	if (game->player.key.key_up == true)
+	move_speed = MOVE_SPEED;
+	if (game->player.key.speed == true)
+		move_speed += MOVE_SPEED;
+	if (game->player.key.key_up == true || game->player.key.key_down == true)
 	{
-		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-		// printf("cos is %f\n", cos(game->player.angle));
-		// printf("sin is %f\n", sin(game->player.angle));
-		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-		// printf("player angle is '%f'\n", (game->player.angle * 180) / PI);
+		move.x = game->player.pos.x + cos(game->player.angle) * game->player.walk_dir * move_speed;
+		move.y = game->player.pos.y + sin(game->player.angle) * game->player.walk_dir * move_speed;
+		if (!is_exceeded((int)floor(move.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(move.x)] != wall)
+		{
+			game->player.pos.x = move.x;
+			game->player.pos.y = move.y;
+		}
 	}
-	if (game->player.key.key_down == true)
+	if (game->player.key.key_left == true || game->player.key.key_right)
 	{
-		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-	}
-	if (game->player.key.key_left == true)
-	{
-		game->player.pos.x += cos(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
-		game->player.pos.y += sin(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
-	}
-	if (game->player.key.key_right == true)
-	{
-		game->player.pos.x += cos(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
-		game->player.pos.y += sin(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
+		move.x = game->player.pos.x + cos(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
+		move.y = game->player.pos.y + sin(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
+		if (!is_exceeded((int)floor(move.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(move.x)] != wall)
+		{
+			game->player.pos.x = move.x;
+			game->player.pos.y = move.y;
+		}
 	}
 }
 
@@ -143,7 +153,7 @@ void	clear_image(t_image *img, int width, int height)
 		x = 0;
 		while (x < width)
 		{
-			put_pixel(img, x, y, 0x333333);
+			put_pixel(img, x, y, 0);
 			x++;
 		}
 		y++;
@@ -192,6 +202,8 @@ int	ft_key_press(int keysym, t_game *game)
 		game->player.key.rot_r = true;
 		game->player.turn_dir = 1;
 	}
+	if (keysym == XK_Shift_L)
+		game->player.key.speed = true;
 	g_updated = true;
 	return (0);
 }
@@ -216,6 +228,8 @@ int	ft_key_release(int keysym, t_game *game)
 		game->player.key.rot_r = false;
 		game->player.turn_dir = 0;
 	}
+	if (keysym == XK_Shift_L)
+		game->player.key.speed = false;
 	game->player.walk_dir = 0;
 	game->player.dir.x = 0;
 	game->player.dir.y = 0;
@@ -246,8 +260,8 @@ bool	is_wall(int x, int y, char **map, t_player player)
 	int	x1;
 	int	y1;
 
-	x1 = (int)(x / TILE_SIZE);
-	y1 = (int)(y / TILE_SIZE);
+	x1 = x / TILE_SIZE;
+	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 		return (false);
 	if (map[y1][x1] == wall)
@@ -334,6 +348,11 @@ void	draw_rectangle(t_image *image, int	x0, int x1, int y0, int y1, int color)
 	}
 }
 
+int	set_color_rgb(int r, int g, int b)
+{
+	return (r << 16 | g << 8 | b);
+}
+
 int	game_loop(t_game *game)
 {
 	t_vector	a;
@@ -346,16 +365,17 @@ int	game_loop(t_game *game)
 	if (g_updated == false && g_first == false)
 		return (1);
 	move_player(game);
-	// mlx_clear_window(game->var.mlx, game->var.win);
+	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT);
-	int	ray = 0;
 	double	ray_angle;
 	// draw_map(&game->img, game->map);
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
 	ray_angle = normalize_angle(game->player.angle - (FOV / 2));
-	while (ray <= (int)R_NB)
+	int	ray = 0;
+	while (ray < (int)R_NB)
 	{
+		ray_angle = normalize_angle(ray_angle);
 		is_facing_down = false;
 		is_facing_left = false;
 		is_facing_right = false;
@@ -387,7 +407,7 @@ int	game_loop(t_game *game)
 		bool	found_horizontal = false;
 		while (next_horiz.x <= WIDTH && next_horiz.x >= 0 && next_horiz.y <= HEIGHT && next_horiz.y >= 0)
 		{
-			if (is_wall(next_horiz.x, next_horiz.y, game->map, game->player) == true)
+			if (is_wall((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
 			{
 				found_horizontal = true;
 				horiz_p = next_horiz;
@@ -418,7 +438,7 @@ int	game_loop(t_game *game)
 		bool	found_vertical = false;
 		while (next_vert.x <= WIDTH && next_vert.x >= 0 && next_vert.y <= HEIGHT && next_vert.y >= 0)
 		{
-			if (is_wall(next_vert.x, next_vert.y, game->map, game->player))
+			if (is_wall((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
 			{
 				found_vertical = true;
 				vert_p.x = next_vert.x;
@@ -446,37 +466,73 @@ int	game_loop(t_game *game)
 		t_vector wall_hit = {0, 0};
 		double		dist_wall = 0;
 		int	color = 0;
+		int	light_level = 20;
+		color = 255;
 		if (horizontal_dist < vertical_dist)
 		{
 			wall_hit = horiz_p;
-			dist_wall = horizontal_dist;
-			color = 255;
+			dist_wall = fabs(horizontal_dist);
+			
 		}
 		else
 		{
 			wall_hit = vert_p;
-			dist_wall = vertical_dist;
-			color = 64;
+			dist_wall = fabs(vertical_dist);
 		}
 		dist_wall *= cos(game->player.angle - ray_angle);
+		if (dist_wall < 0.001)
+			dist_wall = 0.001;
+		color *= light_level / dist_wall;
+		if (color >= 255)
+			color = 255;
+		else if (color <= 0)
+			color = 0;
+		if (is_facing_up && horizontal_dist < vertical_dist)
+			color = set_color_rgb(0, color, 0);
+		else if (is_facing_down && horizontal_dist < vertical_dist)
+			color = set_color_rgb(color, 0, 0);
+		else if (is_facing_right && horizontal_dist > vertical_dist)
+			color = set_color_rgb(0, 0, color);
+		else if (is_facing_left && horizontal_dist > vertical_dist)
+			color = set_color_rgb(0, color, color);
 		// printf("dist wall is %f\n", dist_wall);
-		double	line_height = (32 / dist_wall) * 538;
+		double	line_height = (TILE_SIZE / dist_wall) * 250;
 		// printf("line height is %f\n", line_height);
-		double	draw_begin = (HEIGHT / 2) - (line_height / 2);
-		double	draw_end = draw_begin + line_height;
+		double	draw_begin = 0.5 * (HEIGHT - line_height);
 		if (draw_begin < 0)
 			draw_begin = 0;
+		double	draw_end = draw_begin + line_height;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
 		// printf("draw_begin is %f and the end is %f\n", draw_begin, draw_end);
+		// printf("facing up %d\n", is_facing_up);
+		// printf("facing down %d\n", is_facing_down);
+		// printf("facing left %d\n", is_facing_left);
+		// printf("facing right %d\n", is_facing_right);
 		// draw_line(&game->img, a, wall_hit, 0xFF00FF);
-		draw_rectangle(&game->img, ray * RES, RES, (int)draw_begin, (int)draw_end, color);
+		draw_rectangle(&game->img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), color);
+		// int	j = 0;
+		// while (j < WIDTH)
+		// {
+		// 	put_pixel(&game->img, ray * RES, j, 0xFF0000);
+		// 	j++;
+		// }
 		ray_angle += FOV / R_NB;
 		ray++;
 	}
+	t_vector center = {WIDTH / 2, (HEIGHT / 4) + HEIGHT /3};
+	draw_circle(&game->img, center, 10, 0xFF0000);
 	// draw_circle(&game->img, a, 5, 0x00FF00);
+	t_vector compass = {WIDTH - 100, 100};
+	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
+	draw_circle(&game->img, compass, 50, 0xFFFFFF);
+	draw_line(&game->img, compass, needle, 0xFFFFFF);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
+	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
+	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
+	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
+	mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
 	g_updated = false;
 	g_first = false;
 	return (0);
