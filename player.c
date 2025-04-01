@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/01 13:30:04 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/01 17:29:08 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,5 +85,4 @@ void	init_player(t_game *game)
 	game->player.turn_dir = 0;
 	game->player.walk_dir = 0;
 	get_w_and_h(game->map, &game->player.w, &game->player.h);
-	printf("w and hei %d %d", game->player.w, game->player.h);
 }

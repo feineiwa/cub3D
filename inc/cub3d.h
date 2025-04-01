@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/01 14:05:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/01 19:11:36 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@
 # define WIDTH (COLS * TILE_SIZE)
 # define HEIGHT (ROWS * TILE_SIZE)
 # define FOV 1.0471975512
-# define R_NB (WIDTH / RES)
+# define R_NB WIDTH
 
 typedef struct s_text	t_text;
 typedef struct s_vector	t_vector;
