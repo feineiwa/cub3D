@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 09:26:15 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/20 15:04:47 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/01 13:25:34 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,10 +244,9 @@ void	init_text(t_text *txt)
 	txt->c.r = 0;
 	txt->c.g = 0;
 	txt->c.b = 0;
-	txt->map = NULL;
 }
 
-t_text	ft_parsing(char *path_map)
+t_text	ft_parsing(char *path_map, char ***game_map)
 {
 	int		fd;
 	char	*line;
@@ -396,8 +395,8 @@ t_text	ft_parsing(char *path_map)
 		if (check_blank_line_map(map))
 			txt.error = 1;
 		else
-			txt.map = check_map_valid(map);
-		if (txt.map == NULL)
+			*game_map = check_map_valid(map);
+		if (*game_map == NULL)
 			txt.error = 1;
 		map = ft_free(map);
 	}

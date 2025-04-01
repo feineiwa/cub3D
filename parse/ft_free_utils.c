@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 17:24:16 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/20 14:58:31 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/01 13:19:51 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,4 @@ void	ft_free_txt(t_text *txt)
 		ft_free(txt->ceiling);
 	if (txt->floor)
 		ft_free(txt->floor);
-	if (txt->map)
-		ft_free_arr((void **)txt->map);
 }

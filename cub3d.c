@@ -6,13 +6,14 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/01 00:57:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/01 16:12:42 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./inc/cub3d.h"
 
 bool	g_updated = false;
+bool	g_first = false;
 
 void	put_pixel(t_image *img, int x, int y, int color)
 {
@@ -106,15 +107,8 @@ void	move_player(t_game *game)
 		game->player.angle += game->player.turn_dir * ROT_SPEED;
 	if (game->player.key.rot_r == true)
 		game->player.angle += game->player.turn_dir * ROT_SPEED;
-	// game->player.angle = normalize_angle(game->player.angle);
 	if (game->player.key.key_up == true)
 	{
-	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
-	// // 			+ game->player.dir.x * MOVE_SPEED)] == '0')
-	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
-	// // 	if (game->map[(int)(game->player.pos.y + game->player.dir.y
-	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
-	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
 		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
 		// printf("cos is %f\n", cos(game->player.angle));
 		// printf("sin is %f\n", sin(game->player.angle));
@@ -123,43 +117,19 @@ void	move_player(t_game *game)
 	}
 	if (game->player.key.key_down == true)
 	{
-	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
-	// // 			- game->player.dir.x * MOVE_SPEED)] == '0')
-	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
-	// // 	if (game->map[(int)(game->player.pos.y - game->player.dir.y
-	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
-	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
 		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
 		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
 	}
 	if (game->player.key.key_left == true)
 	{
-	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
-	// // 			- game->player.dir.x * MOVE_SPEED)] == '0')
-	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
-	// // 	if (game->map[(int)(game->player.pos.y - game->player.dir.y
-	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
-	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
-		game->player.angle += PI / 2;
-		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-		game->player.angle -= PI / 2;
+		game->player.pos.x += cos(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
+		game->player.pos.y += sin(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
 	}
 	if (game->player.key.key_right == true)
 	{
-	// // 	if (game->map[(int)game->player.pos.y][(int)(game->player.pos.x
-	// // 			- game->player.dir.x * MOVE_SPEED)] == '0')
-	// // 		game->player.pos.x += game->player.dir.x * MOVE_SPEED;
-	// // 	if (game->map[(int)(game->player.pos.y - game->player.dir.y
-	// // 			* MOVE_SPEED)][(int)game->player.pos.x] == '0')
-	// // 		game->player.pos.y += game->player.dir.y * MOVE_SPEED;
-		game->player.angle += PI / 2;
-		game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-		game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-		game->player.angle -= PI / 2;
+		game->player.pos.x += cos(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
+		game->player.pos.y += sin(game->player.angle + PI / 2) * game->player.walk_dir * MOVE_SPEED;
 	}
-	// game->player.pos.x += cos(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
-	// game->player.pos.y += sin(game->player.angle) * game->player.walk_dir * MOVE_SPEED;
 }
 
 void	clear_image(t_image *img, int width, int height)
@@ -192,34 +162,24 @@ int	init_image(t_game *game, t_image *image)
 
 int	ft_key_press(int keysym, t_game *game)
 {
-	if (g_updated == true)
-		return (0);
 	if (keysym == XK_w)
 	{
 		game->player.key.key_up = true;
 		game->player.walk_dir = 1;
-		game->player.dir.y = -1;
-		game->player.dir.x = 0;
 	}
 	if (keysym == XK_s)
 	{
 		game->player.key.key_down = true;
 		game->player.walk_dir = -1;
-		game->player.dir.y = 1;
-		game->player.dir.x = 0;
 	}
 	if (keysym == XK_d)
 	{
 		game->player.key.key_right = true;
-		game->player.dir.y = 0;
-		game->player.dir.x = 1;
 		game->player.walk_dir = 1;
 	}
 	if (keysym == XK_a)
 	{
 		game->player.key.key_left = true;
-		game->player.dir.y = 0;
-		game->player.dir.x = -1;
 		game->player.walk_dir = -1;
 	}
 	if (keysym == XK_Left)
@@ -232,13 +192,12 @@ int	ft_key_press(int keysym, t_game *game)
 		game->player.key.rot_r = true;
 		game->player.turn_dir = 1;
 	}
+	g_updated = true;
 	return (0);
 }
 
 int	ft_key_release(int keysym, t_game *game)
 {
-	if (g_updated == true)
-		return (1);
 	if (keysym == XK_w)
 		game->player.key.key_up = false;
 	if (keysym == XK_s)
@@ -260,6 +219,7 @@ int	ft_key_release(int keysym, t_game *game)
 	game->player.walk_dir = 0;
 	game->player.dir.x = 0;
 	game->player.dir.y = 0;
+	g_updated = true;
 	return (0);
 }
 
@@ -281,11 +241,16 @@ void	draw_square(t_image *img, int x, int y, int size, int color)
 	}
 }
 
-bool	is_wall(int x, int y, char **map)
+bool	is_wall(int x, int y, char **map, t_player player)
 {
-	if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT)
+	int	x1;
+	int	y1;
+
+	x1 = (int)(x / TILE_SIZE);
+	y1 = (int)(y / TILE_SIZE);
+	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 		return (false);
-	if (map[(int)(y / TILE_SIZE)][(int)(x / TILE_SIZE)] == wall)
+	if (map[y1][x1] == wall)
 		return (true);
 	return (false);
 }
@@ -348,17 +313,22 @@ void	draw_map(t_image *img, char **map)
 	}
 }
 
-bool	distance_between_points(t_vector a, t_vector b)
+double	distance_between_points(t_vector a, t_vector b)
 {
-	return (sqrt(((b.x - a.x) * (b.x - a.x)) + (((b.y - a.y) * ((b.y - a.y))))));
+	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
 }
 
 int	game_loop(t_game *game)
 {
 	t_vector	a;
 	t_vector	b;
-
-	g_updated = true;
+	bool	is_facing_down = false;
+	bool	is_facing_left = false;
+	bool	is_facing_right = false;
+	bool	is_facing_up = false;
+	
+	if (g_updated == false && g_first == false)
+		return (1);
 	move_player(game);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT);
@@ -368,34 +338,25 @@ int	game_loop(t_game *game)
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
 	ray_angle = normalize_angle(game->player.angle - (FOV / 2));
-	int	is_facing_down = 0;
-	int	is_facing_left = 0;
-	int	is_facing_right = 0;
-	int	is_facing_up = 0;
-	// printf("%f\n", ray_angle * 180 / PI);
-	// printf("ay is %f\n", floor(game->player.pos.y) - 1);
-	// printf("ay is %f\n", ceil(game->player.pos.y)  + 1);
-	// printf("ay is %f\n", (floor(a.y / TILE_SIZE) * (TILE_SIZE) + TILE_SIZE) / TILE_SIZE);
-	// Ax = (Ay - game->player.pos.y) / tan(alpha) + game->player.pos.x;
 	while (ray <= (int)R_NB)
 	{
-		is_facing_down = 0;
-		is_facing_left = 0;
-		is_facing_right = 0;
-		is_facing_up = 0;
+		is_facing_down = false;
+		is_facing_left = false;
+		is_facing_right = false;
+		is_facing_up = false;
 		ray_angle = normalize_angle(ray_angle);
 		if (ray_angle > 0 && ray_angle < PI)
-			is_facing_down = 1;
+			is_facing_down = true;
 		else
-			is_facing_up = 1;
-		if (ray_angle > PI / 2  && ray_angle < 3 * PI / 2)
-			is_facing_left = 1;
+			is_facing_up = true;
+		if (ray_angle < (0.5 * PI) || ray_angle > 1.5 * PI)
+			is_facing_right = true;
 		else
-			is_facing_right = 1;
+			is_facing_left = true;
 		t_vector horiz_p = {0, 0};
 		t_vector first_int = {0, 0};
 		if (is_facing_up == 1)
-			first_int.y = floor(a.y / TILE_SIZE) * TILE_SIZE - 1;
+			first_int.y = floor(a.y / TILE_SIZE) * TILE_SIZE - 0.5;
 		else if (is_facing_down == 1)
 			first_int.y = floor(a.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
 		first_int.x = a.x + (first_int.y - a.y) / tan(ray_angle);
@@ -410,11 +371,10 @@ int	game_loop(t_game *game)
 		bool	found_horizontal = false;
 		while (next_horiz.x <= WIDTH && next_horiz.x >= 0 && next_horiz.y <= HEIGHT && next_horiz.y >= 0)
 		{
-			if (is_wall(next_horiz.x, next_horiz.y, game->map))
+			if (is_wall(next_horiz.x, next_horiz.y, game->map, game->player) == true)
 			{
 				found_horizontal = true;
-				horiz_p.x = next_horiz.x;
-				horiz_p.y = next_horiz.y;
+				horiz_p = next_horiz;
 				break ;
 			}
 			else
@@ -427,8 +387,8 @@ int	game_loop(t_game *game)
 		if (is_facing_right == 1)
 			first_int.x = floor(a.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
 		else if (is_facing_left == 1)
-			first_int.x = floor(a.x / TILE_SIZE) * TILE_SIZE - 1;
-		first_int.y = a.y + (first_int.x - a.x) * tan(ray_angle);
+			first_int.x = floor(a.x / TILE_SIZE) * TILE_SIZE - 0.5;
+		first_int.y = a.y + ((first_int.x - a.x) * tan(ray_angle));
 		
 		t_vector next_vert = {first_int.x, first_int.y};
 		s.x = 0;
@@ -438,10 +398,11 @@ int	game_loop(t_game *game)
 		else if (is_facing_left == 1)
 			s.x = -TILE_SIZE;
 		s.y = s.x * tan(ray_angle);
+		
 		bool	found_vertical = false;
 		while (next_vert.x <= WIDTH && next_vert.x >= 0 && next_vert.y <= HEIGHT && next_vert.y >= 0)
 		{
-			if (is_wall(next_vert.x, next_vert.y, game->map))
+			if (is_wall(next_vert.x, next_vert.y, game->map, game->player))
 			{
 				found_vertical = true;
 				vert_p.x = next_vert.x;
@@ -454,39 +415,32 @@ int	game_loop(t_game *game)
 				next_vert.y += s.y;
 			}
 		}
-		//distance calculation
+		// distance calculation
 
 		double horizontal_dist = 0;
 		double vertical_dist = 0;
 		if (found_horizontal == true)
 			horizontal_dist = distance_between_points(a, horiz_p);
 		else
-			horizontal_dist = 99999.0;
+			horizontal_dist = __DBL_MAX__;
 		if (found_vertical == true)
 			vertical_dist = distance_between_points(a, vert_p);
 		else
-			vertical_dist = 99999.0;
+			vertical_dist = __DBL_MAX__;
 		t_vector wall_hit = {0, 0};
 		if (horizontal_dist < vertical_dist)
-		{
-			wall_hit.x = horiz_p.x;
-			wall_hit.y = horiz_p.y;
-		}
+			wall_hit = horiz_p;
 		else
-		{
-			wall_hit.x = vert_p.x;
-			wall_hit.y = vert_p.y;
-			
-		}
+			wall_hit = vert_p;
 		draw_line(&game->img, a, wall_hit, 0xFF00FF);
 		ray_angle += FOV / R_NB;
 		ray++;
 	}
-	// printf("player x %f and player y %f\n", game->player.pos.x, game->player.pos.y);
-	draw_circle(&game->img, a, 10, 0x00FF00);
+	draw_circle(&game->img, a, 5, 0x00FF00);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
 	g_updated = false;
+	g_first = false;
 	return (0);
 }
 
@@ -499,8 +453,8 @@ int	main(int ac, char **av)
 		ft_putendl_fd("Error\nArguments should be just 2", 2);
 		return (1);
 	}
-	game.txt = ft_parsing(av[1]);
-	game.map = game.txt.map;
+	
+	game.txt = ft_parsing(av[1], &game.map);
 	if (game.map == NULL)
 		return (0);
 	if (init_window(&game))
@@ -516,6 +470,7 @@ int	main(int ac, char **av)
 	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
 	// 0xFF0000, "PRESS THE START TO BEGIN");
 	g_updated = false;
+	g_first = true;
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
 	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);
