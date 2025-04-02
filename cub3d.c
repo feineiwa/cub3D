@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/02 02:36:25 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/02 12:53:34 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ void	clear_image(t_image *img, int width, int height)
 		x = 0;
 		while (x < width)
 		{
-			put_pixel(img, x, y, 0);
+			put_pixel(img, x, y, 0x333333);
 			x++;
 		}
 		y++;
@@ -373,14 +373,13 @@ int	game_loop(t_game *game)
 	a.y = game->player.pos.y * TILE_SIZE;
 	ray_angle = normalize_angle(game->player.angle - (FOV / 2));
 	int	ray = 0;
-	while (ray < (int)R_NB)
+	while (ray < R_NB)
 	{
 		ray_angle = normalize_angle(ray_angle);
 		is_facing_down = false;
 		is_facing_left = false;
 		is_facing_right = false;
 		is_facing_up = false;
-		ray_angle = normalize_angle(ray_angle);
 		if (ray_angle > 0 && ray_angle < PI)
 			is_facing_down = true;
 		else
@@ -392,9 +391,9 @@ int	game_loop(t_game *game)
 		t_vector horiz_p = {0, 0};
 		t_vector first_int = {0, 0};
 		if (is_facing_up == 1)
-			first_int.y = floor(a.y / TILE_SIZE) * TILE_SIZE - 0.001;
+			first_int.y = (floor(game->player.pos.y) - 1e-6) * TILE_SIZE;
 		else if (is_facing_down == 1)
-			first_int.y = floor(a.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
+			first_int.y = floor(game->player.pos.y) * TILE_SIZE + TILE_SIZE;
 		first_int.x = a.x + (first_int.y - a.y) / tan(ray_angle);
 		
 		t_vector next_horiz = {first_int.x, first_int.y};
@@ -405,7 +404,7 @@ int	game_loop(t_game *game)
 			s.y = TILE_SIZE;
 		s.x = s.y / tan(ray_angle);
 		bool	found_horizontal = false;
-		while (next_horiz.x <= WIDTH && next_horiz.x >= 0 && next_horiz.y <= HEIGHT && next_horiz.y >= 0)
+		while (next_horiz.x < WIDTH && next_horiz.x > 0 && next_horiz.y < HEIGHT && next_horiz.y >= 0)
 		{
 			if (is_wall((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
 			{
@@ -421,9 +420,9 @@ int	game_loop(t_game *game)
 		}
 		t_vector vert_p = {0, 0};
 		if (is_facing_right == 1)
-			first_int.x = floor(a.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
+			first_int.x = floor(game->player.pos.x) * TILE_SIZE + TILE_SIZE;
 		else if (is_facing_left == 1)
-			first_int.x = floor(a.x / TILE_SIZE) * TILE_SIZE - 0.001;
+			first_int.x = (floor(game->player.pos.x) - 1e-6) * TILE_SIZE;
 		first_int.y = a.y + ((first_int.x - a.x) * tan(ray_angle));
 		
 		t_vector next_vert = {first_int.x, first_int.y};
@@ -436,7 +435,7 @@ int	game_loop(t_game *game)
 		s.y = s.x * tan(ray_angle);
 		
 		bool	found_vertical = false;
-		while (next_vert.x <= WIDTH && next_vert.x >= 0 && next_vert.y <= HEIGHT && next_vert.y >= 0)
+		while (next_vert.x < WIDTH && next_vert.x >= 0 && next_vert.y < HEIGHT && next_vert.y >= 0)
 		{
 			if (is_wall((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
 			{
@@ -466,7 +465,7 @@ int	game_loop(t_game *game)
 		t_vector wall_hit = {0, 0};
 		double		dist_wall = 0;
 		int	color = 0;
-		int	light_level = 20;
+		int	light_level = 60;
 		color = 255;
 		if (horizontal_dist < vertical_dist)
 		{
@@ -495,13 +494,14 @@ int	game_loop(t_game *game)
 			color = set_color_rgb(0, 0, color);
 		else if (is_facing_left && horizontal_dist > vertical_dist)
 			color = set_color_rgb(0, color, color);
+		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		// printf("dist wall is %f\n", dist_wall);
-		double	line_height = (TILE_SIZE / dist_wall) * 250;
+		float	line_height = (TILE_SIZE / dist_wall) * 250;
 		// printf("line height is %f\n", line_height);
-		double	draw_begin = 0.5 * (HEIGHT - line_height);
+		float	draw_begin = 0.5 * (HEIGHT - line_height) + waves;
 		if (draw_begin < 0)
 			draw_begin = 0;
-		double	draw_end = draw_begin + line_height;
+		float	draw_end = draw_begin + line_height + waves;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
 		// printf("draw_begin is %f and the end is %f\n", draw_begin, draw_end);
@@ -509,8 +509,9 @@ int	game_loop(t_game *game)
 		// printf("facing down %d\n", is_facing_down);
 		// printf("facing left %d\n", is_facing_left);
 		// printf("facing right %d\n", is_facing_right);
-		// draw_line(&game->img, a, wall_hit, 0xFF00FF);
+		// printf("ray number %d is %f\n", ray, ray_angle);
 		draw_rectangle(&game->img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), color);
+		// draw_line(&game->img, a, wall_hit, 0xFFEE8C);
 		// int	j = 0;
 		// while (j < WIDTH)
 		// {

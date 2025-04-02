@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/02 00:59:56 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/02 11:29:44 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@
 // # define WIDTH 1200
 // # define HEIGHT 800
 # define PI 3.14159265359
-# define MOVE_SPEED 0.1
+# define MOVE_SPEED 0.05
 # define ROT_SPEED ((2 * PI) / 180)
 # define RES 1
 # define TILE_SIZE 32
