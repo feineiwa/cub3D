@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/02 11:29:44 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/03 09:48:41 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@
 # define MOVE_SPEED 0.05
 # define ROT_SPEED ((2 * PI) / 180)
 # define RES 1
-# define TILE_SIZE 32
+# define TILE_SIZE 20
 # define ROWS 14
 # define COLS 33
-# define WIDTH (COLS * TILE_SIZE)
-# define HEIGHT (ROWS * TILE_SIZE)
+# define WIDTH 1280
+# define HEIGHT 720
 // # define FOV 1.0471975512
 # define FOV (60 * PI) / 180
 // # define R_ANGLE	1
