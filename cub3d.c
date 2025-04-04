@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/02 12:53:34 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/04 13:35:37 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,11 +364,12 @@ int	game_loop(t_game *game)
 	
 	if (g_updated == false && g_first == false)
 		return (1);
+	printf("render\n");
 	move_player(game);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT);
 	double	ray_angle;
-	// draw_map(&game->img, game->map);
+	draw_map(&game->img, game->map);
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
 	ray_angle = normalize_angle(game->player.angle - (FOV / 2));
@@ -511,7 +512,7 @@ int	game_loop(t_game *game)
 		// printf("facing right %d\n", is_facing_right);
 		// printf("ray number %d is %f\n", ray, ray_angle);
 		draw_rectangle(&game->img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), color);
-		// draw_line(&game->img, a, wall_hit, 0xFFEE8C);
+		draw_line(&game->img, a, wall_hit, 0xFFEE8C);
 		// int	j = 0;
 		// while (j < WIDTH)
 		// {
@@ -523,7 +524,7 @@ int	game_loop(t_game *game)
 	}
 	t_vector center = {WIDTH / 2, (HEIGHT / 4) + HEIGHT /3};
 	draw_circle(&game->img, center, 10, 0xFF0000);
-	// draw_circle(&game->img, a, 5, 0x00FF00);
+	draw_circle(&game->img, a, 5, 0x00FF00);
 	t_vector compass = {WIDTH - 100, 100};
 	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
