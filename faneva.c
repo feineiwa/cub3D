@@ -233,11 +233,12 @@ void	simulate(int grid[9], int depth, int max_depth, unsigned int *res)
 {
 	int	find_zero = 0;
 
-	if (max_depth == depth)
+	if (depth == max_depth)
 	{
 		*res = (*res + calculate_hash(grid)) & MODULO;
 		return ;
 	}
+	
 	for (int i = 0; i < 9; i++)
 	{
 		if (grid[i] == 0)
@@ -245,6 +246,7 @@ void	simulate(int grid[9], int depth, int max_depth, unsigned int *res)
 			find_zero = 1;
 			int capt = 0;
 			find_capture(grid, i, &capt, depth, max_depth, res);
+			
 			if (capt == 0)
 			{
 				int new_grid[9];
