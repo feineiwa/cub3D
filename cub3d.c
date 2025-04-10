@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/04 13:35:37 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/10 18:32:15 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void	move_player(t_game *game)
 			game->player.pos.y = move.y;
 		}
 	}
-	if (game->player.key.key_left == true || game->player.key.key_right)
+	if (game->player.key.key_left == true || game->player.key.key_right == true)
 	{
 		move.x = game->player.pos.x + cos(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
 		move.y = game->player.pos.y + sin(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
@@ -153,16 +153,16 @@ void	clear_image(t_image *img, int width, int height)
 		x = 0;
 		while (x < width)
 		{
-			put_pixel(img, x, y, 0x333333);
+			put_pixel(img, x, y, 0);
 			x++;
 		}
 		y++;
 	}
 }
 
-int	init_image(t_game *game, t_image *image)
+int	init_image(t_game *game, t_image *image, int w, int h)
 {
-	image->img_ptr = mlx_new_image(game->var.mlx, WIDTH, HEIGHT);
+	image->img_ptr = mlx_new_image(game->var.mlx, w, h);
 	if (!image->img_ptr)
 		return (1);
 	image->addr = mlx_get_data_addr(image->img_ptr, &image->bpp,
@@ -243,6 +243,8 @@ void	draw_square(t_image *img, int x, int y, int size, int color)
 	int	i;
 
 	j = 0;
+	if (size > MINI_SIZE)
+		return ;
 	while (j < size)
 	{
 		i = 0;
@@ -304,28 +306,28 @@ void	draw_circle(t_image *img, t_vector p, int radius, int color)
 	// }
 }
 
-void	draw_map(t_image *img, char **map)
-{
-	int	x;
-	int	y;
+// void	draw_map(t_image *img, char **map)
+// {
+// 	int	x;
+// 	int	y;
 
-	y = 0;
-	while (map[y])
-	{
-		x = 0;
-		while (map[y][x])
-		{
-			if (map[y][x] == wall)
-				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE - 1,
-					0x000000);
-			if (map[y][x] != wall)
-				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-					0xFFFFFF);
-			x++;
-		}
-		y++;
-	}
-}
+// 	y = 0;
+// 	while (map[y])
+// 	{
+// 		x = 0;
+// 		while (map[y][x])
+// 		{
+// 			if (map[y][x] == wall)
+// 				draw_square(img, x * 20, y * 20, 20 - 1,
+// 					0x000000);
+// 			if (map[y][x] != wall)
+// 				draw_square(img, x * 20, y * 20, 20,
+// 					0xFFFFFF);
+// 			x++;
+// 		}
+// 		y++;
+// 	}
+// }
 
 double	distance_between_points(t_vector a, t_vector b)
 {
@@ -348,6 +350,64 @@ void	draw_rectangle(t_image *image, int	x0, int x1, int y0, int y1, int color)
 	}
 }
 
+void	draw_circle_full(t_image *img, t_vector p, int radius, int color)
+{
+	int	i;
+	int	j;
+	int	dist_squared;
+
+	j = -radius;
+	while (j <= radius)
+	{
+		i = -radius;
+		while (i <= radius)
+		{
+			dist_squared = (i * i) + (j * j);
+			if ( dist_squared <= (radius * radius))
+				put_pixel(img, p.x + i, p.y + j, color);
+			i++;
+		}
+		j++;
+	}
+}
+
+void	draw_minimap(t_image *img, char **map, t_player player)
+{
+	int	x1;
+	int	x2;
+	int	y1;
+	int	y2;
+	
+	x1 = (int)floor(player.pos.x) - 4;
+	if (x1 < 0)
+		x1 = 0;
+	x2 = player.pos.x + 4;
+	if (x2 > player.w)
+		x2 = player.w;
+	y1 = (int)floor(player.pos.y) - 4;
+	if (y1 < 0)
+		y1 = 0;
+	y2 = player.pos.y + 4;
+	if (y2 > player.h)
+		y2 = player.h;
+	t_vector c = {MINI_WIDTH / 2, MINI_WIDTH / 2};
+	draw_circle_full(img, c, MINI_WIDTH / 2, 0x333333);
+	int	j = 0;
+	int	i = 0;
+	while (j < (y2 - y1))
+	{
+		i = 0;
+		while (i < (x2 - x1))
+		{
+			if (map[j + y1][i + x1] == wall)
+				draw_square(img, i * MINI_SIZE, j * MINI_SIZE, MINI_SIZE - 1, 0);
+			i++;
+		}
+		j++;
+	}
+	draw_circle(img, c, (MINI_SIZE - 18), 0x00FF00);
+}
+
 int	set_color_rgb(int r, int g, int b)
 {
 	return (r << 16 | g << 8 | b);
@@ -357,19 +417,18 @@ int	game_loop(t_game *game)
 {
 	t_vector	a;
 	t_vector	b;
-	bool	is_facing_down = false;
-	bool	is_facing_left = false;
-	bool	is_facing_right = false;
-	bool	is_facing_up = false;
+	bool	is_facing_down;
+	bool	is_facing_left;
+	bool	is_facing_right;
+	bool	is_facing_up;
 	
 	if (g_updated == false && g_first == false)
 		return (1);
-	printf("render\n");
 	move_player(game);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT);
+	clear_image(&game->minimap, MINI_WIDTH, MINI_WIDTH);
 	double	ray_angle;
-	draw_map(&game->img, game->map);
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
 	ray_angle = normalize_angle(game->player.angle - (FOV / 2));
@@ -497,7 +556,7 @@ int	game_loop(t_game *game)
 			color = set_color_rgb(0, color, color);
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		// printf("dist wall is %f\n", dist_wall);
-		float	line_height = (TILE_SIZE / dist_wall) * 250;
+		float	line_height = (TILE_SIZE / dist_wall) * 300;
 		// printf("line height is %f\n", line_height);
 		float	draw_begin = 0.5 * (HEIGHT - line_height) + waves;
 		if (draw_begin < 0)
@@ -512,7 +571,7 @@ int	game_loop(t_game *game)
 		// printf("facing right %d\n", is_facing_right);
 		// printf("ray number %d is %f\n", ray, ray_angle);
 		draw_rectangle(&game->img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), color);
-		draw_line(&game->img, a, wall_hit, 0xFFEE8C);
+		// draw_line(&game->minimap, a, wall_hit, 0xFFEE8C);
 		// int	j = 0;
 		// while (j < WIDTH)
 		// {
@@ -524,17 +583,19 @@ int	game_loop(t_game *game)
 	}
 	t_vector center = {WIDTH / 2, (HEIGHT / 4) + HEIGHT /3};
 	draw_circle(&game->img, center, 10, 0xFF0000);
-	draw_circle(&game->img, a, 5, 0x00FF00);
 	t_vector compass = {WIDTH - 100, 100};
 	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
 	draw_line(&game->img, compass, needle, 0xFFFFFF);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
-	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
-	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
-	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
-	mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
+	draw_minimap(&game->minimap, game->map, game->player);
+	mlx_put_image_to_window(game->var.mlx, game->var.win, game->minimap.img_ptr, MINI_X,
+		MINI_Y);
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
 	g_updated = false;
 	g_first = false;
 	return (0);
@@ -556,13 +617,20 @@ int	main(int ac, char **av)
 	if (init_window(&game))
 		return (ft_free_txt(&game.txt), 1);
 	init_player(&game);
-	if (init_image(&game, &game.img))
+	if (init_image(&game, &game.img, WIDTH, HEIGHT))
+	{
+		ft_free_txt(&game.txt);
+		leave_windows(&game);
+	}
+	if (init_image(&game, &game.minimap, MINI_WIDTH, MINI_WIDTH))
 	{
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
 		0);
+	// mlx_put_image_to_window(game.var.mlx, game.var.win, game.minimap.img_ptr, 65,
+	// 	65);
 	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
 	// 0xFF0000, "PRESS THE START TO BEGIN");
 	g_updated = false;

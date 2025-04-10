@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/01 22:19:20 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/10 15:57:24 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ void	init_player(t_game *game)
 		game->player.angle = 0;
 	else if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_w)
 		game->player.angle = PI;
+	game->player.key.speed = false;
 	game->player.key.key_up = false;
 	game->player.key.key_down = false;
 	game->player.key.key_right = false;

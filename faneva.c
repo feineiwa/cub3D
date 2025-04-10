@@ -5,6 +5,63 @@
 #define MODULO ((1 << 30) - 1)
 
 
+
+// unsigned int encode_grid(int grid[9])
+// {
+// 	unsigned int hash = 0;
+// 	for (int i = 0; i < 9; i++)
+// 		hash = (hash << 3) | (grid[i] & 7); // 3 bits per cell
+// 	return (hash);
+// }
+
+// void	check_neighbors(int *values, int *positions, int *num_neighbors, int grid[9], int pos, int i, int neighbors[4])
+// {
+// 	int neighbor = 0;
+// 	if ((pos == 2 || pos == 5) && i == 3)
+// 		neighbor = -1;
+// 	else if ((pos == 3 || pos == 6) && i == 2)
+// 		neighbor = -1;
+// 	else
+// 		neighbor = pos + neighbors[i];
+// 	if (in_bounds(neighbor) && (grid[neighbor] >= 1 && grid[neighbor] < 6))
+// 	{
+// 		positions[*num_neighbors] = neighbor;
+// 		values[*num_neighbors] = grid[neighbor];
+// 		(*num_neighbors)++;
+// 	}
+// }
+
+	// for (int i = 0; i < 4; i++)
+	// {
+	// 	int neighbor ;
+	// 	if ((pos == 2 || pos == 5) && i == 3)
+	// 		continue;
+	// 	else if ((pos == 3 || pos == 6) && i == 2)
+	// 		continue;
+	// 	else
+	// 		neighbor = pos + neighbors[i];
+	// 	if (in_bounds(neighbor) && (grid[neighbor] >= 1 && grid[neighbor] < 6))
+	// 	{
+	// 		positions[num_neighbors] = neighbor;
+	// 		values[num_neighbors] = grid[neighbor];
+	// 		num_neighbors++;
+	// 	}
+	// }
+
+
+// void	copy_grid(int new_grid[9], int grid[9])
+// {
+// 	new_grid[0] = grid[0];
+// 	new_grid[1] = grid[1];
+// 	new_grid[2] = grid[2];
+// 	new_grid[3] = grid[3];
+// 	new_grid[4] = grid[4];
+// 	new_grid[5] = grid[5];
+// 	new_grid[6] = grid[6];
+// 	new_grid[7] = grid[7];
+// 	new_grid[8] = grid[8];
+// }
+
 void	simulate(int grid[9], int depth, int max_depth, unsigned int *res);
 
 int calculate_hash(int grid[9])

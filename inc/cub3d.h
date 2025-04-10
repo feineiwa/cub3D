@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/03 09:48:41 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/10 16:30:04 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,15 +36,15 @@
 # define MOVE_SPEED 0.05
 # define ROT_SPEED ((2 * PI) / 180)
 # define RES 1
-# define TILE_SIZE 20
-# define ROWS 14
-# define COLS 33
-# define WIDTH 1280
-# define HEIGHT 720
-// # define FOV 1.0471975512
-# define FOV (60 * PI) / 180
-// # define R_ANGLE	1
+# define TILE_SIZE 32
+# define WIDTH 1600
+# define HEIGHT 960
+# define FOV 1.0471975512
 # define R_NB (WIDTH / RES)
+# define MINI_SIZE (TILE_SIZE - 10)
+# define MINI_WIDTH (WIDTH / 8)
+# define MINI_X (MINI_WIDTH - (MINI_WIDTH - 15))
+# define MINI_Y (HEIGHT - MINI_WIDTH - 10)
 
 typedef struct s_text	t_text;
 typedef struct s_vector	t_vector;
@@ -158,6 +158,7 @@ typedef struct s_game
 	char				**map;
 	t_var				var;
 	t_image				img;
+	t_image				minimap;
 }						t_game;
 
 // PARSE
