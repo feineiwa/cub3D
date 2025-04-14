@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/11 20:57:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/14 12:39:09 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,8 +243,6 @@ void	draw_square(t_image *img, int x, int y, int size, int color)
 	int	i;
 
 	j = 0;
-	if (size > MINI_SIZE || x >= MINI_WIDTH || x < 0 || y >= MINI_WIDTH || y < 0)
-		return ;
 	while (j < size)
 	{
 		i = 0;
@@ -318,10 +316,10 @@ void	draw_circle(t_image *img, t_vector p, int radius, int color)
 // 		while (map[y][x])
 // 		{
 // 			if (map[y][x] == wall)
-// 				draw_square(img, x * 20, y * 20, 20 - 1,
-// 					0x000000);
+// 				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE - 1,
+// 					0x0000FF);
 // 			if (map[y][x] != wall)
-// 				draw_square(img, x * 20, y * 20, 20,
+// 				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
 // 					0xFFFFFF);
 // 			x++;
 // 		}
@@ -446,14 +444,41 @@ void	draw_circle_full(t_image *img, t_vector p, int radius, int color)
 //     draw_circle(img, c, MINI_SIZE - 15, 0x00FF00);
 // }
 
+void	draw_square_at_edge(t_image *img, int x, int y, int size, t_vector c, int color)
+{
+	int	j;
+	int	i;
+	int	px;
+	int	py;
+	double	dist;
+
+	j = 0;
+	while (j < size)
+	{
+		i = 0;
+		while (i < size)
+		{
+			px = i + x;
+			py = j + y;
+			dist = (px - c.x) * (px - c.x) + (py - c.y) * (py - c.y);
+			if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
+				put_pixel(img, px, py, color);
+			i++;
+		}
+		j++;
+	}
+}
+
 void	draw_minimap(t_image *img, char **map, t_player player)
 {
 	int	x1;
 	int	x2;
 	int	y1;
 	int	y2;
-	int	side = 4;
+	int	side = 6;
+	double angle;
 	
+	angle = normalize_angle(player.angle + PI / 2);
 	x1 = (int)floor(player.pos.x) - side;
 	if (x1 < 0)
 		x1 = 0;
@@ -466,12 +491,12 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 	y2 = player.pos.y + side;
 	if (y2 > player.h)
 		y2 = player.h;
-	t_vector c = {MINI_WIDTH / 2, MINI_WIDTH / 2};
+	t_vector c = {100, HEIGHT - 100};
 	draw_circle_full(img, c, MINI_WIDTH / 2, 0x1E1E1E);
-	double cos_angle = cos(player.angle);
-    double sin_angle = sin(player.angle);
+	double cos_angle = cos(angle);
+    double sin_angle = sin(angle);
 	int	j = y1;
-	int	i = 0;
+	int	i;
 	while (j < y2)
 	{
 		i = x1;
@@ -481,8 +506,8 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 			{
 				t_vector relative = {(i - player.pos.x), (j - player.pos.y)};
 				t_vector rotated = {relative.x * cos_angle - relative.y * sin_angle, relative.x * sin_angle + relative.y * cos_angle};
-				t_vect draw = {(int)(c.x + rotated.x * MINI_SIZE), (int)(c.y + rotated.y * MINI_SIZE)};
-				draw_square(img, draw.x, draw.y, MINI_SIZE - 1, 0xE0E0E0);
+				t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
+				draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE - 1, c, 0xE0E0E0);
 			}
 			i++;
 		}
@@ -508,10 +533,10 @@ int	game_loop(t_game *game)
 	
 	if (g_updated == false && g_first == false)
 		return (1);
-	move_player(game);
 	mlx_clear_window(game->var.mlx, game->var.win);
-	clear_image(&game->minimap, MINI_WIDTH, MINI_WIDTH, 0);
+	// clear_image(&game->minimap, MINI_WIDTH, MINI_WIDTH, 0);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
+	move_player(game);
 	double	ray_angle;
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
@@ -648,20 +673,8 @@ int	game_loop(t_game *game)
 		float	draw_end = draw_begin + line_height + waves;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
-		// printf("draw_begin is %f and the end is %f\n", draw_begin, draw_end);
-		// printf("facing up %d\n", is_facing_up);
-		// printf("facing down %d\n", is_facing_down);
-		// printf("facing left %d\n", is_facing_left);
-		// printf("facing right %d\n", is_facing_right);
-		// printf("ray number %d is %f\n", ray, ray_angle);
 		draw_rectangle(&game->img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), color);
-		// draw_line(&game->minimap, a, wall_hit, 0xFFEE8C);
-		// int	j = 0;
-		// while (j < WIDTH)
-		// {
-		// 	put_pixel(&game->img, ray * RES, j, 0xFF0000);
-		// 	j++;
-		// }
+		// draw_line(&game->img, a, wall_hit, 0xFFEE8C);
 		ray_angle += FOV / R_NB;
 		ray++;
 	}
@@ -671,11 +684,9 @@ int	game_loop(t_game *game)
 	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
 	draw_line(&game->img, compass, needle, 0xFFFFFF);
-	draw_minimap(&game->minimap, game->map, game->player);
+	draw_minimap(&game->img, game->map, game->player);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
-	mlx_put_image_to_window(game->var.mlx, game->var.win, game->minimap.img_ptr, MINI_X,
-		MINI_Y);
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
