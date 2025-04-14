@@ -7,17 +7,12 @@ int				save[3996000000];
 
 unsigned int	simulate(int grid[9], int depth, int max_depth);
 
-unsigned int encode_grid(int grid[9])
-{
-	return  ((grid[0] & 7) << 24) |
-	        ((grid[1] & 7) << 21) |
-	        ((grid[2] & 7) << 18) |
-	        ((grid[3] & 7) << 15) |
-	        ((grid[4] & 7) << 12) |
-	        ((grid[5] & 7) << 9)  |
-	        ((grid[6] & 7) << 6)  |
-	        ((grid[7] & 7) << 3)  |
-	        ((grid[8] & 7));
+unsigned int encode_grid(int grid[9]) {
+    unsigned int encoded = 0;
+    for (int i = 0; i < 9; i++) {
+        encoded |= (grid[i] & 7) << (24 - (i * 3));
+    }
+    return encoded;
 }
 
 

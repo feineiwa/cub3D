@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/10 18:32:15 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/11 20:57:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ void	move_player(t_game *game)
 	}
 }
 
-void	clear_image(t_image *img, int width, int height)
+void	clear_image(t_image *img, int width, int height, int color)
 {
 	int	x;
 	int	y;
@@ -153,7 +153,7 @@ void	clear_image(t_image *img, int width, int height)
 		x = 0;
 		while (x < width)
 		{
-			put_pixel(img, x, y, 0);
+			put_pixel(img, x, y, color);
 			x++;
 		}
 		y++;
@@ -243,7 +243,7 @@ void	draw_square(t_image *img, int x, int y, int size, int color)
 	int	i;
 
 	j = 0;
-	if (size > MINI_SIZE)
+	if (size > MINI_SIZE || x >= MINI_WIDTH || x < 0 || y >= MINI_WIDTH || y < 0)
 		return ;
 	while (j < size)
 	{
@@ -371,47 +371,131 @@ void	draw_circle_full(t_image *img, t_vector p, int radius, int color)
 	}
 }
 
+// void draw_minimap(t_image *img, char **map, t_player player)
+// {
+//     int x1, x2, y1, y2;
+
+//     // Define the bounds for the minimap view (clamp to map size)
+//     x1 = (int)(player.pos.x - 5);
+//     if (x1 < 0)
+//         x1 = 0;
+//     x2 = (int)(player.pos.x + 5);
+//     if (x2 > player.w)
+//         x2 = player.w;
+//     y1 = (int)(player.pos.y - 5);
+//     if (y1 < 0)
+//         y1 = 0;
+//     y2 = (int)(player.pos.y + 5);
+//     if (y2 > player.h)
+//         y2 = player.h;
+
+//     // Center of the minimap
+//     t_vector c = {MINI_WIDTH / 2, MINI_WIDTH / 2};
+
+//     // Draw the minimap background (circle)
+//     // draw_circle_full(img, c, MINI_WIDTH / 2, 0xFFFFFF);
+
+//     // Precompute the cosine and sine of the player's angle for global rotation
+//     double cos_angle = cos(player.angle);
+//     double sin_angle = sin(player.angle);
+
+//     // Loop through the visible portion of the map
+//     for (int j = y1; j < y2; j++) {
+//         for (int i = x1; i < x2; i++) {
+//             if (map[j][i] == wall) {
+//                 // Calculate relative position of the wall to the player
+//                 double relative_x = i - player.pos.x;
+//                 double relative_y = j - player.pos.y;
+
+//                 // Apply global rotation transformation (position around the player)
+//                 double rotated_x = relative_x * cos_angle - relative_y * sin_angle;
+//                 double rotated_y = relative_x * sin_angle + relative_y * cos_angle;
+
+//                 // Map the rotated position to minimap coordinates
+//                 int draw_x = (int)(c.x + rotated_x * MINI_SIZE);
+//                 int draw_y = (int)(c.y + rotated_y * MINI_SIZE);
+
+//                 // Ensure the element is within the minimap's bounds
+//                 if (draw_x >= 0 && draw_x < MINI_WIDTH &&
+//                     draw_y >= 0 && draw_y < MINI_WIDTH) {
+//                     // Apply local rotation to the wall itself
+//                     double wall_size = MINI_SIZE - 1; // Size of the wall square
+//                     for (int local_y = -wall_size / 2; local_y <= wall_size / 2; local_y++) {
+//                         for (int local_x = -wall_size / 2; local_x <= wall_size / 2; local_x++) {
+//                             // Rotate the wall's local coordinates
+//                             double local_rotated_x = local_x * cos(player.angle) - local_y * sin(player.angle);
+//                             double local_rotated_y = local_x * sin(player.angle) + local_y * cos(player.angle);
+
+//                             // Map the rotated local coordinates back to the world
+//                             int pixel_x = (int)(draw_x + local_rotated_x);
+//                             int pixel_y = (int)(draw_y + local_rotated_y);
+
+//                             // Draw the pixel of the rotated wall
+//                             if (pixel_x >= 0 && pixel_x < MINI_WIDTH &&
+//                                 pixel_y >= 0 && pixel_y < MINI_WIDTH) {
+// 								put_pixel(img, pixel_x, pixel_y, 0); // Drawing wall pixel
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     // Draw the player's position (fixed at the center, unrotated)
+//     draw_circle(img, c, MINI_SIZE - 15, 0x00FF00);
+// }
+
 void	draw_minimap(t_image *img, char **map, t_player player)
 {
 	int	x1;
 	int	x2;
 	int	y1;
 	int	y2;
+	int	side = 4;
 	
-	x1 = (int)floor(player.pos.x) - 4;
+	x1 = (int)floor(player.pos.x) - side;
 	if (x1 < 0)
 		x1 = 0;
-	x2 = player.pos.x + 4;
+	x2 = player.pos.x + side;
 	if (x2 > player.w)
 		x2 = player.w;
-	y1 = (int)floor(player.pos.y) - 4;
+	y1 = (int)floor(player.pos.y) - side;
 	if (y1 < 0)
 		y1 = 0;
-	y2 = player.pos.y + 4;
+	y2 = player.pos.y + side;
 	if (y2 > player.h)
 		y2 = player.h;
 	t_vector c = {MINI_WIDTH / 2, MINI_WIDTH / 2};
-	draw_circle_full(img, c, MINI_WIDTH / 2, 0x333333);
-	int	j = 0;
+	draw_circle_full(img, c, MINI_WIDTH / 2, 0x1E1E1E);
+	double cos_angle = cos(player.angle);
+    double sin_angle = sin(player.angle);
+	int	j = y1;
 	int	i = 0;
-	while (j < (y2 - y1))
+	while (j < y2)
 	{
-		i = 0;
-		while (i < (x2 - x1))
+		i = x1;
+		while (i < x2)
 		{
-			if (map[j + y1][i + x1] == wall)
-				draw_square(img, i * MINI_SIZE, j * MINI_SIZE, MINI_SIZE - 1, 0);
+			if (map[j][i] == wall)
+			{
+				t_vector relative = {(i - player.pos.x), (j - player.pos.y)};
+				t_vector rotated = {relative.x * cos_angle - relative.y * sin_angle, relative.x * sin_angle + relative.y * cos_angle};
+				t_vect draw = {(int)(c.x + rotated.x * MINI_SIZE), (int)(c.y + rotated.y * MINI_SIZE)};
+				draw_square(img, draw.x, draw.y, MINI_SIZE - 1, 0xE0E0E0);
+			}
 			i++;
 		}
 		j++;
 	}
-	draw_circle(img, c, (MINI_SIZE - 18), 0x00FF00);
+	draw_circle(img, c, (MINI_SIZE - 15), 0x00FF66);
 }
 
 int	set_color_rgb(int r, int g, int b)
 {
 	return (r << 16 | g << 8 | b);
 }
+
 
 int	game_loop(t_game *game)
 {
@@ -426,8 +510,8 @@ int	game_loop(t_game *game)
 		return (1);
 	move_player(game);
 	mlx_clear_window(game->var.mlx, game->var.win);
-	clear_image(&game->img, WIDTH, HEIGHT);
-	clear_image(&game->minimap, MINI_WIDTH, MINI_WIDTH);
+	clear_image(&game->minimap, MINI_WIDTH, MINI_WIDTH, 0);
+	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	double	ray_angle;
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
@@ -587,15 +671,15 @@ int	game_loop(t_game *game)
 	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
 	draw_line(&game->img, compass, needle, 0xFFFFFF);
+	draw_minimap(&game->minimap, game->map, game->player);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
-	draw_minimap(&game->minimap, game->map, game->player);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->minimap.img_ptr, MINI_X,
 		MINI_Y);
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
+	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
+	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
+	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
+	mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
 	g_updated = false;
 	g_first = false;
 	return (0);
