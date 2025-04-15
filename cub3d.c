@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/14 12:39:09 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/15 15:07:47 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,21 +124,19 @@ void	move_player(t_game *game)
 	{
 		move.x = game->player.pos.x + cos(game->player.angle) * game->player.walk_dir * move_speed;
 		move.y = game->player.pos.y + sin(game->player.angle) * game->player.walk_dir * move_speed;
-		if (!is_exceeded((int)floor(move.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(move.x)] != wall)
-		{
+		if (!is_exceeded((int)floor(move.x), (int)floor(game->player.pos.y), game->player) && game->map[(int)floor(game->player.pos.y)][(int)floor(move.x)] != wall)
 			game->player.pos.x = move.x;
+		if (!is_exceeded((int)floor(game->player.pos.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(game->player.pos.x)] != wall)
 			game->player.pos.y = move.y;
-		}
 	}
 	if (game->player.key.key_left == true || game->player.key.key_right == true)
 	{
 		move.x = game->player.pos.x + cos(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
 		move.y = game->player.pos.y + sin(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
-		if (!is_exceeded((int)floor(move.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(move.x)] != wall)
-		{
+		if (!is_exceeded((int)floor(move.x), (int)floor(game->player.pos.y), game->player) && game->map[(int)floor(game->player.pos.y)][(int)floor(move.x)] != wall)
 			game->player.pos.x = move.x;
+		if (!is_exceeded((int)floor(game->player.pos.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(game->player.pos.x)] != wall)
 			game->player.pos.y = move.y;
-		}
 	}
 }
 
@@ -469,16 +467,85 @@ void	draw_square_at_edge(t_image *img, int x, int y, int size, t_vector c, int c
 	}
 }
 
+void	draw_rotated_square(t_image *img, t_vect s_p, t_vector c, int size, double angle, int color)
+{
+	int	half;
+	int	x;
+	int	y;
+	t_vect draw;
+	t_vector rot;
+	double dist;
+
+	y = 0;
+	while (y < size)
+	{
+		x = 0;
+		while (x < size)
+		{
+			rot.x = x * cos(angle) + y * sin(angle);
+			rot.y = -x * sin(angle) + y * cos(angle);
+			draw.x = (int)(s_p.x + rot.x);
+			draw.y = (int)(s_p.y + rot.y);
+			dist = (draw.x - c.x) * (draw.x - c.x) + (draw.y - c.y) * (draw.y - c.y);
+			if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
+				put_pixel(img, draw.x, draw.y, color);
+			x++;
+		}
+		y++;
+	}
+}
+
+int	get_img_color(t_image *img, int x, int y)
+{
+	return (*(int *)(img->addr + ((y * img->size_line) + (x * (img->bpp
+						/ 8)))));
+}
+
+void	paint_image_to_win(t_game *game, t_image *img, char *path, int s_x,
+		int s_y)
+{
+	t_image	img1;
+	int		x;
+	int		y;
+	int		img_x;
+	int		img_y;
+	int		color;
+
+	img1.img_ptr = mlx_xpm_file_to_image(game->var.mlx, path, &img_x, &img_y);
+	img1.addr = mlx_get_data_addr(img1.img_ptr, &img1.bpp, &img1.size_line,
+			&img1.endian);
+	y = 0;
+	while (y < s_y)
+	{
+		x = 0;
+		while (x < s_x)
+		{
+			int src_x = (int)(double)x * ((double)img_x / (double)s_x);
+			int src_y = (int)(double)y * ((double)img_y / (double)s_y);
+			int	color = get_img_color(&img1, src_x, src_y);
+			if (color < 0)
+				color = 0;
+			if (color != 0)
+				put_pixel(img, x, y, color);
+			else
+				put_pixel(img, x, y, 0x1E1E1E);
+			x++;
+		}
+		y++;
+	}
+	mlx_destroy_image(game->var.mlx, img1.img_ptr);
+}
+
 void	draw_minimap(t_image *img, char **map, t_player player)
 {
 	int	x1;
 	int	x2;
 	int	y1;
 	int	y2;
-	int	side = 6;
+	int	side = 7;
 	double angle;
 	
-	angle = normalize_angle(player.angle + PI / 2);
+	angle = normalize_angle(player.angle + (0.5 * PI));
 	x1 = (int)floor(player.pos.x) - side;
 	if (x1 < 0)
 		x1 = 0;
@@ -493,6 +560,10 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 		y2 = player.h;
 	t_vector c = {100, HEIGHT - 100};
 	draw_circle_full(img, c, MINI_WIDTH / 2, 0x1E1E1E);
+	draw_circle(img, c, MINI_WIDTH / 2, 0x333333);
+	draw_circle(img, c, MINI_WIDTH / 2 + 1, 0x555555);
+	draw_circle(img, c, MINI_WIDTH / 2 + 2, 0x777777);
+	draw_circle(img, c, MINI_WIDTH / 2 + 3, 0x999999);
 	double cos_angle = cos(angle);
     double sin_angle = sin(angle);
 	int	j = y1;
@@ -505,15 +576,17 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 			if (map[j][i] == wall)
 			{
 				t_vector relative = {(i - player.pos.x), (j - player.pos.y)};
-				t_vector rotated = {relative.x * cos_angle - relative.y * sin_angle, relative.x * sin_angle + relative.y * cos_angle};
+				t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
 				t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
-				draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE - 1, c, 0xE0E0E0);
+				// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
+				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
 			}
 			i++;
 		}
 		j++;
 	}
-	draw_circle(img, c, (MINI_SIZE - 15), 0x00FF66);
+	// draw_circle(img, c, 1, 0x00FF66);
+	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
 }
 
 int	set_color_rgb(int r, int g, int b)
@@ -679,7 +752,7 @@ int	game_loop(t_game *game)
 		ray++;
 	}
 	t_vector center = {WIDTH / 2, (HEIGHT / 4) + HEIGHT /3};
-	draw_circle(&game->img, center, 10, 0xFF0000);
+	// draw_circle(&game->img, center, 10, 0xFF0000);
 	t_vector compass = {WIDTH - 100, 100};
 	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
@@ -687,6 +760,12 @@ int	game_loop(t_game *game)
 	draw_minimap(&game->img, game->map, game->player);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
+	t_image f;
+	f.img_ptr = mlx_new_image(game->var.mlx, 12, 12);
+	f.addr = mlx_get_data_addr(f.img_ptr, &f.bpp, &f.size_line, &f.endian);
+	paint_image_to_win(game, &f, "images/arrow.xpm", 12, 12);
+	mlx_put_image_to_window(game->var.mlx, game->var.win, f.img_ptr, 100,
+		HEIGHT - 100);
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");

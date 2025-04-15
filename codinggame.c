@@ -3,6 +3,85 @@
 #include <stdio.h>
 #include <unistd.h>
 
+
+
+// void	draw_rotated_square(t_image *img, t_vector s_p, t_vector c, int size, double angle, int color)
+// {
+// 	int		half;
+// 	t_vector corners[4];
+// 	t_vector start, end;
+// 	int		y, i;
+
+// 	half = size / 2;
+
+// 	// Calculate the four rotated corners of the square
+// 	corners[0].x = s_p.x + (-half * cos(angle) - (-half) * sin(angle));
+// 	corners[0].y = s_p.y + (-half * sin(angle) + (-half) * cos(angle));
+
+// 	corners[1].x = s_p.x + (half * cos(angle) - (-half) * sin(angle));
+// 	corners[1].y = s_p.y + (half * sin(angle) + (-half) * cos(angle));
+
+// 	corners[2].x = s_p.x + (half * cos(angle) - (half) * sin(angle));
+// 	corners[2].y = s_p.y + (half * sin(angle) + (half) * cos(angle));
+
+// 	corners[3].x = s_p.x + (-half * cos(angle) - (half) * sin(angle));
+// 	corners[3].y = s_p.y + (-half * sin(angle) + (half) * cos(angle));
+
+// 	// Fill the square by iterating over each scanline inside its bounding box
+// 	int min_y = corners[0].y, max_y = corners[0].y;
+
+// 	// Find the min and max y-values (bounding box for the square)
+// 	for (i = 1; i < 4; i++)
+// 	{
+// 		if (corners[i].y < min_y)
+// 			min_y = corners[i].y;
+// 		if (corners[i].y > max_y)
+// 			max_y = corners[i].y;
+// 	}
+
+// 	// Iterate through each scanline in the bounding box
+// 	for (y = min_y; y <= max_y; y++)
+// 	{
+// 		double intersections[4]; // Store x-coordinates of intersections with the edges
+// 		int count = 0;
+
+// 		// Find intersections of the scanline with the square's edges
+// 		for (i = 0; i < 4; i++)
+// 		{
+// 			t_vector a = corners[i];
+// 			t_vector b = corners[(i + 1) % 4]; // Next vertex (edge wrap-around)
+
+// 			// Check if the edge crosses the scanline
+// 			if ((y >= a.y && y < b.y) || (y >= b.y && y < a.y))
+// 			{
+// 				// Compute the x-coordinate of the intersection
+// 				double t = (y - a.y) / (b.y - a.y); // Parametric line equation
+// 				intersections[count++] = a.x + t * (b.x - a.x);
+// 			}
+// 		}
+
+// 		// Sort the intersections by x-coordinate (left to right)
+// 		if (count >= 2)
+// 		{
+// 			if (intersections[0] > intersections[1])
+// 			{
+// 				double temp = intersections[0];
+// 				intersections[0] = intersections[1];
+// 				intersections[1] = temp;
+// 			}
+
+// 			// Draw a horizontal line between the two intersections
+// 			start.x = intersections[0];
+// 			start.y = y;
+// 			end.x = intersections[1];
+// 			end.y = y;
+
+// 			draw_line(img, start, end, color);
+// 		}
+// 	}
+// }
+
+
 int				save[3996000000];
 
 unsigned int	simulate(int grid[9], int depth, int max_depth);
