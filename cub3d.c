@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/15 15:07:47 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/16 22:05:38 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,15 @@ void	put_pixel(t_image *img, int x, int y, int color)
 	// *(int *)offset = color;
 }
 
+int	set_color_rgb(int r, int g, int b)
+{
+	return (r << 16 | g << 8 | b);
+}
+
 void	ft_putarr_endl(char **arr, int fd)
 {
 	size_t	i;
-
+	
 	i = 0;
 	while (arr[i])
 	{
@@ -106,6 +111,17 @@ bool is_exceeded(int x, int y, t_player player)
 	if (x < 0 || y < 0 || x >= player.w || y >= player.h)
 		return (true);
 	return(false);
+}
+
+bool	is_collision(double x, double y, t_game *game)
+{
+	t_vect grid;
+
+	grid.x = (int)floor(x);
+	grid.y = (int)floor(y);
+	if (game->map[grid.y][grid.x] == wall)
+		return (true);
+	return (false);
 }
 
 void	move_player(t_game *game)
@@ -274,7 +290,7 @@ void	draw_circle(t_image *img, t_vector p, int radius, int color)
 	int	dist_squared;
 
 	j = -radius;
-	put_pixel(img, p.x, p.y, color);
+	// put_pixel(img, p.x, p.y, color);
 	while (j <= radius)
 	{
 		i = -radius;
@@ -287,43 +303,7 @@ void	draw_circle(t_image *img, t_vector p, int radius, int color)
 		}
 		j++;
 	}
-	// double	angle;
-
-	// angle = 0;
-	// put_pixel(img, p.x, p.y, 0xFF0000);
-	// printf("px {%f} and py {%f}\n", p.x, p.y);
-	// while (angle <= 360)
-	// {
-	// 	p.x += cos(angle) * radius;
-	// 	p.y += sin(angle) * radius;
-	// 	printf("px [%f] and py [%f]\n", p.x, p.y);
-	// 	put_pixel(img, p.x, p.y, color);
-	// 	angle += 1;
-	// }
 }
-
-// void	draw_map(t_image *img, char **map)
-// {
-// 	int	x;
-// 	int	y;
-
-// 	y = 0;
-// 	while (map[y])
-// 	{
-// 		x = 0;
-// 		while (map[y][x])
-// 		{
-// 			if (map[y][x] == wall)
-// 				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE - 1,
-// 					0x0000FF);
-// 			if (map[y][x] != wall)
-// 				draw_square(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-// 					0xFFFFFF);
-// 			x++;
-// 		}
-// 		y++;
-// 	}
-// }
 
 double	distance_between_points(t_vector a, t_vector b)
 {
@@ -501,39 +481,32 @@ int	get_img_color(t_image *img, int x, int y)
 						/ 8)))));
 }
 
-void	paint_image_to_win(t_game *game, t_image *img, char *path, int s_x,
-		int s_y)
+void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y)
 {
-	t_image	img1;
 	int		x;
 	int		y;
-	int		img_x;
-	int		img_y;
 	int		color;
 
-	img1.img_ptr = mlx_xpm_file_to_image(game->var.mlx, path, &img_x, &img_y);
-	img1.addr = mlx_get_data_addr(img1.img_ptr, &img1.bpp, &img1.size_line,
-			&img1.endian);
 	y = 0;
 	while (y < s_y)
 	{
 		x = 0;
 		while (x < s_x)
 		{
-			int src_x = (int)(double)x * ((double)img_x / (double)s_x);
-			int src_y = (int)(double)y * ((double)img_y / (double)s_y);
-			int	color = get_img_color(&img1, src_x, src_y);
+			int src_x = (int)(double)x * ((double)img1->w / (double)s_x);
+			int src_y = (int)(double)y * ((double)img1->h / (double)s_y);
+			color = get_img_color(img1, src_x, src_y);
 			if (color < 0)
 				color = 0;
 			if (color != 0)
-				put_pixel(img, x, y, color);
-			else
-				put_pixel(img, x, y, 0x1E1E1E);
+			{
+				color = set_color_rgb(0, 255, 0);
+				put_pixel(img, x + 100, y + HEIGHT - 100, color);
+			}
 			x++;
 		}
 		y++;
 	}
-	mlx_destroy_image(game->var.mlx, img1.img_ptr);
 }
 
 void	draw_minimap(t_image *img, char **map, t_player player)
@@ -588,12 +561,6 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 	// draw_circle(img, c, 1, 0x00FF66);
 	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
 }
-
-int	set_color_rgb(int r, int g, int b)
-{
-	return (r << 16 | g << 8 | b);
-}
-
 
 int	game_loop(t_game *game)
 {
@@ -752,20 +719,15 @@ int	game_loop(t_game *game)
 		ray++;
 	}
 	t_vector center = {WIDTH / 2, (HEIGHT / 4) + HEIGHT /3};
-	// draw_circle(&game->img, center, 10, 0xFF0000);
+	draw_circle(&game->img, center, 10, 0xFF0000);
 	t_vector compass = {WIDTH - 100, 100};
 	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
 	draw_line(&game->img, compass, needle, 0xFFFFFF);
 	draw_minimap(&game->img, game->map, game->player);
+	paint_image_to_win(&game->img, &game->minimap, 12, 12);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
-	t_image f;
-	f.img_ptr = mlx_new_image(game->var.mlx, 12, 12);
-	f.addr = mlx_get_data_addr(f.img_ptr, &f.bpp, &f.size_line, &f.endian);
-	paint_image_to_win(game, &f, "images/arrow.xpm", 12, 12);
-	mlx_put_image_to_window(game->var.mlx, game->var.win, f.img_ptr, 100,
-		HEIGHT - 100);
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
@@ -796,15 +758,10 @@ int	main(int ac, char **av)
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
-	if (init_image(&game, &game.minimap, MINI_WIDTH, MINI_WIDTH))
-	{
-		ft_free_txt(&game.txt);
-		leave_windows(&game);
-	}
+	game.minimap.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/arrow.xpm", &game.minimap.w, &game.minimap.h);
+	game.minimap.addr = mlx_get_data_addr(game.minimap.img_ptr, &game.minimap.bpp, &game.minimap.size_line, &game.minimap.endian);
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
 		0);
-	// mlx_put_image_to_window(game.var.mlx, game.var.win, game.minimap.img_ptr, 65,
-	// 	65);
 	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
 	// 0xFF0000, "PRESS THE START TO BEGIN");
 	g_updated = false;

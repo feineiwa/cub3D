@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/11 20:48:16 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/15 20:36:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,8 @@ struct					s_image
 	int					bpp;
 	int					size_line;
 	int					endian;
+	int					w;
+	int					h;
 };
 
 struct					s_key
