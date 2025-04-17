@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/10 15:57:24 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/17 15:48:15 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ void	init_player(t_game *game)
 	game->player.key.key_left = false;
 	game->player.key.rot_l = false;
 	game->player.key.rot_r = false;
+	game->player.key.recharge = false;
 	game->player.turn_dir = 0;
 	game->player.walk_dir = 0;
 	get_w_and_h(game->map, &game->player.w, &game->player.h);

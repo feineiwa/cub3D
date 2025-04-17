@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/15 20:36:11 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/17 15:47:47 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,7 @@ struct					s_key
 	bool				rot_l;
 	bool				rot_r;
 	bool				speed;
+	bool				recharge;
 };
 
 struct					s_player
@@ -153,6 +154,14 @@ struct					s_var
 	void				*win;
 };
 
+typedef struct s_pack
+{
+	t_image	arrow;
+	t_image	aiming;
+	t_image gun_sp[15];
+}	t_pack;
+
+
 typedef struct s_game
 {
 	t_player			player;
@@ -160,7 +169,7 @@ typedef struct s_game
 	char				**map;
 	t_var				var;
 	t_image				img;
-	t_image				minimap;
+	t_pack				pack;
 }						t_game;
 
 // PARSE

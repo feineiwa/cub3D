@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/16 22:05:38 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/17 16:28:18 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 bool	g_updated = false;
 bool	g_first = false;
+int		gun_frame = 0;
 
 void	put_pixel(t_image *img, int x, int y, int color)
 {
@@ -218,6 +219,8 @@ int	ft_key_press(int keysym, t_game *game)
 	}
 	if (keysym == XK_Shift_L)
 		game->player.key.speed = true;
+	if (keysym == XK_g)
+		game->player.key.recharge = true;
 	g_updated = true;
 	return (0);
 }
@@ -310,6 +313,70 @@ double	distance_between_points(t_vector a, t_vector b)
 	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
 }
 
+void	draw_rectangle_rgb_gradient(t_image *image, int	x0, int x1, int y0, int y1, t_rgb rgb)
+{
+	int	i;
+	int	round;
+
+	round = 0;
+	while (y0 <= y1)
+	{
+		i = 0;
+		while (i <= x1)
+		{
+			put_pixel(image, i + x0, y0, set_color_rgb(rgb.r, rgb.g, rgb.b));
+			i++;
+		}
+		round++;
+		if (round == 2)
+		{
+			rgb.r -= 1;
+			rgb.g -= 1;
+			rgb.b -= 1;
+			if (rgb.r < 0)
+				rgb.r = 0;
+			if (rgb.g < 0)
+				rgb.g = 0;
+			if (rgb.b < 0)
+				rgb.b = 0;
+			round = 0;
+		}
+		y0++;
+	}
+}
+
+void	draw_rectangle_rgb_rgradient(t_image *image, int	x0, int x1, int y0, int y1, t_rgb rgb)
+{
+	int	i;
+	int	round;
+
+	round = 0;
+	while (y1 >= y0)
+	{
+		i = 0;
+		while (i <= x1)
+		{
+			put_pixel(image, i + x0, y1, set_color_rgb(rgb.r, rgb.g, rgb.b));
+			i++;
+		}
+		round++;
+		if (round == 3)
+		{
+			rgb.r -= 1;
+			rgb.g -= 1;
+			rgb.b -= 1;
+			if (rgb.r < 0)
+				rgb.r = 0;
+			if (rgb.g < 0)
+				rgb.g = 0;
+			if (rgb.b < 0)
+				rgb.b = 0;
+			round = 0;
+		}
+		y1--;
+	}
+}
+
 void	draw_rectangle(t_image *image, int	x0, int x1, int y0, int y1, int color)
 {
 	int	i;
@@ -346,81 +413,6 @@ void	draw_circle_full(t_image *img, t_vector p, int radius, int color)
 		j++;
 	}
 }
-
-// void draw_minimap(t_image *img, char **map, t_player player)
-// {
-//     int x1, x2, y1, y2;
-
-//     // Define the bounds for the minimap view (clamp to map size)
-//     x1 = (int)(player.pos.x - 5);
-//     if (x1 < 0)
-//         x1 = 0;
-//     x2 = (int)(player.pos.x + 5);
-//     if (x2 > player.w)
-//         x2 = player.w;
-//     y1 = (int)(player.pos.y - 5);
-//     if (y1 < 0)
-//         y1 = 0;
-//     y2 = (int)(player.pos.y + 5);
-//     if (y2 > player.h)
-//         y2 = player.h;
-
-//     // Center of the minimap
-//     t_vector c = {MINI_WIDTH / 2, MINI_WIDTH / 2};
-
-//     // Draw the minimap background (circle)
-//     // draw_circle_full(img, c, MINI_WIDTH / 2, 0xFFFFFF);
-
-//     // Precompute the cosine and sine of the player's angle for global rotation
-//     double cos_angle = cos(player.angle);
-//     double sin_angle = sin(player.angle);
-
-//     // Loop through the visible portion of the map
-//     for (int j = y1; j < y2; j++) {
-//         for (int i = x1; i < x2; i++) {
-//             if (map[j][i] == wall) {
-//                 // Calculate relative position of the wall to the player
-//                 double relative_x = i - player.pos.x;
-//                 double relative_y = j - player.pos.y;
-
-//                 // Apply global rotation transformation (position around the player)
-//                 double rotated_x = relative_x * cos_angle - relative_y * sin_angle;
-//                 double rotated_y = relative_x * sin_angle + relative_y * cos_angle;
-
-//                 // Map the rotated position to minimap coordinates
-//                 int draw_x = (int)(c.x + rotated_x * MINI_SIZE);
-//                 int draw_y = (int)(c.y + rotated_y * MINI_SIZE);
-
-//                 // Ensure the element is within the minimap's bounds
-//                 if (draw_x >= 0 && draw_x < MINI_WIDTH &&
-//                     draw_y >= 0 && draw_y < MINI_WIDTH) {
-//                     // Apply local rotation to the wall itself
-//                     double wall_size = MINI_SIZE - 1; // Size of the wall square
-//                     for (int local_y = -wall_size / 2; local_y <= wall_size / 2; local_y++) {
-//                         for (int local_x = -wall_size / 2; local_x <= wall_size / 2; local_x++) {
-//                             // Rotate the wall's local coordinates
-//                             double local_rotated_x = local_x * cos(player.angle) - local_y * sin(player.angle);
-//                             double local_rotated_y = local_x * sin(player.angle) + local_y * cos(player.angle);
-
-//                             // Map the rotated local coordinates back to the world
-//                             int pixel_x = (int)(draw_x + local_rotated_x);
-//                             int pixel_y = (int)(draw_y + local_rotated_y);
-
-//                             // Draw the pixel of the rotated wall
-//                             if (pixel_x >= 0 && pixel_x < MINI_WIDTH &&
-//                                 pixel_y >= 0 && pixel_y < MINI_WIDTH) {
-// 								put_pixel(img, pixel_x, pixel_y, 0); // Drawing wall pixel
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-
-//     // Draw the player's position (fixed at the center, unrotated)
-//     draw_circle(img, c, MINI_SIZE - 15, 0x00FF00);
-// }
 
 void	draw_square_at_edge(t_image *img, int x, int y, int size, t_vector c, int color)
 {
@@ -481,11 +473,11 @@ int	get_img_color(t_image *img, int x, int y)
 						/ 8)))));
 }
 
-void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y)
+void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y, t_vect p, int color)
 {
 	int		x;
 	int		y;
-	int		color;
+	int		img_color;
 
 	y = 0;
 	while (y < s_y)
@@ -495,13 +487,12 @@ void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y)
 		{
 			int src_x = (int)(double)x * ((double)img1->w / (double)s_x);
 			int src_y = (int)(double)y * ((double)img1->h / (double)s_y);
-			color = get_img_color(img1, src_x, src_y);
-			if (color < 0)
-				color = 0;
-			if (color != 0)
+			img_color = get_img_color(img1, src_x, src_y);
+			if (img_color >= 0)
 			{
-				color = set_color_rgb(0, 255, 0);
-				put_pixel(img, x + 100, y + HEIGHT - 100, color);
+				if (color >= 0)
+					img_color = color;
+				put_pixel(img, x + p.x, y + p.y, img_color);
 			}
 			x++;
 		}
@@ -676,16 +667,18 @@ int	game_loop(t_game *game)
 		int	color = 0;
 		int	light_level = 60;
 		color = 255;
+		int	offset;
 		if (horizontal_dist < vertical_dist)
 		{
 			wall_hit = horiz_p;
 			dist_wall = fabs(horizontal_dist);
-			
+			offset = (int)wall_hit.x % TILE_SIZE;
 		}
 		else
 		{
 			wall_hit = vert_p;
 			dist_wall = fabs(vertical_dist);
+			offset = (int)wall_hit.y % TILE_SIZE;
 		}
 		dist_wall *= cos(game->player.angle - ray_angle);
 		if (dist_wall < 0.001)
@@ -704,35 +697,56 @@ int	game_loop(t_game *game)
 		else if (is_facing_left && horizontal_dist > vertical_dist)
 			color = set_color_rgb(0, color, color);
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
-		// printf("dist wall is %f\n", dist_wall);
 		float	line_height = (TILE_SIZE / dist_wall) * 300;
-		// printf("line height is %f\n", line_height);
 		float	draw_begin = 0.5 * (HEIGHT - line_height) + waves;
 		if (draw_begin < 0)
 			draw_begin = 0;
 		float	draw_end = draw_begin + line_height + waves;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
+		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
+		draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT - 1, game->txt.f);
 		draw_rectangle(&game->img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), color);
-		// draw_line(&game->img, a, wall_hit, 0xFFEE8C);
 		ray_angle += FOV / R_NB;
 		ray++;
 	}
-	t_vector center = {WIDTH / 2, (HEIGHT / 4) + HEIGHT /3};
-	draw_circle(&game->img, center, 10, 0xFF0000);
+	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2) + 90};
+	paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
+	// draw_circle(&game->img, center, 10, 0xFF0000);
 	t_vector compass = {WIDTH - 100, 100};
 	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
 	draw_line(&game->img, compass, needle, 0xFFFFFF);
 	draw_minimap(&game->img, game->map, game->player);
-	paint_image_to_win(&game->img, &game->minimap, 12, 12);
+	t_vect p = {100, HEIGHT - 100};
+	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, p, 0x00FF00);
+	t_vect g = {(int)(WIDTH / 2) - 100, HEIGHT  - 300};
+	if (game->player.key.recharge == true)
+	{
+		g_updated = true;
+		if (gun_frame < 15)
+		{
+			paint_image_to_win(&game->img, &game->pack.gun_sp[gun_frame], 500, 500, g, -1);
+			usleep(80000);
+			gun_frame++;
+		}
+		else
+		{
+			game->player.key.recharge = false;
+			gun_frame = 0;
+		}
+	}
+	else
+	{
+		paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);
+		g_updated = false;
+	}
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
-	g_updated = false;
 	g_first = false;
 	return (0);
 }
@@ -758,8 +772,25 @@ int	main(int ac, char **av)
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
-	game.minimap.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/arrow.xpm", &game.minimap.w, &game.minimap.h);
-	game.minimap.addr = mlx_get_data_addr(game.minimap.img_ptr, &game.minimap.bpp, &game.minimap.size_line, &game.minimap.endian);
+	game.pack.arrow.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/arrow.xpm", &game.pack.arrow.w, &game.pack.arrow.h);
+	game.pack.arrow.addr = mlx_get_data_addr(game.pack.arrow.img_ptr, &game.pack.arrow.bpp, &game.pack.arrow.size_line, &game.pack.arrow.endian);
+	game.pack.aiming.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/aiming1.xpm", &game.pack.aiming.w, &game.pack.aiming.h);
+	game.pack.aiming.addr = mlx_get_data_addr(game.pack.aiming.img_ptr, &game.pack.aiming.bpp, &game.pack.aiming.size_line, &game.pack.aiming.endian);
+	int	i = 0;
+	char file[] = "images/gun/00.xpm";
+	while (i < 15)
+	{
+		if (i <= 8)
+			file[12] = (i + 1) + '0';
+		else
+		{
+			file[12] = ((i + 1) % 10) + '0';
+			file[11] = ((i + 1) / 10) + '0';
+		}
+		game.pack.gun_sp[i].img_ptr = mlx_xpm_file_to_image(game.var.mlx, file, &game.pack.gun_sp[i].w, &game.pack.gun_sp[i].h);
+		game.pack.gun_sp[i].addr = mlx_get_data_addr(game.pack.gun_sp[i].img_ptr, &game.pack.gun_sp[i].bpp, &game.pack.gun_sp[i].size_line, &game.pack.gun_sp[i].endian);
+		i++;
+	}
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
 		0);
 	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
