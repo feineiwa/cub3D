@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/17 16:28:18 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/18 15:41:22 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 bool	g_updated = false;
 bool	g_first = false;
 int		gun_frame = 0;
+float	look = 0.5;
 
 void	put_pixel(t_image *img, int x, int y, int color)
 {
@@ -155,6 +156,18 @@ void	move_player(t_game *game)
 		if (!is_exceeded((int)floor(game->player.pos.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(game->player.pos.x)] != wall)
 			game->player.pos.y = move.y;
 	}
+	if (game->player.key.look_up == true)
+	{
+		look += (float)(ROT_SPEED);
+		if (look > 1)
+			look = 1;
+	}
+	if (game->player.key.look_down == true)
+	{
+		look -= (float)(ROT_SPEED);
+		if (look < 0)
+			look = 0;
+	}
 }
 
 void	clear_image(t_image *img, int width, int height, int color)
@@ -221,6 +234,10 @@ int	ft_key_press(int keysym, t_game *game)
 		game->player.key.speed = true;
 	if (keysym == XK_g)
 		game->player.key.recharge = true;
+	if (keysym == XK_Up)
+		game->player.key.look_up = true;
+	if (keysym == XK_Down)
+		game->player.key.look_down = true;
 	g_updated = true;
 	return (0);
 }
@@ -247,6 +264,10 @@ int	ft_key_release(int keysym, t_game *game)
 	}
 	if (keysym == XK_Shift_L)
 		game->player.key.speed = false;
+	if (keysym == XK_Up)
+		game->player.key.look_up = false;
+	if (keysym == XK_Down)
+		game->player.key.look_down = false;
 	game->player.walk_dir = 0;
 	game->player.dir.x = 0;
 	game->player.dir.y = 0;
@@ -345,7 +366,7 @@ void	draw_rectangle_rgb_gradient(t_image *image, int	x0, int x1, int y0, int y1,
 	}
 }
 
-void	draw_rectangle_rgb_rgradient(t_image *image, int	x0, int x1, int y0, int y1, t_rgb rgb)
+void	draw_rectangle_rgb_rgradient(t_image *image, int x0, int x1, int y0, int y1, t_rgb rgb)
 {
 	int	i;
 	int	round;
@@ -381,10 +402,10 @@ void	draw_rectangle(t_image *image, int	x0, int x1, int y0, int y1, int color)
 {
 	int	i;
 
-	while (y0 <= y1)
+	while (y0 < y1)
 	{
 		i = 0;
-		while (i <= x1)
+		while (i < x1)
 		{
 			put_pixel(image, i + x0, y0, color);
 			i++;
@@ -553,6 +574,96 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
 }
 
+void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, int offset, double dist_wall)
+{
+	int	i;
+	int color;
+	int	y;
+	double scale;
+	int	texture_y;
+	double	light = 40 / dist_wall;
+	t_rgb col;
+	int	r;
+	int	g;
+	int	b;
+
+	scale = (double)txt->h / (y1 - y0);
+	y = 0;
+	while (y0 < y1)
+	{
+		i = 0;
+		texture_y = (int)(y * scale);
+		while (i < x1)
+		{
+			color = get_img_color(txt, offset, texture_y);
+			r = (color >> 16) & 0xFF;
+			g = (color >> 8) & 0xFF;
+			b = color & 0xFF;
+			col.r = r * light;
+			if (col.r >= r)
+				col.r = r;
+			else if (col.r < 0)
+				col.r = 0;
+			col.g = g * light;
+			if (col.g >= g)
+				col.g = g;
+			else if (col.r < 0)
+				col.g = 0;
+			col.b = b * light;
+			if (col.b >= b)
+				col.b = b;
+			else if (col.b < 0)
+				col.b = 0;
+			put_pixel(img, i + x0, y0, set_color_rgb(col.r, col.g, col.b));
+			i++;
+		}
+		y++;
+		y0++;	
+	}
+}
+
+void	draw_texture_for_floor(t_image *image,  t_image *txt, int x0, int x1, int y0, int y1, int offset)
+{
+	int	i;
+	// int	round;
+	t_rgb rgb;
+	double scale;
+	int	color;
+	int	texture_y;
+	int	y;
+
+	// round = 0;
+	scale = (double)txt->h / (y1 - y0);
+	y = 0;
+	while (y1 > y0)
+	{
+		i = 0;
+		texture_y = (int)(y * scale);
+		while (i < x1)
+		{
+			color = get_img_color(txt, offset, texture_y);	
+			put_pixel(image, i + x0, y1, color);
+			i++;
+		}
+		// round++;
+		// if (round == 3)
+		// {
+		// 	rgb.r -= 1;
+		// 	rgb.g -= 1;
+		// 	rgb.b -= 1;
+		// 	if (rgb.r < 0)
+		// 		rgb.r = 0;
+		// 	if (rgb.g < 0)
+		// 		rgb.g = 0;
+		// 	if (rgb.b < 0)
+		// 		rgb.b = 0;
+		// 	round = 0;
+		// }
+		y++;
+		y1--;
+	}
+}
+
 int	game_loop(t_game *game)
 {
 	t_vector	a;
@@ -565,7 +676,6 @@ int	game_loop(t_game *game)
 	if (g_updated == false && g_first == false)
 		return (1);
 	mlx_clear_window(game->var.mlx, game->var.win);
-	// clear_image(&game->minimap, MINI_WIDTH, MINI_WIDTH, 0);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	move_player(game);
 	double	ray_angle;
@@ -666,51 +776,65 @@ int	game_loop(t_game *game)
 		double		dist_wall = 0;
 		int	color = 0;
 		int	light_level = 60;
-		color = 255;
-		int	offset;
+		double	o;
 		if (horizontal_dist < vertical_dist)
 		{
 			wall_hit = horiz_p;
 			dist_wall = fabs(horizontal_dist);
-			offset = (int)wall_hit.x % TILE_SIZE;
+			o = ((fmod(wall_hit.x, TILE_SIZE) / TILE_SIZE));
 		}
 		else
 		{
 			wall_hit = vert_p;
 			dist_wall = fabs(vertical_dist);
-			offset = (int)wall_hit.y % TILE_SIZE;
+			o = ((fmod(wall_hit.y, TILE_SIZE) / TILE_SIZE));
 		}
 		dist_wall *= cos(game->player.angle - ray_angle);
 		if (dist_wall < 0.001)
 			dist_wall = 0.001;
-		color *= light_level / dist_wall;
-		if (color >= 255)
-			color = 255;
-		else if (color <= 0)
-			color = 0;
+		int	offset;
+		t_image *img;
 		if (is_facing_up && horizontal_dist < vertical_dist)
-			color = set_color_rgb(0, color, 0);
+		{
+			img = &game->pack.no_img; 
+			offset = (o * img->w);
+		}
 		else if (is_facing_down && horizontal_dist < vertical_dist)
-			color = set_color_rgb(color, 0, 0);
+		{
+			img = &game->pack.so_img; 
+			offset = (o * img->w);
+		}
 		else if (is_facing_right && horizontal_dist > vertical_dist)
-			color = set_color_rgb(0, 0, color);
+		{
+			img = &game->pack.ea_img; 
+			offset = (o * img->w);
+		}
 		else if (is_facing_left && horizontal_dist > vertical_dist)
-			color = set_color_rgb(0, color, color);
+		{
+			img = &game->pack.we_img; 
+			offset = (o * img->w);			
+		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
-		float	line_height = (TILE_SIZE / dist_wall) * 300;
-		float	draw_begin = 0.5 * (HEIGHT - line_height) + waves;
-		if (draw_begin < 0)
+		float	line_height = (TILE_SIZE / dist_wall) * 510;
+		if (line_height > HEIGHT)
+			line_height = HEIGHT;
+		float	draw_begin = look * (HEIGHT - line_height);
+		if (draw_begin <= 0)
 			draw_begin = 0;
+		else
+			draw_begin += waves;
 		float	draw_end = draw_begin + line_height + waves;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
 		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT - 1, game->txt.f);
-		draw_rectangle(&game->img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), color);
+		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
+		// offset = ray % 480;
+		// draw_texture_for_floor(&game->img, &game->pack.floor, ray * RES, RES, (int)draw_end, HEIGHT - 1, offset);
 		ray_angle += FOV / R_NB;
 		ray++;
 	}
-	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2) + 90};
+	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2)};
 	paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
 	// draw_circle(&game->img, center, 10, 0xFF0000);
 	t_vector compass = {WIDTH - 100, 100};
@@ -718,7 +842,7 @@ int	game_loop(t_game *game)
 	draw_circle(&game->img, compass, 50, 0xFFFFFF);
 	draw_line(&game->img, compass, needle, 0xFFFFFF);
 	draw_minimap(&game->img, game->map, game->player);
-	t_vect p = {100, HEIGHT - 100};
+	t_vect p = {100 - 6, HEIGHT - 106};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, p, 0x00FF00);
 	t_vect g = {(int)(WIDTH / 2) - 100, HEIGHT  - 300};
 	if (game->player.key.recharge == true)
@@ -772,10 +896,22 @@ int	main(int ac, char **av)
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
+	game.pack.no_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.no_path, &game.pack.no_img.w, &game.pack.no_img.h);
+	game.pack.no_img.addr = mlx_get_data_addr(game.pack.no_img.img_ptr, &game.pack.no_img.bpp, &game.pack.no_img.size_line, &game.pack.no_img.endian);
+	game.pack.so_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.so_path, &game.pack.so_img.w, &game.pack.so_img.h);
+	game.pack.so_img.addr = mlx_get_data_addr(game.pack.so_img.img_ptr, &game.pack.so_img.bpp, &game.pack.so_img.size_line, &game.pack.so_img.endian);
+	game.pack.ea_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.ea_path, &game.pack.ea_img.w, &game.pack.ea_img.h);
+	game.pack.ea_img.addr = mlx_get_data_addr(game.pack.ea_img.img_ptr, &game.pack.ea_img.bpp, &game.pack.ea_img.size_line, &game.pack.ea_img.endian);
+	game.pack.we_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.we_path, &game.pack.we_img.w, &game.pack.we_img.h);
+	game.pack.we_img.addr = mlx_get_data_addr(game.pack.we_img.img_ptr, &game.pack.we_img.bpp, &game.pack.we_img.size_line, &game.pack.we_img.endian);
 	game.pack.arrow.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/arrow.xpm", &game.pack.arrow.w, &game.pack.arrow.h);
 	game.pack.arrow.addr = mlx_get_data_addr(game.pack.arrow.img_ptr, &game.pack.arrow.bpp, &game.pack.arrow.size_line, &game.pack.arrow.endian);
 	game.pack.aiming.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/aiming1.xpm", &game.pack.aiming.w, &game.pack.aiming.h);
 	game.pack.aiming.addr = mlx_get_data_addr(game.pack.aiming.img_ptr, &game.pack.aiming.bpp, &game.pack.aiming.size_line, &game.pack.aiming.endian);
+	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/grass1.xpm", &game.pack.floor.w, &game.pack.floor.h);
+	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
+
+
 	int	i = 0;
 	char file[] = "images/gun/00.xpm";
 	while (i < 15)

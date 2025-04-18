@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/17 15:47:47 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/18 15:14:04 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,8 @@ struct					s_key
 	bool				key_right;
 	bool				rot_l;
 	bool				rot_r;
+	bool				look_up;
+	bool				look_down;
 	bool				speed;
 	bool				recharge;
 };
@@ -159,6 +161,11 @@ typedef struct s_pack
 	t_image	arrow;
 	t_image	aiming;
 	t_image gun_sp[15];
+	t_image no_img;
+	t_image so_img;
+	t_image ea_img;
+	t_image we_img;
+	t_image floor;
 }	t_pack;
 
 
