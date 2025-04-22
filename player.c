@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/18 08:35:46 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/22 12:50:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,7 @@ void	init_player(t_game *game)
 	game->player.key.rot_l = false;
 	game->player.key.rot_r = false;
 	game->player.key.recharge = false;
+	game->player.key.hide_mouse = false;
 	game->player.turn_dir = 0;
 	game->player.walk_dir = 0;
 	game->player.pos.x += 0.5;

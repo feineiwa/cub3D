@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/18 15:14:04 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/22 18:40:42 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@
 # define PI 3.14159265359
 # define MOVE_SPEED 0.05
 # define ROT_SPEED ((2 * PI) / 180)
+# define MOUSE_SPEED 0.0005;
 # define RES 1
 # define TILE_SIZE 32
 # define WIDTH 1600
@@ -135,6 +136,7 @@ struct					s_key
 	bool				look_down;
 	bool				speed;
 	bool				recharge;
+	bool				hide_mouse;
 };
 
 struct					s_player
@@ -166,6 +168,7 @@ typedef struct s_pack
 	t_image ea_img;
 	t_image we_img;
 	t_image floor;
+	t_image ceil;
 }	t_pack;
 
 

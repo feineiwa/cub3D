@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/18 15:41:22 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/22 18:40:59 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@ bool	g_updated = false;
 bool	g_first = false;
 int		gun_frame = 0;
 float	look = 0.5;
+int		mouse_x = 0;
+int		mouse_y = 0;
+float		mouse_speed = 1;
 
 void	put_pixel(t_image *img, int x, int y, int color)
 {
@@ -132,9 +135,9 @@ void	move_player(t_game *game)
 	double	move_speed;
 
 	if (game->player.key.rot_l == true)
-		game->player.angle += game->player.turn_dir * ROT_SPEED;
+		game->player.angle += game->player.turn_dir * ROT_SPEED * mouse_speed;
 	if (game->player.key.rot_r == true)
-		game->player.angle += game->player.turn_dir * ROT_SPEED;
+		game->player.angle += game->player.turn_dir * ROT_SPEED * mouse_speed;
 	move_speed = MOVE_SPEED;
 	if (game->player.key.speed == true)
 		move_speed += MOVE_SPEED;
@@ -158,16 +161,20 @@ void	move_player(t_game *game)
 	}
 	if (game->player.key.look_up == true)
 	{
-		look += (float)(ROT_SPEED);
+		look += (float)(ROT_SPEED) * mouse_speed;
 		if (look > 1)
 			look = 1;
 	}
 	if (game->player.key.look_down == true)
 	{
-		look -= (float)(ROT_SPEED);
+		look -= (float)(ROT_SPEED) * mouse_speed;
 		if (look < 0)
 			look = 0;
 	}
+	game->player.key.rot_l = false;
+	game->player.key.rot_r = false;
+	game->player.key.look_up = false;
+	game->player.key.look_down = false;
 }
 
 void	clear_image(t_image *img, int width, int height, int color)
@@ -238,6 +245,20 @@ int	ft_key_press(int keysym, t_game *game)
 		game->player.key.look_up = true;
 	if (keysym == XK_Down)
 		game->player.key.look_down = true;
+	if (keysym == XK_Alt_L)
+	{
+		if (game->player.key.hide_mouse == false)
+		{
+			game->player.key.hide_mouse = true;
+			mlx_mouse_hide(game->var.mlx, game->var.win);
+		}
+		else
+		{
+			game->player.key.hide_mouse = false;
+			mlx_mouse_show(game->var.mlx, game->var.win);
+		}
+	}
+	mouse_speed = 1;
 	g_updated = true;
 	return (0);
 }
@@ -340,10 +361,10 @@ void	draw_rectangle_rgb_gradient(t_image *image, int	x0, int x1, int y0, int y1,
 	int	round;
 
 	round = 0;
-	while (y0 <= y1)
+	while (y0 < y1)
 	{
 		i = 0;
-		while (i <= x1)
+		while (i < x1)
 		{
 			put_pixel(image, i + x0, y0, set_color_rgb(rgb.r, rgb.g, rgb.b));
 			i++;
@@ -372,10 +393,10 @@ void	draw_rectangle_rgb_rgradient(t_image *image, int x0, int x1, int y0, int y1
 	int	round;
 
 	round = 0;
-	while (y1 >= y0)
+	while (y1 > y0)
 	{
 		i = 0;
-		while (i <= x1)
+		while (i < x1)
 		{
 			put_pixel(image, i + x0, y1, set_color_rgb(rgb.r, rgb.g, rgb.b));
 			i++;
@@ -664,6 +685,38 @@ void	draw_texture_for_floor(t_image *image,  t_image *txt, int x0, int x1, int y
 	}
 }
 
+void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_angle, int start, int end)
+{
+	double center;
+	t_vector p;
+	int		color;
+	
+	center = HEIGHT / 2;
+	p.x = game->player.pos.x * TILE_SIZE;
+	p.y = game->player.pos.y * TILE_SIZE;
+	while (start < end)
+	{
+		double row = start - center;
+		double ratio = (TILE_SIZE) / row;
+		double diagonal_dist = 510 * ratio;
+		diagonal_dist = floor(diagonal_dist);
+		t_vector floor = {diagonal_dist * cos(ray_angle) + p.x, diagonal_dist * sin(ray_angle) + p.y};
+		t_vector f = {fmod(floor.x, TILE_SIZE), fmod(floor.y, TILE_SIZE)};
+		if (f.x < 0)
+			f.x += TILE_SIZE;
+		if (f.y < 0)
+			f.y += TILE_SIZE;
+		t_vect txt = {(int)((f.x / TILE_SIZE) * texture->w) , (int)((f.y / TILE_SIZE) * texture->h)};
+		// t_vect cell = {(int)(floor.x / TILE_SIZE), (int)(floor.y / TILE_SIZE)};
+		if (txt.x >= 0 && txt.x < texture->w && txt.y >= 0 && txt.y < texture->h)
+		{
+			color = get_img_color(texture, txt.x, txt.y);
+			put_pixel(&game->img, ray, start, color);
+		}
+		start++;
+	}
+}
+
 int	game_loop(t_game *game)
 {
 	t_vector	a;
@@ -826,11 +879,13 @@ int	game_loop(t_game *game)
 		float	draw_end = draw_begin + line_height + waves;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
-		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
-		draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT - 1, game->txt.f);
+		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
+		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
 		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
 		// offset = ray % 480;
-		// draw_texture_for_floor(&game->img, &game->pack.floor, ray * RES, RES, (int)draw_end, HEIGHT - 1, offset);
+		// draw_texture_for_floor(&game->img, &game->pack.floor, ray * RES, RES, (int)draw_end, HEIGHT, offset);
+		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin);
+		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end, HEIGHT);
 		ray_angle += FOV / R_NB;
 		ray++;
 	}
@@ -858,6 +913,7 @@ int	game_loop(t_game *game)
 		{
 			game->player.key.recharge = false;
 			gun_frame = 0;
+			g_updated = false;
 		}
 	}
 	else
@@ -871,7 +927,51 @@ int	game_loop(t_game *game)
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
 	mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
+	if (game->player.key.hide_mouse == true)
+		mlx_string_put(game->var.mlx, game->var.win, 50, 25, 0xFFFFFF, "mouse activate");
 	g_first = false;
+	return (0);
+}
+
+int	ft_mouse_move(int x, int y, t_game *game)
+{
+	if (game->player.key.hide_mouse == false)
+		return (1);
+	if ((WIDTH / 2) + 10 < x)
+	{
+		game->player.key.rot_r = true;
+		game->player.turn_dir = 1;
+	}
+	else if ((WIDTH / 2) - 10 > x)
+	{
+		game->player.key.rot_l = true;
+		game->player.turn_dir = -1;
+	}
+	if ((HEIGHT / 2) + 10 < y)
+		game->player.key.look_down = true;
+	else if ((HEIGHT / 2) - 10 > y)
+		game->player.key.look_up = true;
+	mouse_speed = 0.8;
+	mlx_mouse_move(game->var.mlx, game->var.win, WIDTH / 2, HEIGHT / 2);
+	g_updated = true;
+	return (0);
+}
+
+int	ft_mouse_pressed(int button, int x, int y, t_game *game)
+{
+	if (game->player.key.hide_mouse == false)
+		return (1);
+	if (button == 1)
+		game->player.key.recharge = true;
+	return (0);
+}
+
+int	ft_mouse_release(int button, int x, int y, t_game *game)
+{
+	if (game->player.key.hide_mouse == false)
+		return (1);
+	if (button == 1)
+		game->player.key.recharge = false;
 	return (0);
 }
 
@@ -896,6 +996,7 @@ int	main(int ac, char **av)
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
+	
 	game.pack.no_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.no_path, &game.pack.no_img.w, &game.pack.no_img.h);
 	game.pack.no_img.addr = mlx_get_data_addr(game.pack.no_img.img_ptr, &game.pack.no_img.bpp, &game.pack.no_img.size_line, &game.pack.no_img.endian);
 	game.pack.so_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.so_path, &game.pack.so_img.w, &game.pack.so_img.h);
@@ -908,8 +1009,10 @@ int	main(int ac, char **av)
 	game.pack.arrow.addr = mlx_get_data_addr(game.pack.arrow.img_ptr, &game.pack.arrow.bpp, &game.pack.arrow.size_line, &game.pack.arrow.endian);
 	game.pack.aiming.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/aiming1.xpm", &game.pack.aiming.w, &game.pack.aiming.h);
 	game.pack.aiming.addr = mlx_get_data_addr(game.pack.aiming.img_ptr, &game.pack.aiming.bpp, &game.pack.aiming.size_line, &game.pack.aiming.endian);
-	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/grass1.xpm", &game.pack.floor.w, &game.pack.floor.h);
+	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/floor.xpm", &game.pack.floor.w, &game.pack.floor.h);
 	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
+	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/roof.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
+	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
 
 
 	int	i = 0;
@@ -933,11 +1036,13 @@ int	main(int ac, char **av)
 	// 0xFF0000, "PRESS THE START TO BEGIN");
 	g_updated = false;
 	g_first = true;
+	mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
 	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);
+	mlx_hook(game.var.win, ButtonPress, ButtonPressMask, ft_mouse_pressed, &game);
+	mlx_hook(game.var.win, MotionNotify, PointerMotionMask, ft_mouse_move, &game);
 	mlx_loop_hook(game.var.mlx, game_loop, &game);
-	// game_loop(&game);
 	mlx_loop(game.var.mlx);
 	return (0);
 }
