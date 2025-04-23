@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/22 18:40:59 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/23 12:28:21 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -690,27 +690,42 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	double center;
 	t_vector p;
 	int		color;
+	double	cos_ray;
+	double	sin_ray;
+	double	distance;
 	
-	center = HEIGHT / 2;
-	p.x = game->player.pos.x * TILE_SIZE;
-	p.y = game->player.pos.y * TILE_SIZE;
+	p.x = (double)game->player.pos.x * TILE_SIZE;
+	p.y = (double)game->player.pos.y * TILE_SIZE;
+	cos_ray = cos(ray_angle);
+	sin_ray = sin(ray_angle);
 	while (start < end)
 	{
-		double row = start - center;
-		double ratio = (TILE_SIZE) / row;
-		double diagonal_dist = 510 * ratio;
-		diagonal_dist = floor(diagonal_dist);
-		t_vector floor = {diagonal_dist * cos(ray_angle) + p.x, diagonal_dist * sin(ray_angle) + p.y};
-		t_vector f = {fmod(floor.x, TILE_SIZE), fmod(floor.y, TILE_SIZE)};
-		if (f.x < 0)
-			f.x += TILE_SIZE;
-		if (f.y < 0)
-			f.y += TILE_SIZE;
-		t_vect txt = {(int)((f.x / TILE_SIZE) * texture->w) , (int)((f.y / TILE_SIZE) * texture->h)};
-		// t_vect cell = {(int)(floor.x / TILE_SIZE), (int)(floor.y / TILE_SIZE)};
-		if (txt.x >= 0 && txt.x < texture->w && txt.y >= 0 && txt.y < texture->h)
+		if (start > HALF_HEIGHT)
+			distance = (510 * (TILE_SIZE / (start - (double)HALF_HEIGHT)));
+		else
+			distance = (510 * (TILE_SIZE / ((double)HALF_HEIGHT - start)));
+		t_vector f = {
+			.x = distance * cos_ray + p.x,
+			.y = distance * sin_ray + p.y
+		};
+		t_vector cell = {
+			.x = f.x / TILE_SIZE,
+			.y = f.y / TILE_SIZE
+		};
+		if (cell.x >= 0 || cell.y >= 0 || cell.x < game->player.w || cell.y < game->player.h)
 		{
-			color = get_img_color(texture, txt.x, txt.y);
+			
+			int tex_y = (fmod(f.y, TILE_SIZE) / TILE_SIZE) * texture->h;
+			int tex_x = (fmod(f.x, TILE_SIZE) / TILE_SIZE) * texture->w;
+			if (tex_x >= texture->w)
+				tex_x = texture->w - 1;
+			else if (tex_x < 0)
+				tex_x = 0;
+			if (tex_y >= texture->h)
+				tex_y = texture->h - 1;
+			else if (tex_y < 0)
+				tex_y = 0;
+			color = get_img_color(texture, tex_x, tex_y);
 			put_pixel(&game->img, ray, start, color);
 		}
 		start++;
@@ -758,6 +773,7 @@ int	game_loop(t_game *game)
 		else if (is_facing_down == 1)
 			first_int.y = floor(game->player.pos.y) * TILE_SIZE + TILE_SIZE;
 		first_int.x = a.x + (first_int.y - a.y) / tan(ray_angle);
+
 		
 		t_vector next_horiz = {first_int.x, first_int.y};
 		t_vector s = {0, 0};
@@ -767,7 +783,7 @@ int	game_loop(t_game *game)
 			s.y = TILE_SIZE;
 		s.x = s.y / tan(ray_angle);
 		bool	found_horizontal = false;
-		while (next_horiz.x < WIDTH && next_horiz.x > 0 && next_horiz.y < HEIGHT && next_horiz.y >= 0)
+		while (next_horiz.x < (game->player.w * TILE_SIZE) && next_horiz.x >= 0 && next_horiz.y < (game->player.h * TILE_SIZE) && next_horiz.y >= 0)
 		{
 			if (is_wall((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
 			{
@@ -798,7 +814,7 @@ int	game_loop(t_game *game)
 		s.y = s.x * tan(ray_angle);
 		
 		bool	found_vertical = false;
-		while (next_vert.x < WIDTH && next_vert.x >= 0 && next_vert.y < HEIGHT && next_vert.y >= 0)
+		while (next_vert.x < (game->player.w * TILE_SIZE)  && next_vert.x >= 0 && next_vert.y < (game->player.h * TILE_SIZE)  && next_vert.y >= 0)
 		{
 			if (is_wall((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
 			{
@@ -879,11 +895,9 @@ int	game_loop(t_game *game)
 		float	draw_end = draw_begin + line_height + waves;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
-		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
+		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
 		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
-		// offset = ray % 480;
-		// draw_texture_for_floor(&game->img, &game->pack.floor, ray * RES, RES, (int)draw_end, HEIGHT, offset);
 		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin);
 		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end, HEIGHT);
 		ray_angle += FOV / R_NB;
@@ -918,6 +932,7 @@ int	game_loop(t_game *game)
 	}
 	else
 	{
+		g_global()->music_pid = false;
 		paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);
 		g_updated = false;
 	}
@@ -959,10 +974,14 @@ int	ft_mouse_move(int x, int y, t_game *game)
 
 int	ft_mouse_pressed(int button, int x, int y, t_game *game)
 {
-	if (game->player.key.hide_mouse == false)
+	if (game->player.key.hide_mouse == false && g_global()->one_shoot_music == true)
 		return (1);
 	if (button == 1)
+	{
+		launch_music("sounds/gun1.wav", "2");
+		g_global()->one_shoot_music = true;
 		game->player.key.recharge = true;
+	}
 	return (0);
 }
 
@@ -1011,7 +1030,7 @@ int	main(int ac, char **av)
 	game.pack.aiming.addr = mlx_get_data_addr(game.pack.aiming.img_ptr, &game.pack.aiming.bpp, &game.pack.aiming.size_line, &game.pack.aiming.endian);
 	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/floor.xpm", &game.pack.floor.w, &game.pack.floor.h);
 	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
-	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/roof.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
+	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
 
 
@@ -1032,8 +1051,8 @@ int	main(int ac, char **av)
 	}
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
 		0);
-	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
-	// 0xFF0000, "PRESS THE START TO BEGIN");
+	// // mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
+	// // 0xFF0000, "PRESS THE START TO BEGIN");
 	g_updated = false;
 	g_first = true;
 	mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);

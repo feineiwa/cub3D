@@ -1,0 +1,70 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   music.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/23 08:38:45 by frahenin          #+#    #+#             */
+/*   Updated: 2025/04/23 09:14:52 by frahenin         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "inc/cub3d.h"
+
+void	wait_music(void)
+{
+	pid_t	res;
+
+	if (g_global()->music_pid != -1)
+	{
+		res = waitpid(g_global()->music_pid, 0, WNOHANG);
+		if (res == g_global()->music_pid)
+			g_global()->music_pid = -1;
+	}
+	g_global()->music_pid = -1;
+}
+
+void	launch_music(char const *file, char *vol)
+{
+	pid_t	pid;
+	// char *sound;
+	// char back[2];
+	// char	*last;
+
+	// sound = ft_strjoin("cvlc ", file);
+	// back[0] = ' ';
+	// back[1] = '&';
+	// last = ft_strjoin(sound, back);
+	pid = fork();
+	if (pid == -1)
+		return ;
+	else if (pid == 0)
+	{
+		execlp("cvlc", "cvlc", "--gain", vol, file, (char *)NULL);
+		// execlp("cvlc", "cvlc", "--volume", "5", file, (char *)NULL);
+		// execlp("ffplay", "ffplay", "-volume", "50", "-nodisp", "-autoexit", file, (char *)NULL);
+		// execlp("mpv", "mpv", "--volume=50", "--no-video", file, (char *)NULL);
+	}
+	else
+		g_global()->music_pid = pid;
+	// system(last);
+	// sleep(1);
+	// ft_free(sound);
+	// ft_free(last);
+}
+
+void	stop_music(void)
+{
+	if (g_global()->music_pid != -1)
+	{
+		kill(g_global()->music_pid, SIGTERM);
+		g_global()->music_pid = -1;
+	}
+}
+
+t_g	*g_global(void)
+{
+	static t_g	value = {-1, false};
+	return (&value);
+}

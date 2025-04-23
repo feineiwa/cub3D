@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/22 18:40:42 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/23 12:16:00 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@
 # define TILE_SIZE 32
 # define WIDTH 1600
 # define HEIGHT 960
+# define HALF_HEIGHT 480
 # define FOV 1.0471975512
 # define R_NB (WIDTH / RES)
 # define MINI_SIZE (20)
@@ -182,6 +183,13 @@ typedef struct s_game
 	t_pack				pack;
 }						t_game;
 
+typedef	struct s_g
+{
+	pid_t	music_pid;
+	bool	one_shoot_music;
+}	t_g;
+
+
 // PARSE
 t_text					ft_parsing(char *path_map, char ***game_map);
 
@@ -195,4 +203,11 @@ void					*ft_free(void *param);
 void					ft_free_arr(void **arr);
 void					ft_free_txt(t_text *txt);
 void					init_player(t_game *game);
+
+
+//music
+t_g	*g_global(void);
+void	stop_music(void);
+void	launch_music(char const *file, char *vol);
+void	wait_music(void);
 #endif
