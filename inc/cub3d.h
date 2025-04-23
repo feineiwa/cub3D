@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/23 12:16:00 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/23 19:11:19 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@
 // # define WIDTH 1200
 // # define HEIGHT 800
 # define PI 3.14159265359
-# define MOVE_SPEED 0.05
-# define ROT_SPEED ((2 * PI) / 180)
+# define MOVE_SPEED 0.09
+# define ROT_SPEED 0.05
 # define MOUSE_SPEED 0.0005;
 # define RES 1
 # define TILE_SIZE 32
@@ -170,6 +170,8 @@ typedef struct s_pack
 	t_image we_img;
 	t_image floor;
 	t_image ceil;
+	t_image	compass;
+	t_image needle;
 }	t_pack;
 
 

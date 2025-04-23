@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/23 14:00:55 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/23 20:25:49 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -621,19 +621,16 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 			g = (color >> 8) & 0xFF;
 			b = color & 0xFF;
 			col.r = r * light;
-			col.r = r;
 			if (col.r >= r)
 				col.r = r;
 			else if (col.r < 0)
 				col.r = 0;
 			col.g = g * light;
-			col.g = g;
 			if (col.g >= g)
 				col.g = g;
 			else if (col.r < 0)
 				col.g = 0;
 			col.b = b * light;
-			col.b = b;
 			if (col.b >= b)
 				col.b = b;
 			else if (col.b < 0)
@@ -643,48 +640,6 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 		}
 		y++;
 		y0++;	
-	}
-}
-
-void	draw_texture_for_floor(t_image *image,  t_image *txt, int x0, int x1, int y0, int y1, int offset)
-{
-	int	i;
-	// int	round;
-	t_rgb rgb;
-	double scale;
-	int	color;
-	int	texture_y;
-	int	y;
-
-	// round = 0;
-	scale = (double)txt->h / (y1 - y0);
-	y = 0;
-	while (y1 > y0)
-	{
-		i = 0;
-		texture_y = (int)(y * scale);
-		while (i < x1)
-		{
-			color = get_img_color(txt, offset, texture_y);	
-			put_pixel(image, i + x0, y1, color);
-			i++;
-		}
-		// round++;
-		// if (round == 3)
-		// {
-		// 	rgb.r -= 1;
-		// 	rgb.g -= 1;
-		// 	rgb.b -= 1;
-		// 	if (rgb.r < 0)
-		// 		rgb.r = 0;
-		// 	if (rgb.g < 0)
-		// 		rgb.g = 0;
-		// 	if (rgb.b < 0)
-		// 		rgb.b = 0;
-		// 	round = 0;
-		// }
-		y++;
-		y1--;
 	}
 }
 
@@ -700,36 +655,69 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	
 	p.x = (double)game->player.pos.x * TILE_SIZE;
 	p.y = (double)game->player.pos.y * TILE_SIZE;
+	double	tile_size_inv = 1.0 / TILE_SIZE;
 	cos_ray = cos(ray_angle);
 	sin_ray = sin(ray_angle);
-	fish_correct = cos(ray_angle - game->player.angle);
+	fish_correct = cos(ray_angle - game->player.angle) + 1e-6;
 	while (start < end)
 	{
-		distance = (510 * (TILE_SIZE / fabs(start - (double)HALF_HEIGHT))) / fish_correct;
+		distance = (510 * (TILE_SIZE / (fabs(start - (double)HALF_HEIGHT) + 1e-6))) / fish_correct;
 		t_vector f = {
 			.x = distance * cos_ray + p.x,
 			.y = distance * sin_ray + p.y
 		};
 		t_vector cell = {
-			.x = f.x / TILE_SIZE,
-			.y = f.y / TILE_SIZE
+			.x = f.x * tile_size_inv,
+			.y = f.y * tile_size_inv
 		};
 		if (cell.x >= 0 && cell.y >= 0 && cell.x < game->player.w && cell.y < game->player.h)
 		{
-			int tex_y = (fmod(f.y, TILE_SIZE) / TILE_SIZE) * texture->h;
-			int tex_x = (fmod(f.x, TILE_SIZE) / TILE_SIZE) * texture->w;
-			if (tex_x >= texture->w)
-				tex_x = texture->w - 1;
-			else if (tex_x < 0)
-				tex_x = 0;
-			if (tex_y >= texture->h)
-				tex_y = texture->h - 1;
-			else if (tex_y < 0)
-				tex_y = 0;
+			int tex_y = (fmod(f.y, TILE_SIZE) * tile_size_inv) * texture->h;
+			int tex_x = (fmod(f.x, TILE_SIZE) * tile_size_inv) * texture->w;
+			tex_x %= texture->h;
+			tex_y %= texture->w;
 			color = get_img_color(texture, tex_x, tex_y);
 			put_pixel(&game->img, ray, start, color);
 		}
 		start++;
+	}
+}
+
+void	draw_rotated_texture(t_image *dest, t_image *src, t_vector center, double angle, int s_x, int s_y)
+{
+	t_vect c;
+	int		y;
+	int		x;
+	int		color;
+	double	cos_a;
+	double	sin_a;
+
+	cos_a = cos(angle + (0.5 * PI));
+	sin_a = sin(angle + (0.5 * PI));
+	y = 0;
+	while (y < s_y)
+	{
+		x = 0;
+		while (x < s_y)
+		{
+			int src_x = (int)(double)x * ((double)src->w / (double)s_x);
+			int src_y = (int)(double)y * ((double)src->h / (double)s_y);
+			color = get_img_color(src, src_x, src_y);
+			if (color >= 0)
+			{
+				t_vect d = {
+					.x = x - (s_x / 2),
+					.y = y - (s_y / 2)
+				};
+				t_vector r = {
+					.x = cos_a * d.x - sin_a * d.y,
+					.y = sin_a * d.x + cos_a * d.y
+				};
+				put_pixel(dest, (int)((center.x + r.x)), (int)(center.y + r.y), color);
+			}
+			x++;
+		}
+		y++;
 	}
 }
 
@@ -763,7 +751,7 @@ int	game_loop(t_game *game)
 			is_facing_down = true;
 		else
 			is_facing_up = true;
-		if (ray_angle < (0.5 * PI) || ray_angle > 1.5 * PI)
+		if (ray_angle < 1.57079632679 || ray_angle > 4.71238898038) // 0.5 * PI || 1.5 * PI
 			is_facing_right = true;
 		else
 			is_facing_left = true;
@@ -906,11 +894,10 @@ int	game_loop(t_game *game)
 	}
 	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2)};
 	paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
-	// draw_circle(&game->img, center, 10, 0xFF0000);
 	t_vector compass = {WIDTH - 100, 100};
-	t_vector needle = {compass.x + cos(game->player.angle) * 40, compass.y + sin(game->player.angle) * 40};
-	draw_circle(&game->img, compass, 50, 0xFFFFFF);
-	draw_line(&game->img, compass, needle, 0xFFFFFF);
+	t_vect comp = {WIDTH - 200, 7};
+	paint_image_to_win(&game->img, &game->pack.compass, 200, 200, comp, 0XFFD700);
+	draw_rotated_texture(&game->img, &game->pack.needle, compass, game->player.angle, 110, 110);
 	draw_minimap(&game->img, game->map, game->player);
 	t_vect p = {100 - 6, HEIGHT - 106};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, p, 0x00FF00);
@@ -939,10 +926,10 @@ int	game_loop(t_game *game)
 	}
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
-	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
-	mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
-	mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
-	mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
+	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
 	if (game->player.key.hide_mouse == true)
 		mlx_string_put(game->var.mlx, game->var.win, 50, 25, 0xFFFFFF, "mouse activate");
 	g_first = false;
@@ -1033,6 +1020,11 @@ int	main(int ac, char **av)
 	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
 	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
+
+	game.pack.compass.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/compass1.xpm", &game.pack.compass.w, &game.pack.compass.h);
+	game.pack.compass.addr = mlx_get_data_addr(game.pack.compass.img_ptr, &game.pack.compass.bpp, &game.pack.compass.size_line, &game.pack.compass.endian);
+	game.pack.needle.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/needle.xpm", &game.pack.needle.w, &game.pack.needle.h);
+	game.pack.needle.addr = mlx_get_data_addr(game.pack.needle.img_ptr, &game.pack.needle.bpp, &game.pack.needle.size_line, &game.pack.needle.endian);
 
 
 	int	i = 0;
