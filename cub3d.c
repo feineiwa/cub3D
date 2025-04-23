@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/23 12:28:21 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/23 14:00:55 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -621,16 +621,19 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 			g = (color >> 8) & 0xFF;
 			b = color & 0xFF;
 			col.r = r * light;
+			col.r = r;
 			if (col.r >= r)
 				col.r = r;
 			else if (col.r < 0)
 				col.r = 0;
 			col.g = g * light;
+			col.g = g;
 			if (col.g >= g)
 				col.g = g;
 			else if (col.r < 0)
 				col.g = 0;
 			col.b = b * light;
+			col.b = b;
 			if (col.b >= b)
 				col.b = b;
 			else if (col.b < 0)
@@ -693,17 +696,16 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	double	cos_ray;
 	double	sin_ray;
 	double	distance;
+	double	fish_correct;
 	
 	p.x = (double)game->player.pos.x * TILE_SIZE;
 	p.y = (double)game->player.pos.y * TILE_SIZE;
 	cos_ray = cos(ray_angle);
 	sin_ray = sin(ray_angle);
+	fish_correct = cos(ray_angle - game->player.angle);
 	while (start < end)
 	{
-		if (start > HALF_HEIGHT)
-			distance = (510 * (TILE_SIZE / (start - (double)HALF_HEIGHT)));
-		else
-			distance = (510 * (TILE_SIZE / ((double)HALF_HEIGHT - start)));
+		distance = (510 * (TILE_SIZE / fabs(start - (double)HALF_HEIGHT))) / fish_correct;
 		t_vector f = {
 			.x = distance * cos_ray + p.x,
 			.y = distance * sin_ray + p.y
@@ -712,9 +714,8 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 			.x = f.x / TILE_SIZE,
 			.y = f.y / TILE_SIZE
 		};
-		if (cell.x >= 0 || cell.y >= 0 || cell.x < game->player.w || cell.y < game->player.h)
+		if (cell.x >= 0 && cell.y >= 0 && cell.x < game->player.w && cell.y < game->player.h)
 		{
-			
 			int tex_y = (fmod(f.y, TILE_SIZE) / TILE_SIZE) * texture->h;
 			int tex_x = (fmod(f.x, TILE_SIZE) / TILE_SIZE) * texture->w;
 			if (tex_x >= texture->w)
@@ -884,7 +885,7 @@ int	game_loop(t_game *game)
 			offset = (o * img->w);			
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
-		float	line_height = (TILE_SIZE / dist_wall) * 510;
+		float	line_height = (TILE_SIZE / dist_wall) * (510);
 		if (line_height > HEIGHT)
 			line_height = HEIGHT;
 		float	draw_begin = look * (HEIGHT - line_height);
@@ -895,7 +896,7 @@ int	game_loop(t_game *game)
 		float	draw_end = draw_begin + line_height + waves;
 		if (draw_end >= HEIGHT)
 			draw_end = HEIGHT - 1;
-		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
+		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
 		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
 		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin);
