@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/24 13:55:15 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/24 19:17:36 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,38 +113,18 @@ double	normalize_angle(double angle)
 
 bool is_exceeded(t_vector move, t_player player)
 {
-	// t_vector	m;
-	// double		box_r;
-	// double		box_l;
-	// double		box_u;
-	// double		box_d;
-
-	// m.x = move.x * TILE_SIZE;
-	// m.y = move.y * TILE_SIZE;
-	// box_r = move.x + 2;
-	// box_l = m.x + 4;
-	// box_u = m.y + 4;
-	// box_d = m.y + 2;
-	// if (box_r < 0 || box_r > player.w * TILE_SIZE)
-	// 	return (true);
-	// if (box_l < 0 || box_l > player.w * TILE_SIZE)
-	// 	return (true);
-	// if (box_u < 0 || box_u > player.h * TILE_SIZE)
-	// 	return (true);
-	// if (box_d < 0 || box_d > player.h * TILE_SIZE)
-	// 	return (true);
 	t_vect top_left;
 	t_vect top_right;
 	t_vect bottom_left;
 	t_vect bottom_right;
-	double	collider = 0.1;
+	double	collider = 0.2;
 
-	top_left.x = (int)(move.x - 0.005);
-	top_left.y = (int)(move.y - 0.005);
+	top_left.x = (int)(move.x - collider);
+	top_left.y = (int)(move.y - collider);
 	top_right.x = (int)(move.x + collider);
 	top_right.y = (int)(move.y - collider);
-	bottom_left.x = (int)(move.x - 0.005);
-	bottom_left.y = (int)(move.y + 0.005);
+	bottom_left.x = (int)(move.x - collider);
+	bottom_left.y = (int)(move.y + collider);
 	bottom_right.x = (int)(move.x + collider);
 	bottom_right.y = (int)(move.y + collider);
 	if (top_left.x >= player.w || top_left.x < 0 || top_left.y < 0 || top_left.y >= player.h)
@@ -158,16 +138,6 @@ bool is_exceeded(t_vector move, t_player player)
 	return(false);
 }
 
-// bool	is_hit_wall(int tile_u, int tile_d, int tile_l, int tile_r, char **map)
-// {
-// 	if (map[tile_u][tile_l] == wall ||
-// 		map[tile_u][tile_r] == wall ||
-// 		map[tile_d][tile_l] == wall ||
-// 		map[tile_d][tile_r] == wall)
-// 		return (true);
-// 	return (false);
-// }
-
 bool	is_hit_wall(int tile_x, int tile_y, char **map)
 {
 	if (map[tile_y][tile_x] == wall)
@@ -177,33 +147,18 @@ bool	is_hit_wall(int tile_x, int tile_y, char **map)
 
 bool	is_collision(t_vector move, t_player player, char **map)
 {
-	// t_vector	m;
-	// double		box_r;
-	// double		box_l;
-	// double		box_u;
-	// double		box_d;
-
-	// m.x = move.x * TILE_SIZE;
-	// m.y = move.y * TILE_SIZE;
-	// box_r = m.x - 2;
-	// box_l = m.x + 4;
-	// box_u = m.y + 4;
-	// box_d = m.y - 2;
-	// if (is_hit_wall((int)(box_u / TILE_SIZE), (int)(box_d / TILE_SIZE), (int)(box_l / TILE_SIZE), (int)(box_r / TILE_SIZE), map))
-	// 	return (true);
-
 	t_vect top_left;
 	t_vect top_right;
 	t_vect bottom_left;
 	t_vect bottom_right;
-	double	collider = 0.1;
+	double	collider = 0.2;
 
-	top_left.x = (int)(move.x - 0.005);
-	top_left.y = (int)(move.y - 0.005);
+	top_left.x = (int)(move.x - collider);
+	top_left.y = (int)(move.y - collider);
 	top_right.x = (int)(move.x + collider);
 	top_right.y = (int)(move.y - collider);
-	bottom_left.x = (int)(move.x - 0.005);
-	bottom_left.y = (int)(move.y + 0.005);
+	bottom_left.x = (int)(move.x - collider);
+	bottom_left.y = (int)(move.y + collider);
 	bottom_right.x = (int)(move.x + collider);
 	bottom_right.y = (int)(move.y + collider);
 	if (is_hit_wall(top_left.x, top_left.y, map) ||
@@ -236,6 +191,13 @@ void	move_player(t_game *game)
 			game->player.pos.x = move.x;
 			game->player.pos.y = move.y;
 		}
+		else
+		{
+			if (!is_exceeded((t_vector){move.x, game->player.pos.y}, game->player) && !is_collision((t_vector){move.x, game->player.pos.y}, game->player, game->map))
+				game->player.pos.x = move.x;
+			if (!is_exceeded((t_vector){game->player.pos.x, move.y}, game->player) && !is_collision((t_vector){game->player.pos.x, move.y}, game->player, game->map))
+				game->player.pos.y = move.y;
+		}
 	}
 	if (game->player.key.key_left == true || game->player.key.key_right == true)
 	{
@@ -245,6 +207,13 @@ void	move_player(t_game *game)
 		{
 			game->player.pos.x = move.x;
 			game->player.pos.y = move.y;
+		}
+		else
+		{
+			if (!is_exceeded((t_vector){move.x, game->player.pos.y}, game->player) && !is_collision((t_vector){move.x, game->player.pos.y}, game->player, game->map))
+				game->player.pos.x = move.x;
+			if (!is_exceeded((t_vector){game->player.pos.x, move.y}, game->player) && !is_collision((t_vector){game->player.pos.x, move.y}, game->player, game->map))
+				game->player.pos.y = move.y;
 		}
 	}
 	if (game->player.key.look_up == true)
@@ -696,8 +665,11 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 	int	g;
 	int	b;
 
-	scale = (double)txt->h / (y1 - y0);
+	scale = (double)txt->h / (double)(y1 - y0);
 	y = 0;
+	// fprintf(stderr, "distance %f and scale %f\n", dist_wall,scale);
+	if (dist_wall < 8)
+		scale = 0.9;
 	while (y0 < y1)
 	{
 		i = 0;
@@ -943,22 +915,22 @@ int	game_loop(t_game *game)
 		if (is_facing_up && horizontal_dist < vertical_dist)
 		{
 			img = &game->pack.no_img; 
-			offset = (o * img->w);
+			offset = (int)(o * img->w);
 		}
 		else if (is_facing_down && horizontal_dist < vertical_dist)
 		{
 			img = &game->pack.so_img; 
-			offset = (o * img->w);
+			offset = (int)(o * img->w);
 		}
 		else if (is_facing_right && horizontal_dist > vertical_dist)
 		{
 			img = &game->pack.ea_img; 
-			offset = (o * img->w);
+			offset = (int)(o * img->w);
 		}
 		else if (is_facing_left && horizontal_dist > vertical_dist)
 		{
 			img = &game->pack.we_img; 
-			offset = (o * img->w);			
+			offset = (int)(o * img->w);			
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		float	line_height = (TILE_SIZE / dist_wall) * (510);
