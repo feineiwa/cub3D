@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/23 19:11:19 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/24 12:37:23 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@
 // # define WIDTH 1200
 // # define HEIGHT 800
 # define PI 3.14159265359
-# define MOVE_SPEED 0.09
+# define MOVE_SPEED 0.06
 # define ROT_SPEED 0.05
 # define MOUSE_SPEED 0.0005;
 # define RES 1

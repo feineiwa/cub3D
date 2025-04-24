@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/23 20:25:49 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/24 13:55:15 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,20 +111,105 @@ double	normalize_angle(double angle)
 	return (angle);
 }
 
-bool is_exceeded(int x, int y, t_player player)
+bool is_exceeded(t_vector move, t_player player)
 {
-	if (x < 0 || y < 0 || x >= player.w || y >= player.h)
+	// t_vector	m;
+	// double		box_r;
+	// double		box_l;
+	// double		box_u;
+	// double		box_d;
+
+	// m.x = move.x * TILE_SIZE;
+	// m.y = move.y * TILE_SIZE;
+	// box_r = move.x + 2;
+	// box_l = m.x + 4;
+	// box_u = m.y + 4;
+	// box_d = m.y + 2;
+	// if (box_r < 0 || box_r > player.w * TILE_SIZE)
+	// 	return (true);
+	// if (box_l < 0 || box_l > player.w * TILE_SIZE)
+	// 	return (true);
+	// if (box_u < 0 || box_u > player.h * TILE_SIZE)
+	// 	return (true);
+	// if (box_d < 0 || box_d > player.h * TILE_SIZE)
+	// 	return (true);
+	t_vect top_left;
+	t_vect top_right;
+	t_vect bottom_left;
+	t_vect bottom_right;
+	double	collider = 0.1;
+
+	top_left.x = (int)(move.x - 0.005);
+	top_left.y = (int)(move.y - 0.005);
+	top_right.x = (int)(move.x + collider);
+	top_right.y = (int)(move.y - collider);
+	bottom_left.x = (int)(move.x - 0.005);
+	bottom_left.y = (int)(move.y + 0.005);
+	bottom_right.x = (int)(move.x + collider);
+	bottom_right.y = (int)(move.y + collider);
+	if (top_left.x >= player.w || top_left.x < 0 || top_left.y < 0 || top_left.y >= player.h)
+		return (true);
+	if (top_right.x >= player.w || top_right.x < 0 || top_right.y < 0 || top_right.y >= player.h)
+		return (true);
+	if (bottom_left.x >= player.w || bottom_left.x < 0 || bottom_left.y < 0 || bottom_left.y >= player.h)
+		return (true);
+	if (bottom_right.x >= player.w || bottom_right.x < 0 || bottom_right.y < 0 || bottom_right.y >= player.h)
 		return (true);
 	return(false);
 }
 
-bool	is_collision(double x, double y, t_game *game)
-{
-	t_vect grid;
+// bool	is_hit_wall(int tile_u, int tile_d, int tile_l, int tile_r, char **map)
+// {
+// 	if (map[tile_u][tile_l] == wall ||
+// 		map[tile_u][tile_r] == wall ||
+// 		map[tile_d][tile_l] == wall ||
+// 		map[tile_d][tile_r] == wall)
+// 		return (true);
+// 	return (false);
+// }
 
-	grid.x = (int)floor(x);
-	grid.y = (int)floor(y);
-	if (game->map[grid.y][grid.x] == wall)
+bool	is_hit_wall(int tile_x, int tile_y, char **map)
+{
+	if (map[tile_y][tile_x] == wall)
+		return (true);
+	return (false);	
+}
+
+bool	is_collision(t_vector move, t_player player, char **map)
+{
+	// t_vector	m;
+	// double		box_r;
+	// double		box_l;
+	// double		box_u;
+	// double		box_d;
+
+	// m.x = move.x * TILE_SIZE;
+	// m.y = move.y * TILE_SIZE;
+	// box_r = m.x - 2;
+	// box_l = m.x + 4;
+	// box_u = m.y + 4;
+	// box_d = m.y - 2;
+	// if (is_hit_wall((int)(box_u / TILE_SIZE), (int)(box_d / TILE_SIZE), (int)(box_l / TILE_SIZE), (int)(box_r / TILE_SIZE), map))
+	// 	return (true);
+
+	t_vect top_left;
+	t_vect top_right;
+	t_vect bottom_left;
+	t_vect bottom_right;
+	double	collider = 0.1;
+
+	top_left.x = (int)(move.x - 0.005);
+	top_left.y = (int)(move.y - 0.005);
+	top_right.x = (int)(move.x + collider);
+	top_right.y = (int)(move.y - collider);
+	bottom_left.x = (int)(move.x - 0.005);
+	bottom_left.y = (int)(move.y + 0.005);
+	bottom_right.x = (int)(move.x + collider);
+	bottom_right.y = (int)(move.y + collider);
+	if (is_hit_wall(top_left.x, top_left.y, map) ||
+		is_hit_wall(top_right.x, top_right.y, map) ||
+		is_hit_wall(bottom_left.x, bottom_left.y, map) ||
+		is_hit_wall(bottom_right.x, bottom_right.y, map))
 		return (true);
 	return (false);
 }
@@ -133,6 +218,7 @@ void	move_player(t_game *game)
 {
 	t_vector move;
 	double	move_speed;
+	t_vector	player;
 
 	if (game->player.key.rot_l == true)
 		game->player.angle += game->player.turn_dir * ROT_SPEED * mouse_speed;
@@ -145,19 +231,21 @@ void	move_player(t_game *game)
 	{
 		move.x = game->player.pos.x + cos(game->player.angle) * game->player.walk_dir * move_speed;
 		move.y = game->player.pos.y + sin(game->player.angle) * game->player.walk_dir * move_speed;
-		if (!is_exceeded((int)floor(move.x), (int)floor(game->player.pos.y), game->player) && game->map[(int)floor(game->player.pos.y)][(int)floor(move.x)] != wall)
+		if (!is_exceeded(move, game->player) && !is_collision(move, game->player, game->map))
+		{
 			game->player.pos.x = move.x;
-		if (!is_exceeded((int)floor(game->player.pos.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(game->player.pos.x)] != wall)
 			game->player.pos.y = move.y;
+		}
 	}
 	if (game->player.key.key_left == true || game->player.key.key_right == true)
 	{
 		move.x = game->player.pos.x + cos(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
 		move.y = game->player.pos.y + sin(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
-		if (!is_exceeded((int)floor(move.x), (int)floor(game->player.pos.y), game->player) && game->map[(int)floor(game->player.pos.y)][(int)floor(move.x)] != wall)
+		if (!is_exceeded(move, game->player) && !is_collision(move, game->player, game->map))
+		{
 			game->player.pos.x = move.x;
-		if (!is_exceeded((int)floor(game->player.pos.x), (int)floor(move.y), game->player) && game->map[(int)floor(move.y)][(int)floor(game->player.pos.x)] != wall)
 			game->player.pos.y = move.y;
+		}
 	}
 	if (game->player.key.look_up == true)
 	{
@@ -894,13 +982,14 @@ int	game_loop(t_game *game)
 	}
 	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2)};
 	paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
-	t_vector compass = {WIDTH - 100, 100};
-	t_vect comp = {WIDTH - 200, 7};
-	paint_image_to_win(&game->img, &game->pack.compass, 200, 200, comp, 0XFFD700);
-	draw_rotated_texture(&game->img, &game->pack.needle, compass, game->player.angle, 110, 110);
+	t_vector compass = {WIDTH - 124, 95};
+	t_vect comp = {WIDTH - 200, 20};
+	paint_image_to_win(&game->img, &game->pack.compass, 150, 150, comp, -1);
+	draw_rotated_texture(&game->img, &game->pack.needle, compass, game->player.angle, 100, 100);
 	draw_minimap(&game->img, game->map, game->player);
-	t_vect p = {100 - 6, HEIGHT - 106};
+	t_vect p = {100 - 6, HEIGHT - 100 - 6};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, p, 0x00FF00);
+	// draw_circle_full(&game->img, p, 4, 0x00FF00);
 	t_vect g = {(int)(WIDTH / 2) - 100, HEIGHT  - 300};
 	if (game->player.key.recharge == true)
 	{
@@ -1021,7 +1110,7 @@ int	main(int ac, char **av)
 	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
 
-	game.pack.compass.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/compass1.xpm", &game.pack.compass.w, &game.pack.compass.h);
+	game.pack.compass.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/compass2.xpm", &game.pack.compass.w, &game.pack.compass.h);
 	game.pack.compass.addr = mlx_get_data_addr(game.pack.compass.img_ptr, &game.pack.compass.bpp, &game.pack.compass.size_line, &game.pack.compass.endian);
 	game.pack.needle.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/needle.xpm", &game.pack.needle.w, &game.pack.needle.h);
 	game.pack.needle.addr = mlx_get_data_addr(game.pack.needle.img_ptr, &game.pack.needle.bpp, &game.pack.needle.size_line, &game.pack.needle.endian);
