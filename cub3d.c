@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/24 19:17:36 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/25 17:26:16 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ float	look = 0.5;
 int		mouse_x = 0;
 int		mouse_y = 0;
 float		mouse_speed = 1;
+int		jump_scale = 30;
 
 void	put_pixel(t_image *img, int x, int y, int color)
 {
@@ -117,7 +118,7 @@ bool is_exceeded(t_vector move, t_player player)
 	t_vect top_right;
 	t_vect bottom_left;
 	t_vect bottom_right;
-	double	collider = 0.2;
+	double	collider = 0.1;
 
 	top_left.x = (int)(move.x - collider);
 	top_left.y = (int)(move.y - collider);
@@ -151,7 +152,7 @@ bool	is_collision(t_vector move, t_player player, char **map)
 	t_vect top_right;
 	t_vect bottom_left;
 	t_vect bottom_right;
-	double	collider = 0.2;
+	double	collider = 0.1;
 
 	top_left.x = (int)(move.x - collider);
 	top_left.y = (int)(move.y - collider);
@@ -227,6 +228,34 @@ void	move_player(t_game *game)
 		look -= (float)(ROT_SPEED) * mouse_speed;
 		if (look < 0)
 			look = 0;
+	}
+	if (game->player.key.key_croutch == true)
+	{
+		if (g_global()->j_croutch == 0)
+			g_global()->j_croutch = -200;
+		else
+			g_global()->j_croutch = 0;
+	}
+	if (game->player.key.key_jump == true)
+	{
+		if (jump_scale > 0 && g_global()->j_croutch < 500)
+		{
+			g_global()->j_croutch += jump_scale;
+			if (g_global()->j_croutch >= 500)
+				jump_scale *= -1;
+		}
+		else if (jump_scale < 0)
+		{
+			g_global()->j_croutch += jump_scale;
+			if (g_global()->j_croutch <= 0)
+			{
+				g_global()->j_croutch = 0;
+				jump_scale = 30;
+				g_updated = false;
+				game->player.key.key_jump = false;
+			}
+			
+		}
 	}
 	game->player.key.rot_l = false;
 	game->player.key.rot_r = false;
@@ -315,6 +344,10 @@ int	ft_key_press(int keysym, t_game *game)
 			mlx_mouse_show(game->var.mlx, game->var.win);
 		}
 	}
+	if (keysym == XK_c)
+		game->player.key.key_croutch = true;
+	if (keysym == XK_space && game->player.key.key_jump == false)
+		game->player.key.key_jump = true;
 	mouse_speed = 1;
 	g_updated = true;
 	return (0);
@@ -346,10 +379,11 @@ int	ft_key_release(int keysym, t_game *game)
 		game->player.key.look_up = false;
 	if (keysym == XK_Down)
 		game->player.key.look_down = false;
+	if (keysym == XK_c)
+		game->player.key.key_croutch = false;
 	game->player.walk_dir = 0;
 	game->player.dir.x = 0;
 	game->player.dir.y = 0;
-	g_updated = true;
 	return (0);
 }
 
@@ -656,7 +690,6 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 {
 	int	i;
 	int color;
-	int	y;
 	double scale;
 	int	texture_y;
 	double	light = 40 / dist_wall;
@@ -664,41 +697,28 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 	int	r;
 	int	g;
 	int	b;
+	double	tex_pos = 0;
 
 	scale = (double)txt->h / (double)(y1 - y0);
-	y = 0;
-	// fprintf(stderr, "distance %f and scale %f\n", dist_wall,scale);
-	if (dist_wall < 8)
-		scale = 0.9;
-	while (y0 < y1)
+	while (y0 <= y1)
 	{
 		i = 0;
-		texture_y = (int)(y * scale);
+		texture_y = (int)tex_pos;
+		if (texture_y >= txt->h)
+			texture_y = txt->h - 1;
 		while (i < x1)
 		{
 			color = get_img_color(txt, offset, texture_y);
 			r = (color >> 16) & 0xFF;
 			g = (color >> 8) & 0xFF;
 			b = color & 0xFF;
-			col.r = r * light;
-			if (col.r >= r)
-				col.r = r;
-			else if (col.r < 0)
-				col.r = 0;
-			col.g = g * light;
-			if (col.g >= g)
-				col.g = g;
-			else if (col.r < 0)
-				col.g = 0;
-			col.b = b * light;
-			if (col.b >= b)
-				col.b = b;
-			else if (col.b < 0)
-				col.b = 0;
+			col.r = fmin(fmax(r * light, 0), r);
+			col.g = fmin(fmax(g * light, 0), g);
+			col.b = fmin(fmax(b * light, 0), b);
 			put_pixel(img, i + x0, y0, set_color_rgb(col.r, col.g, col.b));
 			i++;
 		}
-		y++;
+		tex_pos += scale;
 		y0++;	
 	}
 }
@@ -721,7 +741,7 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	fish_correct = cos(ray_angle - game->player.angle) + 1e-6;
 	while (start < end)
 	{
-		distance = (510 * (TILE_SIZE / (fabs(start - (double)HALF_HEIGHT) + 1e-6))) / fish_correct;
+		distance = (510 * ((TILE_SIZE) / (fabs(start - (double)HALF_HEIGHT) + 1e-6))) / fish_correct;
 		t_vector f = {
 			.x = distance * cos_ray + p.x,
 			.y = distance * sin_ray + p.y
@@ -789,17 +809,17 @@ int	game_loop(t_game *game)
 	bool	is_facing_left;
 	bool	is_facing_right;
 	bool	is_facing_up;
+	double	ray_angle;
+	int		ray = 0;
 	
 	if (g_updated == false && g_first == false)
 		return (1);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	move_player(game);
-	double	ray_angle;
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
 	ray_angle = normalize_angle(game->player.angle - (FOV / 2));
-	int	ray = 0;
 	while (ray < R_NB)
 	{
 		ray_angle = normalize_angle(ray_angle);
@@ -933,22 +953,18 @@ int	game_loop(t_game *game)
 			offset = (int)(o * img->w);			
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
-		float	line_height = (TILE_SIZE / dist_wall) * (510);
-		if (line_height > HEIGHT)
-			line_height = HEIGHT;
-		float	draw_begin = look * (HEIGHT - line_height);
-		if (draw_begin <= 0)
-			draw_begin = 0;
-		else
-			draw_begin += waves;
-		float	draw_end = draw_begin + line_height + waves;
-		if (draw_end >= HEIGHT)
-			draw_end = HEIGHT - 1;
-		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
-		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
+		double	line_height = (TILE_SIZE / dist_wall) * 510;
+		double	draw_begin = look * (HEIGHT + g_global()->j_croutch - line_height);
+		double	draw_end = draw_begin + line_height;
+		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
+		draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
 		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
-		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin);
-		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end, HEIGHT);
+		// if (draw_begin <= 0)
+		// 	draw_begin = 0;
+		// if (draw_end >= HEIGHT)
+		// 	draw_end = HEIGHT - 1;   posssible necessary
+		// draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin);
+		// draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT);
 		ray_angle += FOV / R_NB;
 		ray++;
 	}
@@ -959,7 +975,7 @@ int	game_loop(t_game *game)
 	paint_image_to_win(&game->img, &game->pack.compass, 150, 150, comp, -1);
 	draw_rotated_texture(&game->img, &game->pack.needle, compass, game->player.angle, 100, 100);
 	draw_minimap(&game->img, game->map, game->player);
-	t_vect p = {100 - 6, HEIGHT - 100 - 6};
+	t_vect p = {100 - 7, HEIGHT - 100 - 7};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, p, 0x00FF00);
 	// draw_circle_full(&game->img, p, 4, 0x00FF00);
 	t_vect g = {(int)(WIDTH / 2) - 100, HEIGHT  - 300};
@@ -979,7 +995,7 @@ int	game_loop(t_game *game)
 			g_updated = false;
 		}
 	}
-	else
+	else if (game->player.key.key_jump != true)
 	{
 		g_global()->music_pid = false;
 		paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);

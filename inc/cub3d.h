@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/24 17:20:35 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/25 13:42:03 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,8 @@ struct					s_key
 	bool				speed;
 	bool				recharge;
 	bool				hide_mouse;
+	bool				key_croutch;
+	bool				key_jump;
 };
 
 struct					s_player
@@ -189,6 +191,7 @@ typedef	struct s_g
 {
 	pid_t	music_pid;
 	bool	one_shoot_music;
+	int		j_croutch;
 }	t_g;
 
 
