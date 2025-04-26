@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/26 12:55:17 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/26 13:37:23 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,18 +241,21 @@ void	move_player(t_game *game)
 		if (jump_scale > 0 && g_global()->j_croutch < 500)
 		{
 			g_global()->j_croutch += jump_scale;
+			look -= 0.03;
 			if (g_global()->j_croutch >= 500)
 				jump_scale *= -1;
 		}
 		else if (jump_scale < 0)
 		{
 			g_global()->j_croutch += jump_scale;
+			look += 0.03;
 			if (g_global()->j_croutch <= 0)
 			{
 				g_global()->j_croutch = 0;
 				jump_scale = 30;
 				g_updated = false;
 				game->player.key.key_jump = false;
+				look = 0.5;
 			}
 			
 		}
@@ -970,7 +973,7 @@ int	game_loop(t_game *game)
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
-		double	draw_begin = look * (HEIGHT + g_global()->j_croutch - line_height);
+		double	draw_begin = (look * (HEIGHT - line_height) + g_global()->j_croutch);
 		double	draw_end = draw_begin + line_height;
 		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
