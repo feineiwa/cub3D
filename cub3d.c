@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/25 17:26:16 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/26 12:55:17 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,14 +220,14 @@ void	move_player(t_game *game)
 	if (game->player.key.look_up == true)
 	{
 		look += (float)(ROT_SPEED) * mouse_speed;
-		if (look > 1)
-			look = 1;
+		if (look >= 0.8)
+			look = 0.8;
 	}
 	if (game->player.key.look_down == true)
 	{
 		look -= (float)(ROT_SPEED) * mouse_speed;
-		if (look < 0)
-			look = 0;
+		if (look <= 0.3)
+			look = 0.3;
 	}
 	if (game->player.key.key_croutch == true)
 	{
@@ -348,6 +348,26 @@ int	ft_key_press(int keysym, t_game *game)
 		game->player.key.key_croutch = true;
 	if (keysym == XK_space && game->player.key.key_jump == false)
 		game->player.key.key_jump = true;
+	if (keysym == XK_i)
+	{
+		g_global()->zoom += 0.1;
+		g_global()->narrow_look += 100;
+	}
+	if (keysym == XK_o)
+	{
+		g_global()->zoom -= 0.1;
+		g_global()->narrow_look -= 100;
+	}
+	if (g_global()->zoom < 1)
+	{
+		g_global()->zoom = 1;
+		g_global()->narrow_look = 875;
+	}
+	if (g_global()->zoom > 3.0)
+	{
+		g_global()->zoom = 3.0;
+		g_global()->narrow_look = 2875;
+	}
 	mouse_speed = 1;
 	g_updated = true;
 	return (0);
@@ -741,24 +761,17 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	fish_correct = cos(ray_angle - game->player.angle) + 1e-6;
 	while (start < end)
 	{
-		distance = (510 * ((TILE_SIZE) / (fabs(start - (double)HALF_HEIGHT) + 1e-6))) / fish_correct;
+		distance = ((g_global()->project_dist * TILE_SIZE) / (start - (double)HALF_HEIGHT + 1e-6)) / fish_correct;
 		t_vector f = {
 			.x = distance * cos_ray + p.x,
 			.y = distance * sin_ray + p.y
 		};
-		t_vector cell = {
-			.x = f.x * tile_size_inv,
-			.y = f.y * tile_size_inv
-		};
-		if (cell.x >= 0 && cell.y >= 0 && cell.x < game->player.w && cell.y < game->player.h)
-		{
-			int tex_y = (fmod(f.y, TILE_SIZE) * tile_size_inv) * texture->h;
-			int tex_x = (fmod(f.x, TILE_SIZE) * tile_size_inv) * texture->w;
-			tex_x %= texture->h;
-			tex_y %= texture->w;
-			color = get_img_color(texture, tex_x, tex_y);
-			put_pixel(&game->img, ray, start, color);
-		}
+		int tex_y = (int)(f.y * tile_size_inv * texture->h) % texture->h;
+		int tex_x = (int)(f.x * tile_size_inv * texture->w) % texture->w;
+		tex_x = abs(tex_x);
+		tex_y = abs(tex_y);
+		color = get_img_color(texture, tex_x, tex_y);
+		put_pixel(&game->img, ray, start, color);
 		start++;
 	}
 }
@@ -811,7 +824,8 @@ int	game_loop(t_game *game)
 	bool	is_facing_up;
 	double	ray_angle;
 	int		ray = 0;
-	
+	double	project_dist;
+
 	if (g_updated == false && g_first == false)
 		return (1);
 	mlx_clear_window(game->var.mlx, game->var.win);
@@ -819,7 +833,9 @@ int	game_loop(t_game *game)
 	move_player(game);
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
-	ray_angle = normalize_angle(game->player.angle - (FOV / 2));
+	double	adjusted_fov = FOV / g_global()->zoom;
+	g_global()->project_dist = (800 / tan(adjusted_fov / 2) - g_global()->narrow_look);
+	ray_angle = normalize_angle(game->player.angle - (adjusted_fov / 2));
 	while (ray < R_NB)
 	{
 		ray_angle = normalize_angle(ray_angle);
@@ -953,7 +969,7 @@ int	game_loop(t_game *game)
 			offset = (int)(o * img->w);			
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
-		double	line_height = (TILE_SIZE / dist_wall) * 510;
+		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
 		double	draw_begin = look * (HEIGHT + g_global()->j_croutch - line_height);
 		double	draw_end = draw_begin + line_height;
 		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
@@ -965,11 +981,14 @@ int	game_loop(t_game *game)
 		// 	draw_end = HEIGHT - 1;   posssible necessary
 		// draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin);
 		// draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT);
-		ray_angle += FOV / R_NB;
+		ray_angle += adjusted_fov / R_NB;
 		ray++;
 	}
 	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2)};
-	paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
+	if (game->player.key.scope == true)
+		paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
+	else
+		paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
 	t_vector compass = {WIDTH - 124, 95};
 	t_vect comp = {WIDTH - 200, 20};
 	paint_image_to_win(&game->img, &game->pack.compass, 150, 150, comp, -1);
@@ -978,7 +997,7 @@ int	game_loop(t_game *game)
 	t_vect p = {100 - 7, HEIGHT - 100 - 7};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, p, 0x00FF00);
 	// draw_circle_full(&game->img, p, 4, 0x00FF00);
-	t_vect g = {(int)(WIDTH / 2) - 100, HEIGHT  - 300};
+	t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (look * 50))};
 	if (game->player.key.recharge == true)
 	{
 		g_updated = true;
@@ -995,7 +1014,7 @@ int	game_loop(t_game *game)
 			g_updated = false;
 		}
 	}
-	else if (game->player.key.key_jump != true)
+	else if (game->player.key.key_jump == false && game->player.key.scope == false)
 	{
 		g_global()->music_pid = false;
 		paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);
@@ -1021,19 +1040,26 @@ int	ft_mouse_move(int x, int y, t_game *game)
 	{
 		game->player.key.rot_r = true;
 		game->player.turn_dir = 1;
+		g_updated = true;
 	}
 	else if ((WIDTH / 2) - 10 > x)
 	{
 		game->player.key.rot_l = true;
 		game->player.turn_dir = -1;
+		g_updated = true;
 	}
 	if ((HEIGHT / 2) + 10 < y)
+	{
 		game->player.key.look_down = true;
+		g_updated = true;
+	}
 	else if ((HEIGHT / 2) - 10 > y)
+	{
 		game->player.key.look_up = true;
+		g_updated = true;
+	}
 	mouse_speed = 0.8;
 	mlx_mouse_move(game->var.mlx, game->var.win, WIDTH / 2, HEIGHT / 2);
-	g_updated = true;
 	return (0);
 }
 
@@ -1041,11 +1067,36 @@ int	ft_mouse_pressed(int button, int x, int y, t_game *game)
 {
 	if (game->player.key.hide_mouse == false && g_global()->one_shoot_music == true)
 		return (1);
-	if (button == 1)
+	if (button == 1 && game->player.key.hide_mouse == true)
 	{
-		launch_music("sounds/gun1.wav", "2");
+		// launch_music("sounds/gun1.wav", "2");
 		g_global()->one_shoot_music = true;
 		game->player.key.recharge = true;
+		g_updated = true;
+	}
+	if (button == 4 && game->player.key.hide_mouse == true)
+	{
+		game->player.key.scope = true;
+		g_global()->zoom += 0.1;
+		g_global()->narrow_look += 100;
+		g_updated = true;
+	}
+	if (button == 5 && game->player.key.hide_mouse == true)
+	{
+		g_global()->zoom -= 0.1;
+		g_global()->narrow_look -= 100;
+		g_updated = true;
+	}
+	if (g_global()->zoom < 1)
+	{
+		game->player.key.scope = false;
+		g_global()->zoom = 1;
+		g_global()->narrow_look = 875;
+	}
+	if (g_global()->zoom > 3.0)
+	{
+		g_global()->zoom = 3.0;
+		g_global()->narrow_look = 2875;
 	}
 	return (0);
 }
@@ -1093,15 +1144,17 @@ int	main(int ac, char **av)
 	game.pack.arrow.addr = mlx_get_data_addr(game.pack.arrow.img_ptr, &game.pack.arrow.bpp, &game.pack.arrow.size_line, &game.pack.arrow.endian);
 	game.pack.aiming.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/aiming1.xpm", &game.pack.aiming.w, &game.pack.aiming.h);
 	game.pack.aiming.addr = mlx_get_data_addr(game.pack.aiming.img_ptr, &game.pack.aiming.bpp, &game.pack.aiming.size_line, &game.pack.aiming.endian);
-	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/floor.xpm", &game.pack.floor.w, &game.pack.floor.h);
+	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/floor3.xpm", &game.pack.floor.w, &game.pack.floor.h);
 	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
-	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
+	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil0.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
 
 	game.pack.compass.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/compass2.xpm", &game.pack.compass.w, &game.pack.compass.h);
 	game.pack.compass.addr = mlx_get_data_addr(game.pack.compass.img_ptr, &game.pack.compass.bpp, &game.pack.compass.size_line, &game.pack.compass.endian);
 	game.pack.needle.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/needle.xpm", &game.pack.needle.w, &game.pack.needle.h);
 	game.pack.needle.addr = mlx_get_data_addr(game.pack.needle.img_ptr, &game.pack.needle.bpp, &game.pack.needle.size_line, &game.pack.needle.endian);
+	game.pack.scope.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/scope.xpm", &game.pack.scope.w, &game.pack.scope.h);
+	game.pack.scope.addr = mlx_get_data_addr(game.pack.scope.img_ptr, &game.pack.scope.bpp, &game.pack.scope.size_line, &game.pack.scope.endian);
 
 
 	int	i = 0;
