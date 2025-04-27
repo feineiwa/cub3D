@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/26 13:37:23 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/27 19:10:02 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ bool is_exceeded(t_vector move, t_player player)
 
 bool	is_hit_wall(int tile_x, int tile_y, char **map)
 {
-	if (map[tile_y][tile_x] == wall)
+	if (map[tile_y][tile_x] == wall || map[tile_y][tile_x] == door)
 		return (true);
 	return (false);	
 }
@@ -437,7 +437,7 @@ bool	is_wall(int x, int y, char **map, t_player player)
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 		return (false);
-	if (map[y1][x1] == wall)
+	if (map[y1][x1] == wall || map[y1][x1] == door)
 		return (true);
 	return (false);
 }
@@ -693,14 +693,15 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 		i = x1;
 		while (i < x2)
 		{
+			t_vector relative = {(i - player.pos.x), (j - player.pos.y)};
+			t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
+			t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
 			if (map[j][i] == wall)
-			{
-				t_vector relative = {(i - player.pos.x), (j - player.pos.y)};
-				t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
-				t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
-				// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
 				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
-			}
+			else if (map[j][i] == door)
+				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x82490b);
+			// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
+			
 			i++;
 		}
 		j++;
@@ -732,13 +733,16 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 		while (i < x1)
 		{
 			color = get_img_color(txt, offset, texture_y);
-			r = (color >> 16) & 0xFF;
-			g = (color >> 8) & 0xFF;
-			b = color & 0xFF;
-			col.r = fmin(fmax(r * light, 0), r);
-			col.g = fmin(fmax(g * light, 0), g);
-			col.b = fmin(fmax(b * light, 0), b);
-			put_pixel(img, i + x0, y0, set_color_rgb(col.r, col.g, col.b));
+			if (color >= 0)
+			{
+				r = (color >> 16) & 0xFF;
+				g = (color >> 8) & 0xFF;
+				b = color & 0xFF;
+				col.r = fmin(fmax(r * light, 0), r);
+				col.g = fmin(fmax(g * light, 0), g);
+				col.b = fmin(fmax(b * light, 0), b);
+				put_pixel(img, i + x0, y0, set_color_rgb(col.r, col.g, col.b));
+			}
 			i++;
 		}
 		tex_pos += scale;
@@ -951,25 +955,32 @@ int	game_loop(t_game *game)
 			dist_wall = 0.001;
 		int	offset;
 		t_image *img;
+		img = NULL;
+		if (game->map[(int)floor(wall_hit.y / TILE_SIZE)][(int)floor(wall_hit.x / TILE_SIZE)] == door)
+			img = &game->pack.door[0];
 		if (is_facing_up && horizontal_dist < vertical_dist)
 		{
-			img = &game->pack.no_img; 
+			if (img == NULL)
+				img = &game->pack.no_img; 
 			offset = (int)(o * img->w);
 		}
 		else if (is_facing_down && horizontal_dist < vertical_dist)
 		{
-			img = &game->pack.so_img; 
-			offset = (int)(o * img->w);
+			if (img == NULL)
+				img = &game->pack.so_img;
+			offset = img->w - (int)(o * img->w) - 1;
 		}
 		else if (is_facing_right && horizontal_dist > vertical_dist)
 		{
-			img = &game->pack.ea_img; 
+			if (img == NULL)
+				img = &game->pack.ea_img;
 			offset = (int)(o * img->w);
 		}
 		else if (is_facing_left && horizontal_dist > vertical_dist)
 		{
-			img = &game->pack.we_img; 
-			offset = (int)(o * img->w);			
+			if (img == NULL)
+				img = &game->pack.we_img;
+			offset = img->w - (int)(o * img->w) - 1;
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
@@ -1151,6 +1162,9 @@ int	main(int ac, char **av)
 	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
 	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil0.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
+	game.pack.door[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/open0.xpm", &game.pack.door[0].w, &game.pack.door[0].h);
+	game.pack.door[0].addr = mlx_get_data_addr(game.pack.door[0].img_ptr, &game.pack.door[0].bpp, &game.pack.door[0].size_line, &game.pack.door[0].endian);
+
 
 	game.pack.compass.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/compass2.xpm", &game.pack.compass.w, &game.pack.compass.h);
 	game.pack.compass.addr = mlx_get_data_addr(game.pack.compass.img_ptr, &game.pack.compass.bpp, &game.pack.compass.size_line, &game.pack.compass.endian);

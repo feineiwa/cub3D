@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/26 12:27:46 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/27 16:57:02 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ typedef enum e_cell
 	p_s = 'S',
 	p_e = 'E',
 	p_w = 'W',
+	door = '2',
 }						t_cell;
 
 struct					s_vect
@@ -177,6 +178,7 @@ typedef struct s_pack
 	t_image	compass;
 	t_image needle;
 	t_image scope;
+	t_image door[6];
 }	t_pack;
 
 
