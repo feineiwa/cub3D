@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/27 19:10:02 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/28 13:11:14 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 bool	g_updated = false;
 bool	g_first = false;
 int		gun_frame = 0;
-float	look = 0.5;
+float	look = 0;
 int		mouse_x = 0;
 int		mouse_y = 0;
 float		mouse_speed = 1;
@@ -220,14 +220,14 @@ void	move_player(t_game *game)
 	if (game->player.key.look_up == true)
 	{
 		look += (float)(ROT_SPEED) * mouse_speed;
-		if (look >= 0.8)
-			look = 0.8;
+		if (look >= 0.3)
+			look = 0.3;
 	}
 	if (game->player.key.look_down == true)
 	{
 		look -= (float)(ROT_SPEED) * mouse_speed;
-		if (look <= 0.3)
-			look = 0.3;
+		if (look <= - 0.3)
+			look = - 0.3;
 	}
 	if (game->player.key.key_croutch == true)
 	{
@@ -750,7 +750,7 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 	}
 }
 
-void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_angle, int start, int end)
+void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_angle, int start, int end, double middle, bool floor)
 {
 	double center;
 	t_vector p;
@@ -758,23 +758,31 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	double	cos_ray;
 	double	sin_ray;
 	double	distance;
-	double	fish_correct;
 	
 	p.x = (double)game->player.pos.x * TILE_SIZE;
 	p.y = (double)game->player.pos.y * TILE_SIZE;
 	double	tile_size_inv = 1.0 / TILE_SIZE;
 	cos_ray = cos(ray_angle);
 	sin_ray = sin(ray_angle);
-	fish_correct = cos(ray_angle - game->player.angle) + 1e-6;
+	double	beta = fabs(ray_angle - game->player.angle);
 	while (start < end)
 	{
-		distance = ((g_global()->project_dist * TILE_SIZE) / (start - (double)HALF_HEIGHT + 1e-6)) / fish_correct;
-		t_vector f = {
-			.x = distance * cos_ray + p.x,
-			.y = distance * sin_ray + p.y
-		};
-		int tex_y = (int)(f.y * tile_size_inv * texture->h) % texture->h;
-		int tex_x = (int)(f.x * tile_size_inv * texture->w) % texture->w;
+		double r = start - middle;
+		double s = TILE_SIZE * g_global()->project_dist / r;
+		double distance = s / cos(beta);
+		t_vector f;
+		if (floor == false)
+		{
+			f.x = p.x - cos_ray * distance;
+			f.y = p.y - sin_ray * distance;
+		}
+		else
+		{
+			f.x = p.x + cos_ray * distance;
+			f.y = p.y + sin_ray * distance;
+		}
+		int tex_x = (int)((fmod(f.x , TILE_SIZE) * tile_size_inv) * texture->w);
+		int tex_y = (int)((fmod(f.y, TILE_SIZE) * tile_size_inv) * texture->h);
 		tex_x = abs(tex_x);
 		tex_y = abs(tex_y);
 		color = get_img_color(texture, tex_x, tex_y);
@@ -841,7 +849,7 @@ int	game_loop(t_game *game)
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
 	double	adjusted_fov = FOV / g_global()->zoom;
-	g_global()->project_dist = (800 / tan(adjusted_fov / 2) - g_global()->narrow_look);
+	g_global()->project_dist = (800 / tan(adjusted_fov / 2)) - g_global()->narrow_look;
 	ray_angle = normalize_angle(game->player.angle - (adjusted_fov / 2));
 	while (ray < R_NB)
 	{
@@ -984,17 +992,18 @@ int	game_loop(t_game *game)
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
-		double	draw_begin = (look * (HEIGHT - line_height) + g_global()->j_croutch);
+		double middle = (HEIGHT / 2) + (look * HEIGHT);
+		double	draw_begin = middle - (line_height / 2) + g_global()->j_croutch;
 		double	draw_end = draw_begin + line_height;
-		draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
-		draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
+		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
+		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
 		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
 		// if (draw_begin <= 0)
 		// 	draw_begin = 0;
 		// if (draw_end >= HEIGHT)
 		// 	draw_end = HEIGHT - 1;   posssible necessary
-		// draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin);
-		// draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT);
+		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin, middle, false);
+		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT, middle, true);
 		ray_angle += adjusted_fov / R_NB;
 		ray++;
 	}
