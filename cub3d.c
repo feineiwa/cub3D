@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/28 13:11:14 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/28 14:30:38 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -965,7 +965,23 @@ int	game_loop(t_game *game)
 		t_image *img;
 		img = NULL;
 		if (game->map[(int)floor(wall_hit.y / TILE_SIZE)][(int)floor(wall_hit.x / TILE_SIZE)] == door)
-			img = &game->pack.door[0];
+		{
+			if (o < 0.33)
+			{
+				// dist_wall += 1;
+				img = &game->pack.no_img;
+			}
+			else if (o > 0.66)
+			{
+				// dist_wall
+				img = &game->pack.no_img;
+			}
+			else
+			{
+				dist_wall += (TILE_SIZE / 4);
+				img = &game->pack.door[0];
+			}
+		}
 		if (is_facing_up && horizontal_dist < vertical_dist)
 		{
 			if (img == NULL)
