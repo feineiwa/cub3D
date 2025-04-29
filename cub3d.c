@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/28 14:30:38 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/29 17:29:08 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -829,6 +829,20 @@ void	draw_rotated_texture(t_image *dest, t_image *src, t_vector center, double a
 	}
 }
 
+bool	hit_door(int x, int y, char **map, t_player player)
+{
+	int	x1;
+	int	y1;
+
+	x1 = x / TILE_SIZE;
+	y1 = y / TILE_SIZE;
+	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
+		return (false);
+	if (map[y1][x1] == door)
+		return (true);
+	return (false);
+}
+
 int	game_loop(t_game *game)
 {
 	t_vector	a;
@@ -912,6 +926,7 @@ int	game_loop(t_game *game)
 		else if (is_facing_left == 1)
 			s.x = -TILE_SIZE;
 		s.y = s.x * tan(ray_angle);
+
 		
 		bool	found_vertical = false;
 		while (next_vert.x < (game->player.w * TILE_SIZE)  && next_vert.x >= 0 && next_vert.y < (game->player.h * TILE_SIZE)  && next_vert.y >= 0)
@@ -929,6 +944,7 @@ int	game_loop(t_game *game)
 				next_vert.y += s.y;
 			}
 		}
+		
 		// distance calculation
 
 		double horizontal_dist = 0;
@@ -958,34 +974,20 @@ int	game_loop(t_game *game)
 			dist_wall = fabs(vertical_dist);
 			o = ((fmod(wall_hit.y, TILE_SIZE) / TILE_SIZE));
 		}
+		// if (game->map[(int)floor(wall_hit.y)][(int)floor(wall_hit.x)] == door)
+		// {
+		// 	if (is)	
+		// }
 		dist_wall *= cos(game->player.angle - ray_angle);
 		if (dist_wall < 0.001)
 			dist_wall = 0.001;
 		int	offset;
 		t_image *img;
 		img = NULL;
-		if (game->map[(int)floor(wall_hit.y / TILE_SIZE)][(int)floor(wall_hit.x / TILE_SIZE)] == door)
-		{
-			if (o < 0.33)
-			{
-				// dist_wall += 1;
-				img = &game->pack.no_img;
-			}
-			else if (o > 0.66)
-			{
-				// dist_wall
-				img = &game->pack.no_img;
-			}
-			else
-			{
-				dist_wall += (TILE_SIZE / 4);
-				img = &game->pack.door[0];
-			}
-		}
 		if (is_facing_up && horizontal_dist < vertical_dist)
 		{
 			if (img == NULL)
-				img = &game->pack.no_img; 
+				img = &game->pack.no_img;
 			offset = (int)(o * img->w);
 		}
 		else if (is_facing_down && horizontal_dist < vertical_dist)
@@ -1013,13 +1015,9 @@ int	game_loop(t_game *game)
 		double	draw_end = draw_begin + line_height;
 		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
-		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
-		// if (draw_begin <= 0)
-		// 	draw_begin = 0;
-		// if (draw_end >= HEIGHT)
-		// 	draw_end = HEIGHT - 1;   posssible necessary
 		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin, middle, false);
 		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT, middle, true);
+		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
 		ray_angle += adjusted_fov / R_NB;
 		ray++;
 	}
