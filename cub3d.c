@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/29 17:29:08 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/29 18:43:49 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -758,33 +758,29 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	double	cos_ray;
 	double	sin_ray;
 	double	distance;
+	double r;
 	
 	p.x = (double)game->player.pos.x * TILE_SIZE;
 	p.y = (double)game->player.pos.y * TILE_SIZE;
 	double	tile_size_inv = 1.0 / TILE_SIZE;
 	cos_ray = cos(ray_angle);
 	sin_ray = sin(ray_angle);
-	double	beta = fabs(ray_angle - game->player.angle);
+	double	beta = normalize_angle(ray_angle - game->player.angle);
 	while (start < end)
 	{
-		double r = start - middle;
-		double s = TILE_SIZE * g_global()->project_dist / r;
+		if (floor)
+			r = start - middle;
+		else
+			r = middle - start;
+		double s = (TILE_SIZE * g_global()->project_dist) / r;
 		double distance = s / cos(beta);
 		t_vector f;
-		if (floor == false)
-		{
-			f.x = p.x - cos_ray * distance;
-			f.y = p.y - sin_ray * distance;
-		}
-		else
-		{
-			f.x = p.x + cos_ray * distance;
-			f.y = p.y + sin_ray * distance;
-		}
+		f.x = p.x + cos_ray * distance;
+		f.y = p.y + sin_ray * distance;
 		int tex_x = (int)((fmod(f.x , TILE_SIZE) * tile_size_inv) * texture->w);
 		int tex_y = (int)((fmod(f.y, TILE_SIZE) * tile_size_inv) * texture->h);
 		tex_x = abs(tex_x);
-		tex_y = abs(tex_y);
+        tex_y = abs(tex_y);
 		color = get_img_color(texture, tex_x, tex_y);
 		put_pixel(&game->img, ray, start, color);
 		start++;
