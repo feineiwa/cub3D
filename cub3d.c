@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/29 18:43:49 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/30 16:32:27 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -738,6 +738,9 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 				r = (color >> 16) & 0xFF;
 				g = (color >> 8) & 0xFF;
 				b = color & 0xFF;
+				// col.r = r;
+				// col.g = g;
+				// col.b = b;
 				col.r = fmin(fmax(r * light, 0), r);
 				col.g = fmin(fmax(g * light, 0), g);
 				col.b = fmin(fmax(b * light, 0), b);
@@ -750,9 +753,8 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 	}
 }
 
-void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_angle, int start, int end, double middle, bool floor)
+void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_angle, int start, int end, double middle, bool fl)
 {
-	double center;
 	t_vector p;
 	int		color;
 	double	cos_ray;
@@ -768,7 +770,7 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	double	beta = normalize_angle(ray_angle - game->player.angle);
 	while (start < end)
 	{
-		if (floor)
+		if (fl)
 			r = start - middle;
 		else
 			r = middle - start;
@@ -777,9 +779,9 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 		t_vector f;
 		f.x = p.x + cos_ray * distance;
 		f.y = p.y + sin_ray * distance;
-		int tex_x = (int)((fmod(f.x , TILE_SIZE) * tile_size_inv) * texture->w);
-		int tex_y = (int)((fmod(f.y, TILE_SIZE) * tile_size_inv) * texture->h);
-		tex_x = abs(tex_x);
+		int tex_x = (int)((fmod(f.x , TILE_SIZE) / (TILE_SIZE)) * texture->w);
+		int tex_y = (int)((fmod(f.y, TILE_SIZE) / (TILE_SIZE)) * texture->h);
+		tex_x = abs(tex_x); 
         tex_y = abs(tex_y);
 		color = get_img_color(texture, tex_x, tex_y);
 		put_pixel(&game->img, ray, start, color);
@@ -970,39 +972,103 @@ int	game_loop(t_game *game)
 			dist_wall = fabs(vertical_dist);
 			o = ((fmod(wall_hit.y, TILE_SIZE) / TILE_SIZE));
 		}
-		// if (game->map[(int)floor(wall_hit.y)][(int)floor(wall_hit.x)] == door)
-		// {
-		// 	if (is)	
-		// }
-		dist_wall *= cos(game->player.angle - ray_angle);
-		if (dist_wall < 0.001)
-			dist_wall = 0.001;
+		bool has_door = false;
 		int	offset;
 		t_image *img;
 		img = NULL;
-		if (is_facing_up && horizontal_dist < vertical_dist)
+		if (game->map[(int)floor(wall_hit.y / TILE_SIZE)][(int)floor(wall_hit.x / TILE_SIZE)] == door)
 		{
-			if (img == NULL)
-				img = &game->pack.no_img;
-			offset = (int)(o * img->w);
+			has_door = true;
+			if (horizontal_dist < vertical_dist)
+			{
+				if (is_facing_up)
+					s.y = - TILE_SIZE / 4;
+				else if (is_facing_down)
+					s.y = TILE_SIZE / 4;
+				t_vector door_h;
+				t_vector door_v;
+				door_h.y = horiz_p.y + s.y;
+				door_h.x = horiz_p.x +  (s.y / tan(ray_angle));
+				door_v.x = vert_p.x;
+				door_v.y = vert_p.y;
+				double door_h_dist = distance_between_points(a, door_h);
+				double	door_v_dist = vertical_dist;
+				if (door_h_dist < door_v_dist)
+				{
+					dist_wall = fabs(door_h_dist);
+					o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
+					if (is_facing_up || is_facing_down)
+						img = &game->pack.door[0];
+				}
+				else
+				{
+					dist_wall = fabs(door_v_dist);
+					o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
+					if (is_facing_left || is_facing_right)
+						img = &game->pack.door[1];
+				}
+				offset = (int)(o * img->w);
+			}
+			else
+			{
+				if (is_facing_left)
+					s.x = - TILE_SIZE / 4;
+				else if (is_facing_right)
+					s.x = TILE_SIZE / 4;
+				t_vector door_v;
+				t_vector door_h;
+				door_v.x = vert_p.x + s.x;
+				door_v.y = vert_p.y + (s.x * tan(ray_angle));
+				door_h.x = horiz_p.x;
+				door_h.y = horiz_p.y;
+				double door_v_dist = distance_between_points(a, door_v);
+				double door_h_dist = horizontal_dist;
+				if (door_h_dist < door_v_dist)
+				{
+					dist_wall = fabs(door_h_dist);
+					o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
+					if (is_facing_up || is_facing_down)
+						img = &game->pack.door[1];
+				}
+				else
+				{
+					dist_wall = fabs(door_v_dist);
+					o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
+					if (is_facing_left || is_facing_right)
+						img = &game->pack.door[0];
+				}
+				offset = (int)(o * img->w);
+			}
 		}
-		else if (is_facing_down && horizontal_dist < vertical_dist)
+		dist_wall *= cos(ray_angle - game->player.angle);
+		if (dist_wall < 0.001)
+			dist_wall = 0.001;
+		if (has_door == false)
 		{
-			if (img == NULL)
-				img = &game->pack.so_img;
-			offset = img->w - (int)(o * img->w) - 1;
-		}
-		else if (is_facing_right && horizontal_dist > vertical_dist)
-		{
-			if (img == NULL)
-				img = &game->pack.ea_img;
-			offset = (int)(o * img->w);
-		}
-		else if (is_facing_left && horizontal_dist > vertical_dist)
-		{
-			if (img == NULL)
-				img = &game->pack.we_img;
-			offset = img->w - (int)(o * img->w) - 1;
+			if (is_facing_up && horizontal_dist < vertical_dist)
+			{
+				if (img == NULL)
+					img = &game->pack.no_img;
+				offset = (int)(o * img->w);
+			}
+			else if (is_facing_down && horizontal_dist < vertical_dist)
+			{
+				if (img == NULL)
+					img = &game->pack.so_img;
+				offset = img->w - (int)(o * img->w) - 1;
+			}
+			else if (is_facing_right && horizontal_dist > vertical_dist)
+			{
+				if (img == NULL)
+					img = &game->pack.ea_img;
+				offset = (int)(o * img->w);
+			}
+			else if (is_facing_left && horizontal_dist > vertical_dist)
+			{
+				if (img == NULL)
+					img = &game->pack.we_img;
+				offset = img->w - (int)(o * img->w) - 1;
+			}
 		}
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
@@ -1011,9 +1077,9 @@ int	game_loop(t_game *game)
 		double	draw_end = draw_begin + line_height;
 		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
+		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
 		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin, middle, false);
 		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT, middle, true);
-		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
 		ray_angle += adjusted_fov / R_NB;
 		ray++;
 	}
@@ -1177,12 +1243,14 @@ int	main(int ac, char **av)
 	game.pack.arrow.addr = mlx_get_data_addr(game.pack.arrow.img_ptr, &game.pack.arrow.bpp, &game.pack.arrow.size_line, &game.pack.arrow.endian);
 	game.pack.aiming.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/aiming1.xpm", &game.pack.aiming.w, &game.pack.aiming.h);
 	game.pack.aiming.addr = mlx_get_data_addr(game.pack.aiming.img_ptr, &game.pack.aiming.bpp, &game.pack.aiming.size_line, &game.pack.aiming.endian);
-	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/floor3.xpm", &game.pack.floor.w, &game.pack.floor.h);
+	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/floor6.xpm", &game.pack.floor.w, &game.pack.floor.h);
 	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
 	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil0.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
-	game.pack.door[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/open0.xpm", &game.pack.door[0].w, &game.pack.door[0].h);
+	game.pack.door[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door.xpm", &game.pack.door[0].w, &game.pack.door[0].h);
 	game.pack.door[0].addr = mlx_get_data_addr(game.pack.door[0].img_ptr, &game.pack.door[0].bpp, &game.pack.door[0].size_line, &game.pack.door[0].endian);
+	game.pack.door[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door_side1.xpm", &game.pack.door[1].w, &game.pack.door[1].h);
+	game.pack.door[1].addr = mlx_get_data_addr(game.pack.door[1].img_ptr, &game.pack.door[1].bpp, &game.pack.door[1].size_line, &game.pack.door[1].endian);
 
 
 	game.pack.compass.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/compass2.xpm", &game.pack.compass.w, &game.pack.compass.h);

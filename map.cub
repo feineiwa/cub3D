@@ -1,7 +1,7 @@
 NO ./images/wall_stone4.xpm
-SO ./images/wall_stone2.xpm
-EA ./images/wall_stone3.xpm
-WE ./images/wall_stone1.xpm
+SO ./images/wall_stone1.xpm
+EA ./images/wall_stone2.xpm
+WE ./images/wall_stone3.xpm
 
 C 135,206,235
 F 139,90,43
