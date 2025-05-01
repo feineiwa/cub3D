@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/27 16:57:02 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/30 19:43:10 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,6 +143,7 @@ struct					s_key
 	bool				key_croutch;
 	bool				key_jump;
 	bool				scope;
+	bool				door_check;
 };
 
 struct					s_player
@@ -178,7 +179,7 @@ typedef struct s_pack
 	t_image	compass;
 	t_image needle;
 	t_image scope;
-	t_image door[6];
+	t_image door[2];
 }	t_pack;
 
 
@@ -200,6 +201,7 @@ typedef	struct s_g
 	double	project_dist;
 	float	zoom;
 	int		narrow_look;
+	bool	door_open;
 }	t_g;
 
 

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/30 16:32:27 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/01 20:44:37 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ bool is_exceeded(t_vector move, t_player player)
 
 bool	is_hit_wall(int tile_x, int tile_y, char **map)
 {
-	if (map[tile_y][tile_x] == wall || map[tile_y][tile_x] == door)
+	if (map[tile_y][tile_x] == wall || (map[tile_y][tile_x] == door && g_global()->door_open == false))
 		return (true);
 	return (false);	
 }
@@ -260,6 +260,19 @@ void	move_player(t_game *game)
 			
 		}
 	}
+	if (game->player.key.door_check == true)
+	{
+		if (game->map[(int)floor(game->player.pos.y - 1)][(int)floor(game->player.pos.x)] == door || game->map[(int)floor(game->player.pos.y + 1)][(int)floor(game->player.pos.x)] == door || game->map[(int)floor(game->player.pos.y)][(int)floor(game->player.pos.x - 1)] == door || game->map[(int)floor(game->player.pos.y)][(int)floor(game->player.pos.x + 1)] == door)
+		{
+			if (g_global()->door_open == false)
+			{
+				g_global()->door_open = true;
+			}
+			else
+				g_global()->door_open = false;
+			g_updated = true;
+		}
+	}
 	game->player.key.rot_l = false;
 	game->player.key.rot_r = false;
 	game->player.key.look_up = false;
@@ -371,6 +384,8 @@ int	ft_key_press(int keysym, t_game *game)
 		g_global()->zoom = 3.0;
 		g_global()->narrow_look = 2875;
 	}
+	if (keysym == XK_f)
+		game->player.key.door_check = true;
 	mouse_speed = 1;
 	g_updated = true;
 	return (0);
@@ -404,6 +419,8 @@ int	ft_key_release(int keysym, t_game *game)
 		game->player.key.look_down = false;
 	if (keysym == XK_c)
 		game->player.key.key_croutch = false;
+	if (keysym == XK_f)
+		game->player.key.door_check = false;
 	game->player.walk_dir = 0;
 	game->player.dir.x = 0;
 	game->player.dir.y = 0;
@@ -437,7 +454,7 @@ bool	is_wall(int x, int y, char **map, t_player player)
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 		return (false);
-	if (map[y1][x1] == wall || map[y1][x1] == door)
+	if (map[y1][x1] == wall || (map[y1][x1] == door && g_global()->door_open == false))
 		return (true);
 	return (false);
 }
@@ -699,7 +716,7 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 			if (map[j][i] == wall)
 				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
 			else if (map[j][i] == door)
-				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x82490b);
+				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x00FFFF);
 			// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
 			
 			i++;
@@ -835,9 +852,9 @@ bool	hit_door(int x, int y, char **map, t_player player)
 	x1 = x / TILE_SIZE;
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
-		return (false);
+	return (false);
 	if (map[y1][x1] == door)
-		return (true);
+	return (true);
 	return (false);
 }
 
@@ -852,6 +869,7 @@ int	game_loop(t_game *game)
 	double	ray_angle;
 	int		ray = 0;
 	double	project_dist;
+	int		dist_door = 800;
 
 	if (g_updated == false && g_first == false)
 		return (1);
@@ -862,7 +880,7 @@ int	game_loop(t_game *game)
 	a.y = game->player.pos.y * TILE_SIZE;
 	double	adjusted_fov = FOV / g_global()->zoom;
 	g_global()->project_dist = (800 / tan(adjusted_fov / 2)) - g_global()->narrow_look;
-	ray_angle = normalize_angle(game->player.angle - (adjusted_fov / 2));
+	ray_angle = normalize_angle(game->player.angle - (adjusted_fov / 2) + 0.0001);
 	while (ray < R_NB)
 	{
 		ray_angle = normalize_angle(ray_angle);
@@ -972,13 +990,36 @@ int	game_loop(t_game *game)
 			dist_wall = fabs(vertical_dist);
 			o = ((fmod(wall_hit.y, TILE_SIZE) / TILE_SIZE));
 		}
-		bool has_door = false;
 		int	offset;
 		t_image *img;
 		img = NULL;
+		
+		if (is_facing_up && horizontal_dist < vertical_dist)
+		{
+			if (img == NULL)
+				img = &game->pack.no_img;
+			offset = (int)(o * img->w);
+		}
+		else if (is_facing_down && horizontal_dist < vertical_dist)
+		{
+			if (img == NULL)
+			img = &game->pack.so_img;
+			offset = img->w - (int)(o * img->w) - 1;
+		}
+		else if (is_facing_right && horizontal_dist > vertical_dist)
+		{
+			if (img == NULL)
+				img = &game->pack.ea_img;
+			offset = (int)(o * img->w);
+		}
+		else if (is_facing_left && horizontal_dist > vertical_dist)
+		{
+			if (img == NULL)
+				img = &game->pack.we_img;
+			offset = img->w - (int)(o * img->w) - 1;
+		}
 		if (game->map[(int)floor(wall_hit.y / TILE_SIZE)][(int)floor(wall_hit.x / TILE_SIZE)] == door)
 		{
-			has_door = true;
 			if (horizontal_dist < vertical_dist)
 			{
 				if (is_facing_up)
@@ -1039,37 +1080,13 @@ int	game_loop(t_game *game)
 				}
 				offset = (int)(o * img->w);
 			}
+			
 		}
 		dist_wall *= cos(ray_angle - game->player.angle);
 		if (dist_wall < 0.001)
 			dist_wall = 0.001;
-		if (has_door == false)
-		{
-			if (is_facing_up && horizontal_dist < vertical_dist)
-			{
-				if (img == NULL)
-					img = &game->pack.no_img;
-				offset = (int)(o * img->w);
-			}
-			else if (is_facing_down && horizontal_dist < vertical_dist)
-			{
-				if (img == NULL)
-					img = &game->pack.so_img;
-				offset = img->w - (int)(o * img->w) - 1;
-			}
-			else if (is_facing_right && horizontal_dist > vertical_dist)
-			{
-				if (img == NULL)
-					img = &game->pack.ea_img;
-				offset = (int)(o * img->w);
-			}
-			else if (is_facing_left && horizontal_dist > vertical_dist)
-			{
-				if (img == NULL)
-					img = &game->pack.we_img;
-				offset = img->w - (int)(o * img->w) - 1;
-			}
-		}
+		if (ray == WIDTH / 2)
+			dist_door = (int)dist_wall;
 		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
 		double middle = (HEIGHT / 2) + (look * HEIGHT);

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 08:38:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/27 17:27:33 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/04/30 19:43:28 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,6 @@ void	stop_music(void)
 
 t_g	*g_global(void)
 {
-	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875};
+	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875, false};
 	return (&value);
 }
