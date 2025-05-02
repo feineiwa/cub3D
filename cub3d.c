@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/01 20:44:37 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/02 19:14:59 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ bool is_exceeded(t_vector move, t_player player)
 
 bool	is_hit_wall(int tile_x, int tile_y, char **map)
 {
-	if (map[tile_y][tile_x] == wall || (map[tile_y][tile_x] == door && g_global()->door_open == false))
+	if (map[tile_y][tile_x] == wall || (map[tile_y][tile_x] == door_c && g_global()->door_open == false))
 		return (true);
 	return (false);	
 }
@@ -258,19 +258,6 @@ void	move_player(t_game *game)
 				look = 0.5;
 			}
 			
-		}
-	}
-	if (game->player.key.door_check == true)
-	{
-		if (game->map[(int)floor(game->player.pos.y - 1)][(int)floor(game->player.pos.x)] == door || game->map[(int)floor(game->player.pos.y + 1)][(int)floor(game->player.pos.x)] == door || game->map[(int)floor(game->player.pos.y)][(int)floor(game->player.pos.x - 1)] == door || game->map[(int)floor(game->player.pos.y)][(int)floor(game->player.pos.x + 1)] == door)
-		{
-			if (g_global()->door_open == false)
-			{
-				g_global()->door_open = true;
-			}
-			else
-				g_global()->door_open = false;
-			g_updated = true;
 		}
 	}
 	game->player.key.rot_l = false;
@@ -454,7 +441,7 @@ bool	is_wall(int x, int y, char **map, t_player player)
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 		return (false);
-	if (map[y1][x1] == wall || (map[y1][x1] == door && g_global()->door_open == false))
+	if (map[y1][x1] == wall || (map[y1][x1] == door_c && g_global()->door_open == false))
 		return (true);
 	return (false);
 }
@@ -715,7 +702,7 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 			t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
 			if (map[j][i] == wall)
 				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
-			else if (map[j][i] == door)
+			else if (map[j][i] == door_c)
 				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x00FFFF);
 			// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
 			
@@ -792,7 +779,7 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 		else
 			r = middle - start;
 		double s = (TILE_SIZE * g_global()->project_dist) / r;
-		double distance = s / cos(beta);
+		double distance = s / fabs(cos(beta) + 1.0);
 		t_vector f;
 		f.x = p.x + cos_ray * distance;
 		f.y = p.y + sin_ray * distance;
@@ -853,9 +840,19 @@ bool	hit_door(int x, int y, char **map, t_player player)
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 	return (false);
-	if (map[y1][x1] == door)
-	return (true);
+	if (map[y1][x1] == door_c)
+		return (true);
 	return (false);
+}
+
+void	check_door_close(t_game *game, int dist_door, t_vector door_hit)
+{
+	if (game->player.key.door_check == true && dist_door <= 50)
+	{
+		if (game->map[(int)floor(door_hit.y / TILE_SIZE)][(int)floor(door_hit.x / TILE_SIZE)] == door_c)
+			game->map[(int)floor(door_hit.y / TILE_SIZE)][(int)floor(door_hit.x / TILE_SIZE)] = door_o;
+		g_updated = true;
+	}
 }
 
 int	game_loop(t_game *game)
@@ -869,7 +866,8 @@ int	game_loop(t_game *game)
 	double	ray_angle;
 	int		ray = 0;
 	double	project_dist;
-	int		dist_door = 800;
+	int		dist_door = __INT_MAX__;
+	t_vector	door_hit;
 
 	if (g_updated == false && g_first == false)
 		return (1);
@@ -1018,7 +1016,7 @@ int	game_loop(t_game *game)
 				img = &game->pack.we_img;
 			offset = img->w - (int)(o * img->w) - 1;
 		}
-		if (game->map[(int)floor(wall_hit.y / TILE_SIZE)][(int)floor(wall_hit.x / TILE_SIZE)] == door)
+		if (game->map[(int)floor(wall_hit.y / TILE_SIZE)][(int)floor(wall_hit.x / TILE_SIZE)] == door_c)
 		{
 			if (horizontal_dist < vertical_dist)
 			{
@@ -1037,6 +1035,7 @@ int	game_loop(t_game *game)
 				if (door_h_dist < door_v_dist)
 				{
 					dist_wall = fabs(door_h_dist);
+					wall_hit = door_h;
 					o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_up || is_facing_down)
 						img = &game->pack.door[0];
@@ -1044,6 +1043,7 @@ int	game_loop(t_game *game)
 				else
 				{
 					dist_wall = fabs(door_v_dist);
+					wall_hit = door_v;
 					o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_left || is_facing_right)
 						img = &game->pack.door[1];
@@ -1067,6 +1067,7 @@ int	game_loop(t_game *game)
 				if (door_h_dist < door_v_dist)
 				{
 					dist_wall = fabs(door_h_dist);
+					wall_hit = door_h;
 					o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_up || is_facing_down)
 						img = &game->pack.door[1];
@@ -1074,27 +1075,33 @@ int	game_loop(t_game *game)
 				else
 				{
 					dist_wall = fabs(door_v_dist);
+					wall_hit = door_v;
 					o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_left || is_facing_right)
 						img = &game->pack.door[0];
 				}
 				offset = (int)(o * img->w);
 			}
-			
+			if (ray == R_NB / 2)
+			{
+				door_hit = wall_hit;
+				dist_door = (int)dist_wall;
+			}
 		}
-		dist_wall *= cos(ray_angle - game->player.angle);
+		dist_wall *= cos(game->player.angle - ray_angle);
 		if (dist_wall < 0.001)
 			dist_wall = 0.001;
-		if (ray == WIDTH / 2)
-			dist_door = (int)dist_wall;
-		double waves = 4 + (cos (MOVE_SPEED + 8 * (game->player.pos.x + game->player.pos.y)));
+		double waves = 6 + (cos ((MOVE_SPEED + 8) * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
 		double middle = (HEIGHT / 2) + (look * HEIGHT);
 		double	draw_begin = middle - (line_height / 2) + g_global()->j_croutch;
-		double	draw_end = draw_begin + line_height;
+		middle += waves;
+		draw_begin += waves;
+		double	draw_end = draw_begin + line_height + waves;
 		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
-		draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
+		if (img != NULL)
+			draw_texture(&game->img, img, ray * RES, RES, (int)(draw_begin), (int)(draw_end), offset, dist_wall);
 		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin, middle, false);
 		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT, middle, true);
 		ray_angle += adjusted_fov / R_NB;
@@ -1105,6 +1112,8 @@ int	game_loop(t_game *game)
 		paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 	else
 		paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
+	
+	
 	t_vector compass = {WIDTH - 124, 95};
 	t_vect comp = {WIDTH - 200, 20};
 	paint_image_to_win(&game->img, &game->pack.compass, 150, 150, comp, -1);
@@ -1142,6 +1151,7 @@ int	game_loop(t_game *game)
 	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
 	// mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
 	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
+	check_door_close(game, dist_door, door_hit);
 	if (game->player.key.hide_mouse == true)
 		mlx_string_put(game->var.mlx, game->var.win, 50, 25, 0xFFFFFF, "mouse activate");
 	g_first = false;

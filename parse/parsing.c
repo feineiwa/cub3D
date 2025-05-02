@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 09:26:15 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/27 16:53:31 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/02 17:22:01 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,7 @@ char	**check_map_valid(char *map)
 	{
 		if (map[i] != wall && map[i] != ground && map[i] != space
 			&& map[i] != p_n && map[i] != p_s && map[i] != p_e && map[i] != p_w
-			&& map[i] != '\n' && map[i] != door)
+			&& map[i] != '\n' && map[i] != door_c && map[i] != door_o)
 			return (NULL);
 		if (map[i] == p_n || map[i] == p_s || map[i] == p_e || map[i] == p_w)
 		{

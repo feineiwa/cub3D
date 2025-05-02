@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/30 19:43:10 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/02 17:19:08 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,8 @@ typedef enum e_cell
 	p_s = 'S',
 	p_e = 'E',
 	p_w = 'W',
-	door = '2',
+	door_c = 'D',
+	door_o = 'd',
 }						t_cell;
 
 struct					s_vect
