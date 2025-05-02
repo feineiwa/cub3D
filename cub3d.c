@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/02 19:14:59 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/02 23:31:50 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -371,7 +371,7 @@ int	ft_key_press(int keysym, t_game *game)
 		g_global()->zoom = 3.0;
 		g_global()->narrow_look = 2875;
 	}
-	if (keysym == XK_f)
+	if (keysym == XK_f && game->player.key.door_check == false)
 		game->player.key.door_check = true;
 	mouse_speed = 1;
 	g_updated = true;
@@ -831,7 +831,7 @@ void	draw_rotated_texture(t_image *dest, t_image *src, t_vector center, double a
 	}
 }
 
-bool	hit_door(int x, int y, char **map, t_player player)
+bool	is_hit_door(int x, int y, char **map, t_player player)
 {
 	int	x1;
 	int	y1;
@@ -839,19 +839,41 @@ bool	hit_door(int x, int y, char **map, t_player player)
 	x1 = x / TILE_SIZE;
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
-	return (false);
+		return (false);
 	if (map[y1][x1] == door_c)
 		return (true);
 	return (false);
 }
 
-void	check_door_close(t_game *game, int dist_door, t_vector door_hit)
+void	check_door_close(t_game *game)
 {
-	if (game->player.key.door_check == true && dist_door <= 50)
+	t_vector	ray;
+	float	cos_angle;
+	float	sin_angle;
+	double		dist;
+
+	ray.x = game->player.pos.x;
+	ray.y = game->player.pos.y;
+	cos_angle = cos(game->player.angle);
+	sin_angle = sin(game->player.angle);
+	dist = __INT_MAX__;
+	while (ray.x > 0 && (int)ray.x < game->player.w && ray.y > 0 && (int)ray.y < game->player.h)
 	{
-		if (game->map[(int)floor(door_hit.y / TILE_SIZE)][(int)floor(door_hit.x / TILE_SIZE)] == door_c)
-			game->map[(int)floor(door_hit.y / TILE_SIZE)][(int)floor(door_hit.x / TILE_SIZE)] = door_o;
-		g_updated = true;
+		if (game->map[(int)ray.y][(int)ray.x] == door_c || game->map[(int)ray.y][(int)ray.x] == door_o)
+		{
+			dist = distance_between_points(game->player.pos, ray);
+			dist *= TILE_SIZE;
+			break ;
+		}
+		ray.x += cos_angle;
+		ray.y += sin_angle;
+	}
+	if (game->player.key.door_check == true && (dist <= 64 && dist >= 32))
+	{
+		if (game->map[(int)ray.y][(int)ray.x] == door_c)
+			game->map[(int)ray.y][(int)ray.x] = door_o;
+		else
+			game->map[(int)ray.y][(int)ray.x] = door_c;
 	}
 }
 
@@ -868,11 +890,12 @@ int	game_loop(t_game *game)
 	double	project_dist;
 	int		dist_door = __INT_MAX__;
 	t_vector	door_hit;
-
+	
 	if (g_updated == false && g_first == false)
-		return (1);
+	return (1);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
+	check_door_close(game);
 	move_player(game);
 	a.x = game->player.pos.x * TILE_SIZE;
 	a.y = game->player.pos.y * TILE_SIZE;
@@ -1034,16 +1057,12 @@ int	game_loop(t_game *game)
 				double	door_v_dist = vertical_dist;
 				if (door_h_dist < door_v_dist)
 				{
-					dist_wall = fabs(door_h_dist);
-					wall_hit = door_h;
 					o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_up || is_facing_down)
 						img = &game->pack.door[0];
 				}
 				else
 				{
-					dist_wall = fabs(door_v_dist);
-					wall_hit = door_v;
 					o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_left || is_facing_right)
 						img = &game->pack.door[1];
@@ -1066,16 +1085,12 @@ int	game_loop(t_game *game)
 				double door_h_dist = horizontal_dist;
 				if (door_h_dist < door_v_dist)
 				{
-					dist_wall = fabs(door_h_dist);
-					wall_hit = door_h;
 					o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_up || is_facing_down)
 						img = &game->pack.door[1];
 				}
 				else
 				{
-					dist_wall = fabs(door_v_dist);
-					wall_hit = door_v;
 					o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
 					if (is_facing_left || is_facing_right)
 						img = &game->pack.door[0];
@@ -1151,7 +1166,6 @@ int	game_loop(t_game *game)
 	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
 	// mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
 	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
-	check_door_close(game, dist_door, door_hit);
 	if (game->player.key.hide_mouse == true)
 		mlx_string_put(game->var.mlx, game->var.win, 50, 25, 0xFFFFFF, "mouse activate");
 	g_first = false;
