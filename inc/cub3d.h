@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/02 17:19:08 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/06 01:22:08 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,6 +184,13 @@ typedef struct s_pack
 }	t_pack;
 
 
+typedef	struct s_sprit
+{
+	t_vector	pos;
+	t_image		img;
+}	t_sprit;
+
+
 typedef struct s_game
 {
 	t_player			player;
@@ -192,6 +199,7 @@ typedef struct s_game
 	t_var				var;
 	t_image				img;
 	t_pack				pack;
+	t_sprit				sp;
 }						t_game;
 
 typedef	struct s_g
