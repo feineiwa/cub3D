@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/06 03:27:15 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/06 16:34:32 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -777,7 +777,7 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 	double	tile_size_inv = 1.0 / TILE_SIZE;
 	cos_ray = cos(ray_angle);
 	sin_ray = sin(ray_angle);
-	double	beta = normalize_angle(game->player.angle - ray_angle);
+	double	beta = normalize_angle(ray_angle - game->player.angle);
 	while (start < end)
 	{
 		if (fl)
@@ -972,11 +972,11 @@ void	check_door_close(t_game *game)
 	}
 }
 
-void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height, t_image *img)
+void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height, t_image *img, double ray_dist[WIDTH], double dist)
 {
 	int	sprite_height = (int)proj_sp_height;
 	int	sprite_width = sprite_height;
-	int	start_y = (int)(sp_screen.y - sprite_height / 2);
+	int	start_y = (int)(sp_screen.y - (sprite_height / 2) * 0.4);
 	int end_y = start_y + sprite_height;
 	int	start_x = (int)(sp_screen.x - sprite_width / 2);
 	int	end_x = start_x + sprite_width;
@@ -984,7 +984,7 @@ void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height, t_imag
 	int	y = start_y;
 	while (x < end_x)
 	{
-		if (x < 0 || x >= WIDTH)
+		if (x < 0 || x >= WIDTH || ray_dist[x] < dist)
 		{
 			x++;
 			continue;
@@ -1004,7 +1004,6 @@ void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height, t_imag
 				put_pixel(&game->img, x, y, color);
 			y++;
 		}
-		
 		x++;
 	}
 }
@@ -1022,6 +1021,8 @@ int	game_loop(t_game *game)
 	double	project_dist;
 	int		dist_door = __INT_MAX__;
 	t_vector	door_hit;
+	double 	middle;
+	double	ray_dist[R_NB];
 	
 	if (g_updated == false && g_first == false)
 		return (1);
@@ -1232,9 +1233,10 @@ int	game_loop(t_game *game)
 		dist_wall *= cos(game->player.angle - ray_angle);
 		if (dist_wall < 0.001)
 			dist_wall = 0.001;
+		ray_dist[ray] = dist_wall;
 		double waves = 6 + (cos ((MOVE_SPEED + 8) * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
-		double middle = (HEIGHT / 2) + (look * HEIGHT) + g_global()->j_croutch;
+		middle = (HEIGHT / 2) + (look * HEIGHT) + g_global()->j_croutch;
 		double	draw_begin = middle - (line_height * (look + 0.5));
 		middle += waves;
 		draw_begin += waves;
@@ -1246,33 +1248,29 @@ int	game_loop(t_game *game)
 		draw_floor_and_ceil(game, &game->pack.ceil, ray, ray_angle, 0, (int)draw_begin, middle, false);
 		draw_floor_and_ceil(game, &game->pack.floor, ray, ray_angle, (int)draw_end + 1, HEIGHT, middle, true);
 
-		//sprite;
 		ray_angle += adjusted_fov / R_NB;
 		ray++;
 	}
-		t_vector h;
-		h.x = game->sp.pos.x - game->player.pos.x;
-		h.y = game->sp.pos.y - game->player.pos.y;
-		double	p = atan2(h.y, h.x);
-		p = normalize_angle(p);
-		double player_rot = normalize_angle(game->player.angle);
-		double q = player_rot + (FOV / 2.0) - p;
-		if (player_rot < 0.5 * PI && p > (2.0 * PI - 0.5 * PI)) // Player in Q1, sprite in Q4
-    		q += 2.0 * PI;
-		else if (player_rot > (2.0 * PI - 0.5 * PI) && p < 0.5 * PI) // Player in Q4, sprite in Q1
-   			q -= 2.0 * PI;
-		t_vector sp_screen = {
-    		.x = q * (WIDTH / FOV),
-    		.y = HALF_HEIGHT // Middle of screen vertically
-		};
-		t_vector sp = {.x = game->sp.pos.x * TILE_SIZE, .y = game->sp.pos.y * TILE_SIZE};
-		double dist = distance_between_points(a, sp);
-		double proj_sp_height;
-		if (dist > 0.1)
-		{
-			proj_sp_height = g_global()->project_dist * TILE_SIZE / dist;
-			draw_sprite(game, sp_screen, proj_sp_height, &game->pack.gun_sp[0]);	
-		}
+		//sprite;
+	t_vector h;
+	h.x = game->sp.pos.x - game->player.pos.x;
+	h.y = game->sp.pos.y - game->player.pos.y;
+	double	p = atan2(h.y, h.x);
+	p = normalize_angle(p);
+	double q = normalize_angle(p - game->player.angle + HALF_FOV);
+	t_vector sp_screen = {
+		.x = q * (WIDTH / FOV),
+		.y =  middle // Middle of screen vertically
+	};
+	t_vector sp = {.x = game->sp.pos.x * TILE_SIZE, .y = game->sp.pos.y * TILE_SIZE};
+	double dist = distance_between_points(a, sp);
+	double proj_sp_height;
+	if (dist > 4)
+	{
+		proj_sp_height = g_global()->project_dist * TILE_SIZE / dist;
+		draw_sprite(game, sp_screen, proj_sp_height, &game->sp.img, ray_dist, dist);
+	}
+
 	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2)};
 	if (game->player.key.scope == true)
 		paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
@@ -1292,17 +1290,22 @@ int	game_loop(t_game *game)
 	if (game->player.key.recharge == true)
 	{
 		g_updated = true;
+		static size_t last_update = 0;
 		if (gun_frame < 15)
 		{
 			paint_image_to_win(&game->img, &game->pack.gun_sp[gun_frame], 500, 500, g, -1);
-			usleep(80000);
-			gun_frame++;
+			if (get_current_time() - last_update >= FPS)
+			{
+				gun_frame++;
+				last_update = get_current_time();
+			}
 		}
 		else
 		{
 			game->player.key.recharge = false;
 			gun_frame = 0;
-			g_updated = false;
+			last_update = 0;
+			g_updated = true;
 		}
 	}
 	else if (game->player.key.key_jump == false && game->player.key.scope == false)
@@ -1313,10 +1316,6 @@ int	game_loop(t_game *game)
 	}
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y - 60, 0xFFFFFF, "NORD");
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 10, compass.y + 70, 0xFFFFFF, "SOUTH");
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x + 60, compass.y + 5, 0xFFFFFF, "EAST");
-	// mlx_string_put(game->var.mlx, game->var.win, compass.x - 80, compass.y + 5, 0xFFFFFF, "WEST");
 	if (game->player.key.hide_mouse == true)
 		mlx_string_put(game->var.mlx, game->var.win, 50, 25, 0xFFFFFF, "mouse activate");
 	g_first = false;
@@ -1451,6 +1450,9 @@ int	main(int ac, char **av)
 	game.pack.needle.addr = mlx_get_data_addr(game.pack.needle.img_ptr, &game.pack.needle.bpp, &game.pack.needle.size_line, &game.pack.needle.endian);
 	game.pack.scope.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/scope.xpm", &game.pack.scope.w, &game.pack.scope.h);
 	game.pack.scope.addr = mlx_get_data_addr(game.pack.scope.img_ptr, &game.pack.scope.bpp, &game.pack.scope.size_line, &game.pack.scope.endian);
+
+	game.sp.img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp2.xpm", &game.sp.img.w, &game.sp.img.h);
+	game.sp.img.addr = mlx_get_data_addr(game.sp.img.img_ptr, &game.sp.img.bpp, &game.sp.img.size_line, &game.sp.img.endian);
 
 
 	int	i = 0;

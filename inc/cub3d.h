@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/06 01:22:08 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/06 16:27:04 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
+# include <sys/time.h>
+
 
 # ifndef BONUS
 #  define BONUS 0
@@ -48,6 +50,8 @@
 # define MINI_WIDTH (180)
 # define MINI_X (MINI_WIDTH - (MINI_WIDTH - 15))
 # define MINI_Y (HEIGHT - MINI_WIDTH - 10)
+
+# define FPS 80
 
 typedef struct s_text	t_text;
 typedef struct s_vector	t_vector;
@@ -234,4 +238,5 @@ t_g	*g_global(void);
 void	stop_music(void);
 void	launch_music(char const *file, char *vol);
 void	wait_music(void);
+size_t	get_current_time(void);
 #endif

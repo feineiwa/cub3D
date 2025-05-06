@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 08:38:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/30 19:43:28 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/06 16:14:19 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,4 +67,13 @@ t_g	*g_global(void)
 {
 	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875, false};
 	return (&value);
+}
+
+size_t	get_current_time(void)
+{
+	struct timeval	time;
+
+	if (gettimeofday(&time, NULL) == -1)
+		printf("Error gettimeofday()\n");
+	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
