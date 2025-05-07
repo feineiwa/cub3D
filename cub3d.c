@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/06 16:34:32 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/07 12:37:07 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,13 +219,13 @@ void	move_player(t_game *game)
 	}
 	if (game->player.key.look_up == true)
 	{
-		look += (float)(ROT_SPEED) * mouse_speed;
+		look += (float)(ROT_SPEED);
 		if (look >= 0.3)
 			look = 0.3;
 	}
 	if (game->player.key.look_down == true)
 	{
-		look -= (float)(ROT_SPEED) * mouse_speed;
+		look -= (float)(ROT_SPEED);
 		if (look <= -0.3)
 			look = -0.3;
 	}
@@ -1234,13 +1234,12 @@ int	game_loop(t_game *game)
 		if (dist_wall < 0.001)
 			dist_wall = 0.001;
 		ray_dist[ray] = dist_wall;
-		double waves = 6 + (cos ((MOVE_SPEED + 8) * (game->player.pos.x + game->player.pos.y)));
+		double waves = 6 + (cos (20 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
-		middle = (HEIGHT / 2) + (look * HEIGHT) + g_global()->j_croutch;
-		double	draw_begin = middle - (line_height * (look + 0.5));
-		middle += waves;
+		middle = (0.5 + look) * HEIGHT + g_global()->j_croutch + waves;
+		double draw_begin = middle - 0.5 * line_height;
 		draw_begin += waves;
-		double	draw_end = draw_begin + line_height + waves;
+		double	draw_end = draw_begin + line_height;
 		// draw_rectangle_rgb_gradient(&game->img, ray * RES, RES, 0, (int)draw_begin, game->txt.c);
 		// draw_rectangle_rgb_rgradient(&game->img, ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
 		if (img != NULL)
@@ -1324,32 +1323,24 @@ int	game_loop(t_game *game)
 
 int	ft_mouse_move(int x, int y, t_game *game)
 {
+	int	dx;
+	int	dy;
+
 	if (game->player.key.hide_mouse == false)
 		return (1);
-	if ((WIDTH / 2) + 10 < x)
+	dx = x - WIDTH / 2;
+	dy = y - HEIGHT / 2;
+	if (dx != 0 || dy != 0)
 	{
-		game->player.key.rot_r = true;
-		game->player.turn_dir = 1;
+		game->player.angle += dx * 1e-4;
+		look -= dy * 1e-4;
+		if (look <= -0.3)
+			look = -0.3;
+		else if (look >= 0.3)
+			look = 0.3;
 		g_updated = true;
+		mlx_mouse_move(game->var.mlx, game->var.win, WIDTH / 2, HEIGHT / 2);
 	}
-	else if ((WIDTH / 2) - 10 > x)
-	{
-		game->player.key.rot_l = true;
-		game->player.turn_dir = -1;
-		g_updated = true;
-	}
-	if ((HEIGHT / 2) + 10 < y)
-	{
-		game->player.key.look_down = true;
-		g_updated = true;
-	}
-	else if ((HEIGHT / 2) - 10 > y)
-	{
-		game->player.key.look_up = true;
-		g_updated = true;
-	}
-	mouse_speed = 0.8;
-	mlx_mouse_move(game->var.mlx, game->var.win, WIDTH / 2, HEIGHT / 2);
 	return (0);
 }
 
