@@ -6,7 +6,7 @@ CFLAGS = -g
 
 INCS = -I./inc/ -I$(LIBFT) $(LIBMLX)
 
-LFLAGS = -L$(LIBFT) -lft -L$(LIBMLX) -lmlx -lXext -lX11 -lm
+LFLAGS = -L$(LIBFT) -lft -L$(LIBMLX) -lmlx -lXext -lX11 -lm -lXfixes
 
 LIBFT = ./libft/
 

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/06 16:27:04 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/09 01:06:06 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,15 @@ typedef	struct s_sprit
 	t_vector	pos;
 	t_image		img;
 }	t_sprit;
+
+typedef struct s_door
+{
+	t_vector pos;
+	bool	is_opening;
+	bool	is_closing;
+	double	slide_progress;
+}	t_door;
+
 
 
 typedef struct s_game

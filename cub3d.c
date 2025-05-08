@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/07 12:37:07 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/09 01:09:09 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1008,6 +1008,37 @@ void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height, t_imag
 	}
 }
 
+// void	update_doors(t_game *game, double delta_time)
+// {
+// 	int	i;
+// 	t_door *door;
+
+// 	i = 0;
+// 	while (i < game->door_count)
+// 	{
+// 		door = &game->doors[i];
+// 		if (door->is_opening && door->slide_progress < 1.0)
+// 		{
+// 			door->slide_progress += delta_time;
+// 			if (door->slide_progress >= 1.0)
+// 			{
+// 				door->slide_progress = 1.0;
+// 				door->is_opening = false;
+// 			}
+// 		}
+// 		else if (door->is_closing && door->slide_progress > 0.0)
+// 		{
+// 			door->slide_progress -= delta_time;
+// 			if (door->slide_progress <= 1.0)
+// 			{
+// 				door->slide_progress = 0.0;
+// 				door->is_closing = false;
+// 			}
+// 		}
+// 		i++;
+// 	}
+// }
+
 int	game_loop(t_game *game)
 {
 	t_vector	a;
@@ -1023,6 +1054,11 @@ int	game_loop(t_game *game)
 	t_vector	door_hit;
 	double 	middle;
 	double	ray_dist[R_NB];
+	double 	waves;
+	t_vector	door_o_horiz;
+	t_vector	door_o_vert;
+	bool	found_h_o_door = false;
+	bool	found_v_o_door = false;
 	
 	if (g_updated == false && g_first == false)
 		return (1);
@@ -1067,8 +1103,11 @@ int	game_loop(t_game *game)
 			s.y = TILE_SIZE;
 		s.x = s.y / tan(ray_angle);
 		bool	found_horizontal = false;
+		found_h_o_door = false;
 		while (next_horiz.x < (game->player.w * TILE_SIZE) && next_horiz.x >= 0 && next_horiz.y < (game->player.h * TILE_SIZE) && next_horiz.y >= 0)
 		{
+			if (game->map[(int)floor(next_horiz.y / TILE_SIZE)][(int)floor(next_horiz.x / TILE_SIZE)] == door_o)
+				found_h_o_door = true;
 			if (is_wall_door((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
 			{
 				found_horizontal = true;
@@ -1097,8 +1136,11 @@ int	game_loop(t_game *game)
 
 		
 		bool	found_vertical = false;
+		found_v_o_door = false;
 		while (next_vert.x < (game->player.w * TILE_SIZE)  && next_vert.x >= 0 && next_vert.y < (game->player.h * TILE_SIZE)  && next_vert.y >= 0)
 		{
+			if (game->map[(int)floor(next_vert.y / TILE_SIZE)][(int)floor(next_vert.x / TILE_SIZE)] == door_o)
+				found_v_o_door = true;
 			if (is_wall_door((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
 			{
 				found_vertical = true;
@@ -1114,6 +1156,9 @@ int	game_loop(t_game *game)
 		}
 		
 		// // distance calculation
+		t_vector wall_hit = {0, 0};
+		double		dist_wall = 0;
+		int	color = 0;
 		double horizontal_dist = 0;
 		double vertical_dist = 0;
 		if (found_horizontal == true)
@@ -1124,9 +1169,6 @@ int	game_loop(t_game *game)
 			vertical_dist = distance_between_points(a, vert_p);
 		else
 			vertical_dist = __DBL_MAX__;
-		t_vector wall_hit = {0, 0};
-		double		dist_wall = 0;
-		int	color = 0;
 		int	light_level = 60;
 		double	o;
 		if (horizontal_dist < vertical_dist)
@@ -1148,24 +1190,40 @@ int	game_loop(t_game *game)
 		{
 			if (img == NULL)
 				img = &game->pack.no_img;
+			int map_x = (int)floor((wall_hit.x / TILE_SIZE));
+			int map_y = (int)floor(wall_hit.y / TILE_SIZE) + 1;
+			if (game->map[map_y][map_x] == door_o && found_v_o_door == true || (game->map[map_y][map_x] == door_o && game->map[(int)game->player.pos.y][(int)game->player.pos.x] == door_o))
+				img = &game->pack.door[1];
 			offset = (int)(o * img->w);
 		}
 		else if (is_facing_down && horizontal_dist < vertical_dist)
 		{
 			if (img == NULL)
-			img = &game->pack.so_img;
+				img = &game->pack.so_img;
+			int map_x = (int)floor((wall_hit.x / TILE_SIZE));
+			int map_y = (int)floor(wall_hit.y / TILE_SIZE) - 1;
+			if (game->map[map_y][map_x] == door_o && found_v_o_door == true || (game->map[map_y][map_x] == door_o && game->map[(int)game->player.pos.y][(int)game->player.pos.x] == door_o))
+				img = &game->pack.door[1];
 			offset = img->w - (int)(o * img->w) - 1;
 		}
 		else if (is_facing_right && horizontal_dist > vertical_dist)
 		{
 			if (img == NULL)
 				img = &game->pack.ea_img;
+			int map_x = (int)floor((wall_hit.x / TILE_SIZE) - 1);
+			int map_y = (int)floor(wall_hit.y / TILE_SIZE);
+			if (game->map[map_y][map_x] == door_o && found_h_o_door == true || (game->map[map_y][map_x] == door_o && game->map[(int)game->player.pos.y][(int)game->player.pos.x] == door_o))
+				img = &game->pack.door[1];
 			offset = (int)(o * img->w);
 		}
 		else if (is_facing_left && horizontal_dist > vertical_dist)
 		{
 			if (img == NULL)
 				img = &game->pack.we_img;
+			int map_x = (int)floor((wall_hit.x / TILE_SIZE) + 1);
+			int map_y = (int)floor(wall_hit.y / TILE_SIZE);
+			if (game->map[map_y][map_x] == door_o && found_h_o_door == true || (game->map[map_y][map_x] == door_o && game->map[(int)game->player.pos.y][(int)game->player.pos.x] == door_o))
+				img = &game->pack.door[1];
 			offset = img->w - (int)(o * img->w) - 1;
 		}
 		if (is_hit_door(wall_hit.x, wall_hit.y, game->map, game->player))
@@ -1189,6 +1247,10 @@ int	game_loop(t_game *game)
 					if (is_facing_up || is_facing_down)
 						img = &game->pack.door[0];
 					dist_wall = door_h_dist;
+					if (is_facing_up)
+						offset = (int)(o * img->w);
+					else if (is_facing_down)
+						offset = img->w - (int)(o * img->w) - 1;
 				}
 				else
 				{
@@ -1196,8 +1258,11 @@ int	game_loop(t_game *game)
 					if (is_facing_left || is_facing_right)
 						img = &game->pack.door[1];
 					dist_wall = door_v_dist;
+					if (is_facing_left)
+						offset = img->w - (int)(o * img->w) - 1;
+					else if (is_facing_right)
+						offset = (int)(o * img->w);
 				}
-				offset = (int)(o * img->w);
 			}
 			else
 			{
@@ -1218,6 +1283,10 @@ int	game_loop(t_game *game)
 					if (is_facing_up || is_facing_down)
 						img = &game->pack.door[1];
 					dist_wall = door_h_dist;
+					if (is_facing_up)
+						offset = (int)(o * img->w);
+					else if (is_facing_down)
+						offset = img->w - (int)(o * img->w) - 1;
 				}
 				else
 				{
@@ -1225,8 +1294,11 @@ int	game_loop(t_game *game)
 					if (is_facing_left || is_facing_right)
 						img = &game->pack.door[0];
 					dist_wall = door_v_dist;
+					if (is_facing_left)
+						offset = img->w - (int)(o * img->w) - 1;
+					else if (is_facing_right)
+						offset = (int)(o * img->w);
 				}
-				offset = (int)(o * img->w);
 			}
 		}
 
@@ -1234,7 +1306,7 @@ int	game_loop(t_game *game)
 		if (dist_wall < 0.001)
 			dist_wall = 0.001;
 		ray_dist[ray] = dist_wall;
-		double waves = 6 + (cos (20 * (game->player.pos.x + game->player.pos.y)));
+		waves = 5 + (cos (20 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
 		middle = (0.5 + look) * HEIGHT + g_global()->j_croutch + waves;
 		double draw_begin = middle - 0.5 * line_height;
@@ -1285,7 +1357,7 @@ int	game_loop(t_game *game)
 	t_vect pl = {100 - 7, HEIGHT - 100 - 7};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, pl, 0x00FF00);
 	// draw_circle_full(&game->img, p, 4, 0x00FF00);
-	t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (look * 50))};
+	t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (look * 50) - (waves * 10))};
 	if (game->player.key.recharge == true)
 	{
 		g_updated = true;
