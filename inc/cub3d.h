@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/09 01:06:06 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/09 09:05:40 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,6 +213,7 @@ typedef struct s_game
 	t_image				img;
 	t_pack				pack;
 	t_sprit				sp;
+	t_door				*doors;
 }						t_game;
 
 typedef	struct s_g
@@ -224,6 +225,7 @@ typedef	struct s_g
 	float	zoom;
 	int		narrow_look;
 	bool	door_open;
+	int		door_count;
 }	t_g;
 
 
@@ -248,4 +250,25 @@ void	stop_music(void);
 void	launch_music(char const *file, char *vol);
 void	wait_music(void);
 size_t	get_current_time(void);
+
+
+//
+bool	is_wall_door(int x, int y, char **map, t_player player);
+double	normalize_angle(double angle);
+double	distance_between_points(t_vector a, t_vector b);
+bool	is_hit_door(int x, int y, char **map, t_player player);
+
+//door
+
+void	handle_door(t_game *game);
+void	init_door(t_door *door, t_cell	cell, int pos_x, int pos_y);
+int	count_door(char **map);
+void	update_doors(t_game *game, double delta_time);
+void	check_door_close(t_game *game);
+
+//ray_cast
+void	compute_ray_orientation(double angle, bool	*up, bool *down, bool *left, bool *right);
+t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up, bool is_facing_down, bool *found_h_o_door, bool *found_horizontal);
+t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left, bool is_facing_right, bool *found_v_o_door, bool *found_vertical);
+
 #endif

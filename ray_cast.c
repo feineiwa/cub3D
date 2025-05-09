@@ -1,0 +1,101 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ray_cast.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
+/*   Updated: 2025/05/09 14:57:17 by frahenin         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "inc/cub3d.h"
+
+void	compute_ray_orientation(double angle, bool	*up, bool *down, bool *left, bool *right)
+{
+	if (angle > 0 && angle < PI)
+		*down = true;
+	else
+		*up = true;
+	if (angle < 1.57079632679 || angle > 4.71238898038) // 0.5 * PI || 1.5 * PI
+		*right = true;
+	else
+		*left = true;
+}
+
+t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up, bool is_facing_down, bool *found_h_o_door, bool *found_horizontal)
+{
+	t_vector horiz_p = {0, 0};
+	t_vector first_int = {0, 0};
+	t_vector	a = {.x = game->player.pos.x * TILE_SIZE, .y = game->player.pos.y * TILE_SIZE};
+
+	if (is_facing_up == 1)
+		first_int.y = (floor(game->player.pos.y) - 1e-6) * TILE_SIZE;
+	else if (is_facing_down == 1)
+		first_int.y = floor(game->player.pos.y) * TILE_SIZE + TILE_SIZE;
+	first_int.x = a.x + (first_int.y - a.y) / tan(ray_angle);
+	t_vector s = {0, 0};
+	t_vector next_horiz = {first_int.x, first_int.y};
+	if (is_facing_up == 1)
+		s.y = - TILE_SIZE;
+	if (is_facing_down == 1)
+		s.y = TILE_SIZE;
+	s.x = s.y / tan(ray_angle);
+	while (next_horiz.x < (game->player.w * TILE_SIZE) && next_horiz.x >= 0 && next_horiz.y < (game->player.h * TILE_SIZE) && next_horiz.y >= 0)
+	{
+		if (game->map[(int)floor(next_horiz.y / TILE_SIZE)][(int)floor(next_horiz.x / TILE_SIZE)] == door_o)
+			*found_h_o_door = true;
+		if (is_wall_door((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
+		{
+			*found_horizontal = true;
+			horiz_p = next_horiz;
+			break ;
+		}
+		else
+		{
+			next_horiz.x += s.x;
+			next_horiz.y += s.y;
+		}
+	}
+	return (horiz_p);
+}
+
+t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left, bool is_facing_right, bool *found_v_o_door, bool *found_vertical)
+{
+	t_vector vert_p = {0, 0};
+	t_vector first_int;
+	t_vector s;
+	t_vector	a = {.x = game->player.pos.x * TILE_SIZE, .y = game->player.pos.y * TILE_SIZE};
+	
+	if (is_facing_right == 1)
+		first_int.x = floor(game->player.pos.x) * TILE_SIZE + TILE_SIZE;
+	else if (is_facing_left == 1)
+		first_int.x = (floor(game->player.pos.x) - 1e-6) * TILE_SIZE;
+	first_int.y = a.y + ((first_int.x - a.x) * tan(ray_angle));
+	
+	t_vector next_vert = {first_int.x, first_int.y};
+	if (is_facing_right == 1)
+		s.x = TILE_SIZE;
+	else if (is_facing_left == 1)
+		s.x = -TILE_SIZE;
+	s.y = s.x * tan(ray_angle);
+	while (next_vert.x < (game->player.w * TILE_SIZE)  && next_vert.x >= 0 && next_vert.y < (game->player.h * TILE_SIZE)  && next_vert.y >= 0)
+	{
+		if (game->map[(int)floor(next_vert.y / TILE_SIZE)][(int)floor(next_vert.x / TILE_SIZE)] == door_o)
+			*found_v_o_door = true;
+		if (is_wall_door((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
+		{
+			*found_vertical = true;
+			vert_p.x = next_vert.x;
+			vert_p.y = next_vert.y;
+			break ;
+		}
+		else
+		{
+			next_vert.x += s.x;
+			next_vert.y += s.y;
+		}
+	}
+	return (vert_p);
+}
