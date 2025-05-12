@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/09 09:05:40 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/12 11:49:34 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,8 +224,7 @@ typedef	struct s_g
 	double	project_dist;
 	float	zoom;
 	int		narrow_look;
-	bool	door_open;
-	int		door_count;
+	float	door_prog;
 }	t_g;
 
 
@@ -270,5 +269,9 @@ void	check_door_close(t_game *game);
 void	compute_ray_orientation(double angle, bool	*up, bool *down, bool *left, bool *right);
 t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up, bool is_facing_down, bool *found_h_o_door, bool *found_horizontal);
 t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left, bool is_facing_right, bool *found_v_o_door, bool *found_vertical);
+
+bool	is_hit_door_open(int x, int y, char **map, t_player player);
+bool	is_hit_door_close(int x, int y, char **map, t_player player);
+bool	is_hit_door(int x, int y, char **map, t_player player);
 
 #endif

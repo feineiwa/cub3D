@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/09 14:57:17 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/12 14:18:46 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,13 @@ t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up,
 	s.x = s.y / tan(ray_angle);
 	while (next_horiz.x < (game->player.w * TILE_SIZE) && next_horiz.x >= 0 && next_horiz.y < (game->player.h * TILE_SIZE) && next_horiz.y >= 0)
 	{
-		if (game->map[(int)floor(next_horiz.y / TILE_SIZE)][(int)floor(next_horiz.x / TILE_SIZE)] == door_o)
+		if (is_hit_door_open((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
+		{
+			*found_horizontal = true;
 			*found_h_o_door = true;
+			horiz_p = next_horiz;
+			break ;
+		}
 		if (is_wall_door((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
 		{
 			*found_horizontal = true;
@@ -82,13 +87,17 @@ t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left,
 	s.y = s.x * tan(ray_angle);
 	while (next_vert.x < (game->player.w * TILE_SIZE)  && next_vert.x >= 0 && next_vert.y < (game->player.h * TILE_SIZE)  && next_vert.y >= 0)
 	{
-		if (game->map[(int)floor(next_vert.y / TILE_SIZE)][(int)floor(next_vert.x / TILE_SIZE)] == door_o)
+		if (is_hit_door_open((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
+		{
+			*found_vertical = true;
 			*found_v_o_door = true;
+			vert_p = next_vert;
+			break ;
+		}
 		if (is_wall_door((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
 		{
 			*found_vertical = true;
-			vert_p.x = next_vert.x;
-			vert_p.y = next_vert.y;
+			vert_p = next_vert;
 			break ;
 		}
 		else

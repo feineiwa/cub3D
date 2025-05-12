@@ -6,42 +6,42 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/09 08:51:53 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/12 12:37:35 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc/cub3d.h"
 
-void	update_doors(t_game *game, double delta_time)
-{
-	int	i;
-	t_door *door;
+// void	update_doors(t_game *game, double delta_time)
+// {
+// 	int	i;
+// 	t_door *door;
 
-	i = 0;
-	while (i < g_global()->door_count)
-	{
-		door = &game->doors[i];
-		if (door->is_opening && door->slide_progress < 1.0)
-		{
-			door->slide_progress += delta_time;
-			if (door->slide_progress >= 1.0)
-			{
-				door->slide_progress = 1.0;
-				door->is_opening = false;
-			}
-		}
-		else if (door->is_closing && door->slide_progress > 0.0)
-		{
-			door->slide_progress -= delta_time;
-			if (door->slide_progress <= 1.0)
-			{
-				door->slide_progress = 0.0;
-				door->is_closing = false;
-			}
-		}
-		i++;
-	}
-}
+// 	i = 0;
+// 	while (i < g_global()->door_count)
+// 	{
+// 		door = &game->doors[i];
+// 		if (door->is_opening && door->slide_progress < 1.0)
+// 		{
+// 			door->slide_progress += delta_time;
+// 			if (door->slide_progress >= 1.0)
+// 			{
+// 				door->slide_progress = 1.0;
+// 				door->is_opening = false;
+// 			}
+// 		}
+// 		else if (door->is_closing && door->slide_progress > 0.0)
+// 		{
+// 			door->slide_progress -= delta_time;
+// 			if (door->slide_progress <= 1.0)
+// 			{
+// 				door->slide_progress = 0.0;
+// 				door->is_closing = false;
+// 			}
+// 		}
+// 		i++;
+// 	}
+// }
 
 int	count_door(char **map)
 {
@@ -85,30 +85,30 @@ void	init_door(t_door *door, t_cell	cell, int pos_x, int pos_y)
 	}
 }
 
-void	handle_door(t_game *game)
-{ 
-	int	j;
-	int	i;
+// void	handle_door(t_game *game)
+// { 
+// 	int	j;
+// 	int	i;
 
-	g_global()->door_count = count_door(game->map);
-	game->doors = malloc(sizeof(t_door) * g_global()->door_count);
-	if (game->doors == NULL)
-		return ;
-	j = 0;
-	while (game->map[j])
-	{
-		i = 0;
-		while (game->map[j][i])
-		{
-			if (game->map[j][i] == door_c)
-				init_door(&game->doors[i], door_c, i, j);
-			else if (game->map[j][i] == door_o)
-				init_door(&game->doors[i], door_o, i, j);
-			i++;
-		}
-		j++;
-	}		
-}
+// 	g_global()->door_count = count_door(game->map);
+// 	game->doors = malloc(sizeof(t_door) * g_global()->door_count);
+// 	if (game->doors == NULL)
+// 		return ;
+// 	j = 0;
+// 	while (game->map[j])
+// 	{
+// 		i = 0;
+// 		while (game->map[j][i])
+// 		{
+// 			if (game->map[j][i] == door_c)
+// 				init_door(&game->doors[i], door_c, i, j);
+// 			else if (game->map[j][i] == door_o)
+// 				init_door(&game->doors[i], door_o, i, j);
+// 			i++;
+// 		}
+// 		j++;
+// 	}		
+// }
 
 void	check_door_close(t_game *game)
 {
@@ -225,8 +225,27 @@ void	check_door_close(t_game *game)
 	if (dist_door < 60 && game->player.key.door_check == true)
 	{
 		if (game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_c)
-			game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_o;
+		{
+			g_global()->door_prog += 0.1;
+			if (g_global()->door_prog >= 1.0)
+			{
+				g_global()->door_prog = 1.0;
+				game->player.key.door_check = false;
+			}
+			if (g_global()->door_prog == 1.0)
+				game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_o;
+		}
 		else if(game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_o)
-			game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_c;
+		{
+			
+			g_global()->door_prog -= 0.1;
+			if (g_global()->door_prog <= 0.0)
+			{
+				g_global()->door_prog = 0.0;
+				game->player.key.door_check = false;
+			}
+			if (g_global()->door_prog == 0.0)
+				game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_c;
+		}
 	}
 }
