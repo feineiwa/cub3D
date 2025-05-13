@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/13 16:47:50 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/14 02:19:45 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,14 +71,28 @@ void	init_door(t_door *door, t_cell	cell, int pos_x, int pos_y)
 	{
 		door->pos.x = pos_x;
 		door->pos.y = pos_y;
-		door->door_prog = 1.0;
+		door->door_prog = 0.0;
 	}
 	else if (cell == door_o)
 	{
 		door->pos.x = pos_x;
 		door->pos.y = pos_y;
-		door->door_prog = 0.0;
+		door->door_prog = 0.8;
 	}
+}
+
+int	find_door(t_door *doors, int x, int y)
+{
+	int	i;
+
+	i = 0;
+	while (i < g_global()->door_count)
+	{
+		if (doors[i].pos.x == x && doors[i].pos.y == y)
+			return (i);
+		i++;
+	}
+	return (-1);
 }
 
 t_door	*handle_door(char **map)
@@ -88,7 +102,8 @@ t_door	*handle_door(char **map)
 	int	k;
 	t_door	*doors;
 	
-	doors = malloc(sizeof(t_door) * count_door(map));
+	g_global()->door_count = count_door(map);
+	doors = malloc(sizeof(t_door) * g_global()->door_count);
 	if (doors == NULL)
 		return (NULL);
 	j = 0;
@@ -221,108 +236,62 @@ void	check_door_close(t_game *game)
 		door_hit.x = vert_p.x / TILE_SIZE;
 		door_hit.y = vert_p.y / TILE_SIZE;
 	}
-	if (dist_door < 60 && game->player.key.door_check == true)
+	static	size_t door_time = 0;
+	static t_vector	prev_door;
+	static	int		prev_index = -1;
+	int	door_index = find_door(game->doors, (int)floor(door_hit.x), (int)floor(door_hit.y));
+	if (dist_door < 60 && game->player.key.door_check == true && door_index >= 0)
 	{
-		if (game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_c)
+		if (game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_c && prev_index < 0)
 		{
+			game->doors[door_index].door_prog += 0.1;
 			g_global()->door_prog += 0.1;
 			g_global()->updated = true;
 			game->player.key.door_check = true;
-			if (g_global()->door_prog >= 0.8f)
+			if (game->doors[door_index].door_prog >= 0.8f)
 			{
-				g_global()->door_prog = 0.8f;
+				game->doors[door_index].door_prog = 0.8f;g_global()->door_prog += 0.8f;
 				game->player.key.door_check = false;
+				door_time = get_current_time();
 			}
-			if (g_global()->door_prog == 0.8f)
+			if (game->doors[door_index].door_prog == 0.8f)
+			{
 				game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_o;
+				prev_door = door_hit;
+				prev_index = door_index;
+			}
 		}
 		else if(game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_o)
 		{
-			
-			g_global()->door_prog -= 0.1;
-			if (g_global()->door_prog <= 0.0f)
+			game->doors[door_index].door_prog -= 0.1;
+			g_global()->updated = true;
+			if (game->doors[door_index].door_prog <= 0.0f)
 			{
-				g_global()->door_prog = 0.0f;
+				game->doors[door_index].door_prog = 0.0f;
 				game->player.key.door_check = false;
+				door_time = get_current_time();
 			}
-			if (g_global()->door_prog == 0.0f)
+			if (game->doors[door_index].door_prog == 0.0f)
+			{
 				game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_c;
+				prev_index = -1;
+			}
+		}
+	}
+	if (game->map[(int)floor(game->player.pos.y)][(int)floor(game->player.pos.x)] != door_o && prev_index >= 0 && game->map[(int)floor(prev_door.y)][(int)floor(prev_door.x)] == door_o && get_current_time() - door_time >= 2000)
+	{
+		game->doors[prev_index].door_prog -= 0.1;
+		g_global()->updated = true;
+		if (game->doors[prev_index].door_prog <= 0.0f)
+		{
+			game->doors[prev_index].door_prog = 0.0f;
+			game->player.key.door_check = false;
+			door_time = get_current_time();
+		}
+		if (game->doors[prev_index].door_prog == 0.0f)
+		{
+			game->map[(int)floor(prev_door.y)][(int)floor(prev_door.x)] = door_c;
+			prev_index = -1;
 		}
 	}
 }
-
-// if (is_hit_door((int)floor(wall_hit.x), (int)floor(wall_hit.y), game->map, game->player))
-			// {
-			// 	if (horizontal_dist < vertical_dist)
-			// 	{
-			// 		if (is_facing_up)
-			// 			s.y = - TILE_SIZE / 2;
-			// 		else if (is_facing_down)
-			// 			s.y = TILE_SIZE / 2;
-			// 		door_h.y = horiz_p.y + s.y;
-			// 		door_h.x = horiz_p.x +  (s.y / tan(ray_angle));
-			// 		door_v = vert_p;
-			// 		door_h_dist = distance_between_points(a, door_h);
-			// 		door_v_dist = vertical_dist;
-			// 		if (door_h_dist < door_v_dist)
-			// 		{
-			// 			o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
-			// 			if (is_facing_up || is_facing_down)
-			// 				img = &game->pack.door[0];
-			// 			dist_wall = door_h_dist;
-			// 			wall_hit = door_h;
-			// 			if (is_facing_up)
-			// 				offset = (int)((g_global()->door_prog * img->w) - (o * img->w));
-			// 			else if (is_facing_down)
-			// 				offset = (int)(g_global()->door_prog * img->w) - (1.0 - o * img->w);
-			// 		}
-			// 		else
-			// 		{
-			// 			o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
-			// 			if (is_facing_left || is_facing_right)
-			// 				img = &game->pack.door[1];
-			// 			dist_wall = door_v_dist;
-			// 			wall_hit = door_v;
-			// 			if (is_facing_left)
-			// 				offset = img->w - (int)(o * img->w) - 1;
-			// 			else if (is_facing_right)
-			// 				offset = (int)(o * img->w);
-			// 		}
-			// 	}
-			// 	else
-			// 	{
-			// 		if (is_facing_left)
-			// 			s.x = - TILE_SIZE / 2;
-			// 		else if (is_facing_right)
-			// 			s.x = TILE_SIZE / 2;
-			// 		door_v.x = vert_p.x + s.x;
-			// 		door_v.y = vert_p.y + (s.x * tan(ray_angle));
-			// 		door_h = horiz_p;
-			// 		door_v_dist = distance_between_points(a, door_v);
-			// 		door_h_dist = horizontal_dist;
-			// 		if (door_h_dist < door_v_dist)
-			// 		{
-			// 			o = ((fmod(door_h.x, TILE_SIZE) / TILE_SIZE));
-			// 			if (is_facing_up || is_facing_down)
-			// 				img = &game->pack.door[1];
-			// 			dist_wall = door_h_dist;
-			// 			wall_hit = door_h;
-			// 			if (is_facing_up)
-			// 				offset = (int)(o * img->w);
-			// 			else if (is_facing_down)
-			// 				offset = img->w - (int)(o * img->w) - 1;
-			// 		}
-			// 		else
-			// 		{
-			// 			o = ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
-			// 			if (is_facing_left || is_facing_right)
-			// 				img = &game->pack.door[0];
-			// 			dist_wall = door_v_dist;
-			// 			wall_hit = door_v;
-			// 			if (is_facing_left)
-			// 				offset = (int)(g_global()->door_prog * img->w) - (1.0 - o * img->w);
-			// 			else if (is_facing_right)
-			// 				offset = (int)((g_global()->door_prog * img->w) - (o * img->w));
-			// 		}
-			// 	}
-			// }

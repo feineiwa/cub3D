@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/13 17:51:42 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/14 01:00:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,7 +196,7 @@ typedef	struct s_sprit
 
 typedef struct s_door
 {
-	t_vector pos;
+	t_vect pos;
 	double	door_prog;
 }	t_door;
 
@@ -224,6 +224,7 @@ typedef	struct s_g
 	int		narrow_look;
 	float	door_prog;
 	bool	updated;
+	int		door_count;
 }	t_g;
 
 
@@ -262,6 +263,7 @@ t_door	*handle_door(char **map);
 void	init_door(t_door *door, t_cell	cell, int pos_x, int pos_y);
 int	count_door(char **map);
 // void	update_doors(t_game *game, double delta_time);
+int		find_door(t_door *doors, int x, int y);
 void	check_door_close(t_game *game);
 
 //ray_cast

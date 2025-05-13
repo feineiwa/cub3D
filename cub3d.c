@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/13 22:28:54 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/14 02:50:41 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -935,8 +935,8 @@ int	game_loop(t_game *game)
 	t_vector door_v;
 	t_vector door_h;
 	
-	if (g_global()->updated == false && g_first == false)
-		return (1);
+	// if (g_global()->updated == false && g_first == false)
+	// 	return (1);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	check_door_close(game);
@@ -998,6 +998,8 @@ int	game_loop(t_game *game)
 				img = &game->pack.no_img;
 			int map_x = (int)floor((wall_hit.x / TILE_SIZE));
 			int map_y = (int)floor(wall_hit.y / TILE_SIZE) + 1;
+			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
+				img = &game->pack.door[1];
 			offset = (int)(o * img->w);
 		}
 		else if (is_facing_down && horizontal_dist < vertical_dist)
@@ -1006,6 +1008,8 @@ int	game_loop(t_game *game)
 				img = &game->pack.so_img;
 			int map_x = (int)floor((wall_hit.x / TILE_SIZE));
 			int map_y = (int)floor(wall_hit.y / TILE_SIZE) - 1;
+			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
+				img = &game->pack.door[1];
 			offset = img->w - (int)(o * img->w) - 1;
 		}
 		else if (is_facing_right && horizontal_dist > vertical_dist)
@@ -1014,6 +1018,8 @@ int	game_loop(t_game *game)
 				img = &game->pack.ea_img;
 			int map_x = (int)floor((wall_hit.x / TILE_SIZE) - 1);
 			int map_y = (int)floor(wall_hit.y / TILE_SIZE);
+			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
+				img = &game->pack.door[1];
 			offset = (int)(o * img->w);
 		}
 		else if (is_facing_left && horizontal_dist > vertical_dist)
@@ -1022,6 +1028,8 @@ int	game_loop(t_game *game)
 				img = &game->pack.we_img;
 			int map_x = (int)floor((wall_hit.x / TILE_SIZE) + 1);
 			int map_y = (int)floor(wall_hit.y / TILE_SIZE);
+			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
+				img = &game->pack.door[1];
 			offset = img->w - (int)(o * img->w) - 1;
 		}
 		if (is_hit_door((int)floor(wall_hit.x), (int)floor(wall_hit.y), game->map, game->player))
@@ -1029,6 +1037,7 @@ int	game_loop(t_game *game)
 			img = NULL;
 			double door_v_dist;
 			double	door_h_dist;
+			int	door_index = find_door(game->doors, (int)floor(wall_hit.x / TILE_SIZE), (int)floor(wall_hit.y / TILE_SIZE));
 			if (horizontal_dist < vertical_dist)
 			{
 				if (is_facing_up)
@@ -1061,7 +1070,7 @@ int	game_loop(t_game *game)
 				else
 					o = 1.0 - ((fmod(door_v.y, TILE_SIZE) / TILE_SIZE));
 			}
-			if (o <= g_global()->door_prog)
+			if (o <= game->doors[door_index].door_prog)
 			{
 				t_vector	player;
 
@@ -1180,7 +1189,7 @@ int	game_loop(t_game *game)
 				}
 			}
 			else
-			{			
+			{
 				if (horizontal_dist < vertical_dist)
 				{
 					if (is_facing_up)
@@ -1200,9 +1209,9 @@ int	game_loop(t_game *game)
 						dist_wall = door_h_dist;
 						wall_hit = door_h;
 						if (is_facing_up)
-							offset = (int)((g_global()->door_prog * img->w) - (o * img->w));
+							offset = (int)((game->doors[door_index].door_prog * img->w) - (o * img->w));
 						else if (is_facing_down)
-							offset = (int)(g_global()->door_prog * img->w) - (o * img->w);
+							offset = (int)((game->doors[door_index].door_prog * img->w) - (o * img->w));
 					}
 					else
 					{
@@ -1248,15 +1257,15 @@ int	game_loop(t_game *game)
 						dist_wall = door_v_dist;
 						wall_hit = door_v;
 						if (is_facing_left)
-							offset = (int)(g_global()->door_prog * img->w) - (1.0 - o * img->w);
+							offset = (int)((game->doors[door_index].door_prog * img->w) - (1.0 - o * img->w));
 						else if (is_facing_right)
-							offset = (int)((g_global()->door_prog * img->w) - (1.0 - o * img->w));
+							offset = (int)((game->doors[door_index].door_prog * img->w) - (1.0 - o * img->w));
 					}
 				}
 			}
 			// door.c texture///
 			if (is_facing_up && horizontal_dist < vertical_dist)
-			{
+			{						
 				if (img == NULL)
 				{
 					img = &game->pack.no_img;
