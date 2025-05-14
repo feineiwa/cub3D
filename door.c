@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/14 02:19:45 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/14 08:59:01 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,12 +245,11 @@ void	check_door_close(t_game *game)
 		if (game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_c && prev_index < 0)
 		{
 			game->doors[door_index].door_prog += 0.1;
-			g_global()->door_prog += 0.1;
 			g_global()->updated = true;
 			game->player.key.door_check = true;
 			if (game->doors[door_index].door_prog >= 0.8f)
 			{
-				game->doors[door_index].door_prog = 0.8f;g_global()->door_prog += 0.8f;
+				game->doors[door_index].door_prog = 0.8f;
 				game->player.key.door_check = false;
 				door_time = get_current_time();
 			}

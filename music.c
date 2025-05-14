@@ -6,11 +6,27 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 08:38:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/14 00:40:45 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/14 09:24:40 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc/cub3d.h"
+
+bool	is_music_playing(void)
+{
+	int	status;
+	pid_t	res;
+	
+	if (g_global()->music_pid == -1)
+		return (false);
+	res = waitpid(g_global()->music_pid, &status, WNOHANG);
+	if (res == g_global()->music_pid)
+		return (g_global()->music_pid = -1, false);
+	else if (res == 0)
+		return (true);
+	else
+		return (g_global()->music_pid = -1, false);
+}
 
 void	wait_music(void)
 {
@@ -65,7 +81,7 @@ void	stop_music(void)
 
 t_g	*g_global(void)
 {
-	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875, 0.0, false, 0};
+	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875, false, 0};
 	return (&value);
 }
 

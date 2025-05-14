@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/14 02:50:41 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/14 11:57:05 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -299,6 +299,8 @@ int	init_image(t_game *game, t_image *image, int w, int h)
 
 int	ft_key_press(int keysym, t_game *game)
 {
+	if (keysym == XK_Return)
+		g_first = true;
 	if (keysym == XK_w)
 	{
 		game->player.key.key_up = true;
@@ -375,7 +377,11 @@ int	ft_key_press(int keysym, t_game *game)
 		g_global()->narrow_look = 2875;
 	}
 	if (keysym == XK_f && game->player.key.door_check == false)
+	{
 		game->player.key.door_check = true;
+		if (!is_music_playing())
+			launch_music("./sounds/sliding.mp3", "0.5");
+	}
 	mouse_speed = 1;
 	g_global()->updated = true;
 	return (0);
@@ -935,8 +941,8 @@ int	game_loop(t_game *game)
 	t_vector door_v;
 	t_vector door_h;
 	
-	// if (g_global()->updated == false && g_first == false)
-	// 	return (1);
+	if (g_global()->updated == false && g_first == false)
+		return (1);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	check_door_close(game);
@@ -1435,7 +1441,8 @@ int	ft_mouse_pressed(int button, int x, int y, t_game *game)
 		return (1);
 	if (button == 1 && game->player.key.hide_mouse == true)
 	{
-		// launch_music("sounds/gun1.wav", "2");
+		if (!is_music_playing())
+			launch_music("sounds/gun1.wav", "0.5");
 		g_global()->one_shoot_music = true;
 		game->player.key.recharge = true;
 		g_global()->updated = true;
@@ -1517,7 +1524,7 @@ int	main(int ac, char **av)
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
 	game.pack.door[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door.xpm", &game.pack.door[0].w, &game.pack.door[0].h);
 	game.pack.door[0].addr = mlx_get_data_addr(game.pack.door[0].img_ptr, &game.pack.door[0].bpp, &game.pack.door[0].size_line, &game.pack.door[0].endian);
-	game.pack.door[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door_side1.xpm", &game.pack.door[1].w, &game.pack.door[1].h);
+	game.pack.door[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door_side2.xpm", &game.pack.door[1].w, &game.pack.door[1].h);
 	game.pack.door[1].addr = mlx_get_data_addr(game.pack.door[1].img_ptr, &game.pack.door[1].bpp, &game.pack.door[1].size_line, &game.pack.door[1].endian);
 
 
@@ -1530,6 +1537,10 @@ int	main(int ac, char **av)
 
 	game.sp.img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp1.xpm", &game.sp.img.w, &game.sp.img.h);
 	game.sp.img.addr = mlx_get_data_addr(game.sp.img.img_ptr, &game.sp.img.bpp, &game.sp.img.size_line, &game.sp.img.endian);
+
+	t_image scene;
+	scene.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/disaster_war.xpm", &scene.w, &scene.h);
+	scene.addr = mlx_get_data_addr(scene.img_ptr, &scene.bpp, &scene.size_line, &scene.endian);
 
 
 	int	i = 0;
@@ -1547,12 +1558,13 @@ int	main(int ac, char **av)
 		game.pack.gun_sp[i].addr = mlx_get_data_addr(game.pack.gun_sp[i].img_ptr, &game.pack.gun_sp[i].bpp, &game.pack.gun_sp[i].size_line, &game.pack.gun_sp[i].endian);
 		i++;
 	}
+	paint_image_to_win(&game.img, &scene, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
 		0);
-	// // mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
-	// // 0xFF0000, "PRESS THE START TO BEGIN");
+	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
+	// 0xFF0000, "PRESS START TO BEGIN");
 	g_global()->updated = false;
-	g_first = true;
+	g_first = false;
 	mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);

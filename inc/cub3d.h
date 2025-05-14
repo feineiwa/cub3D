@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/14 01:00:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/14 09:22:49 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,7 +222,6 @@ typedef	struct s_g
 	double	project_dist;
 	float	zoom;
 	int		narrow_look;
-	float	door_prog;
 	bool	updated;
 	int		door_count;
 }	t_g;
@@ -249,6 +248,7 @@ void	stop_music(void);
 void	launch_music(char const *file, char *vol);
 void	wait_music(void);
 size_t	get_current_time(void);
+bool	is_music_playing(void);
 
 
 //
