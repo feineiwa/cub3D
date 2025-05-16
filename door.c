@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/14 08:59:01 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/16 14:23:01 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	count_door(char **map)
 		while (map[j][i])
 		{
 			if (map[j][i] == door_c || map[j][i] == door_o)
-				count++;	
+				count++;
 			i++;
 		}
 		j++;
@@ -252,9 +252,6 @@ void	check_door_close(t_game *game)
 				game->doors[door_index].door_prog = 0.8f;
 				game->player.key.door_check = false;
 				door_time = get_current_time();
-			}
-			if (game->doors[door_index].door_prog == 0.8f)
-			{
 				game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_o;
 				prev_door = door_hit;
 				prev_index = door_index;
@@ -269,9 +266,6 @@ void	check_door_close(t_game *game)
 				game->doors[door_index].door_prog = 0.0f;
 				game->player.key.door_check = false;
 				door_time = get_current_time();
-			}
-			if (game->doors[door_index].door_prog == 0.0f)
-			{
 				game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] = door_c;
 				prev_index = -1;
 			}
@@ -285,12 +279,9 @@ void	check_door_close(t_game *game)
 		{
 			game->doors[prev_index].door_prog = 0.0f;
 			game->player.key.door_check = false;
-			door_time = get_current_time();
-		}
-		if (game->doors[prev_index].door_prog == 0.0f)
-		{
 			game->map[(int)floor(prev_door.y)][(int)floor(prev_door.x)] = door_c;
 			prev_index = -1;
+			door_time = get_current_time();
 		}
 	}
 }

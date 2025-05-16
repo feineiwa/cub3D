@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/14 09:22:49 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/16 15:01:41 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,7 @@ typedef enum e_cell
 	p_w = 'W',
 	door_c = 'D',
 	door_o = 'd',
+	sprite = 's'
 }						t_cell;
 
 struct					s_vect
@@ -187,11 +188,20 @@ typedef struct s_pack
 	t_image door[2];
 }	t_pack;
 
-
 typedef	struct s_sprit
 {
 	t_vector	pos;
-	t_image		img;
+	t_image		idle[5];
+	t_image		death[5];
+	t_image		pain[5];
+	t_image		walk[5];
+	t_vector	d;
+	double		p;
+	double		q;
+	t_vector	sp;
+	t_vector	sp_screen;
+	double		dist;
+	double		proj_sp_height;
 }	t_sprit;
 
 typedef struct s_door
@@ -210,7 +220,7 @@ typedef struct s_game
 	t_var				var;
 	t_image				img;
 	t_pack				pack;
-	t_sprit				sp;
+	t_sprit				*sp;
 	t_door				*doors;
 }						t_game;
 
@@ -224,6 +234,7 @@ typedef	struct s_g
 	int		narrow_look;
 	bool	updated;
 	int		door_count;
+	int		sp_count;
 }	t_g;
 
 

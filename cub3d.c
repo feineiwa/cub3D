@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/14 11:57:05 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/16 17:26:15 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,8 +379,8 @@ int	ft_key_press(int keysym, t_game *game)
 	if (keysym == XK_f && game->player.key.door_check == false)
 	{
 		game->player.key.door_check = true;
-		if (!is_music_playing())
-			launch_music("./sounds/sliding.mp3", "0.5");
+		// if (!is_music_playing())
+		// 	launch_music("./sounds/sliding.mp3", "0.5");
 	}
 	mouse_speed = 1;
 	g_global()->updated = true;
@@ -715,6 +715,7 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x00FFFF);
 			else if (map[j][i] == door_o)
 				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x007070);
+				// draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xFF0000);
 			// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
 			
 			i++;
@@ -1340,23 +1341,47 @@ int	game_loop(t_game *game)
 		ray++;
 	}
 		//sprite;
-	t_vector h;
-	h.x = game->sp.pos.x - game->player.pos.x;
-	h.y = game->sp.pos.y - game->player.pos.y;
-	double	p = atan2(h.y, h.x);
-	p = normalize_angle(p);
-	double q = normalize_angle(p - game->player.angle + HALF_FOV);
-	t_vector sp_screen = {
-		.x = q * (WIDTH / FOV),
-		.y =  middle // Middle of screen vertically
-	};
-	t_vector sp = {.x = game->sp.pos.x * TILE_SIZE, .y = game->sp.pos.y * TILE_SIZE};
-	double dist = distance_between_points(a, sp);
-	double proj_sp_height;
-	if (dist > 4)
+	int	sp_c = 0;
+	while (sp_c < g_global()->sp_count)
 	{
-		proj_sp_height = g_global()->project_dist * TILE_SIZE / dist;
-		draw_sprite(game, sp_screen, proj_sp_height, &game->sp.img, ray_dist, dist);
+		game->sp[sp_c].d.x = game->sp[sp_c].pos.x - game->player.pos.x;
+		game->sp[sp_c].d.y = game->sp[sp_c].pos.y - game->player.pos.y;
+		game->sp[sp_c].p = normalize_angle(atan2(game->sp[sp_c].d.y, game->sp[sp_c].d.x));
+		game->sp[sp_c].q = normalize_angle(game->sp[sp_c].p - game->player.angle + HALF_FOV);
+		game->sp[sp_c].sp_screen.x = game->sp[sp_c].q * (WIDTH / FOV);
+		game->sp[sp_c].sp_screen.y = middle;
+		game->sp[sp_c].sp.x = game->sp[sp_c].pos.x * TILE_SIZE;
+		game->sp[sp_c].sp.y = game->sp[sp_c].pos.y * TILE_SIZE;
+		game->sp[sp_c].dist = distance_between_points(a, game->sp[sp_c].sp);
+		if (game->sp[sp_c].dist > 4)
+		{
+			game->sp[sp_c].proj_sp_height = g_global()->project_dist * TILE_SIZE / game->sp[sp_c].dist;
+			int	in_crosshair = ((WIDTH / 2) - (game->sp[sp_c].proj_sp_height / 2) < game->sp[sp_c].sp_screen.x && (WIDTH / 2) + (game->sp[sp_c].proj_sp_height / 2) > game->sp[sp_c].sp_screen.x) && 
+				(HALF_HEIGHT - (game->sp[sp_c].proj_sp_height / 2) < game->sp[sp_c].sp_screen.y) && (HALF_HEIGHT + (game->sp[sp_c].proj_sp_height / 2) > game->sp[sp_c].sp_screen.y);
+			static bool	shoot = false;
+			static size_t shoot_time = 0;
+			if (game->player.key.recharge == true && in_crosshair)
+			{
+				if (shoot_time == 0)
+					shoot_time = get_current_time();
+				shoot = true;
+			}
+			if (get_current_time() - shoot_time >= 20)
+			{
+				shoot_time = 0;
+				shoot = false;
+			}
+			if (shoot == true)
+				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].pain[0], ray_dist, game->sp[sp_c].dist);
+			else
+				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].walk[0], ray_dist, game->sp[sp_c].dist);
+			if (game->player.key.recharge == false)
+			{
+				shoot_time = 0;
+				shoot = false;
+			}
+		}
+		sp_c++;
 	}
 
 	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2)};
@@ -1441,8 +1466,8 @@ int	ft_mouse_pressed(int button, int x, int y, t_game *game)
 		return (1);
 	if (button == 1 && game->player.key.hide_mouse == true)
 	{
-		if (!is_music_playing())
-			launch_music("sounds/gun1.wav", "0.5");
+		// if (!is_music_playing())
+		// 	launch_music("sounds/gun1.wav", "0.5");
 		g_global()->one_shoot_music = true;
 		game->player.key.recharge = true;
 		g_global()->updated = true;
@@ -1483,6 +1508,66 @@ int	ft_mouse_release(int button, int x, int y, t_game *game)
 	return (0);
 }
 
+int	count_sprite(char **map)
+{
+	int i;
+	int	j;
+	int	count;
+
+	j = 0;
+	count = 0;
+	while (map[j])
+	{
+		i = 0;
+		while (map[j][i])
+		{
+			if (map[j][i] == sprite)
+				count++;
+			i++;
+		}
+		j++;
+	}
+	return (count);
+}
+
+t_sprit	*init_sprite(char **map, t_game *game)
+{
+	int	x;
+	int	y;
+	t_sprit *sp;
+	int	k;
+
+	g_global()->sp_count = count_sprite(map);
+	if (g_global()->sp_count <= 0)
+		return (NULL);
+	sp  = malloc(sizeof(t_sprit) * g_global()->sp_count);
+	if (!sp)
+		return (NULL);
+	y = 0;
+	k = 0;
+	while (map[y])
+	{
+		x = 0;
+		while (map[y][x])
+		{
+			if (map[y][x] == sprite)
+			{
+				sp[k].pos.x = x + 0.5;
+				sp[k].pos.y = y;
+				sp[k].walk[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp1.xpm", &sp[k].walk[0].w, &sp[k].walk[0].h);
+				sp[k].walk[0].addr = mlx_get_data_addr(sp[k].walk[0].img_ptr, &sp[k].walk[0].bpp, &sp[k].walk[0].size_line, &sp[k].walk[0].endian);
+				sp[k].pain[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/pain1.xpm", &sp[k].pain[0].w, &sp[k].pain[0].h);
+				sp[k].pain[0].addr = mlx_get_data_addr(sp[k].pain[0].img_ptr, &sp[k].pain[0].bpp, &sp[k].pain[0].size_line, &sp[k].pain[0].endian);
+				k++;
+				///need to fill all
+			}
+			x++;
+		}
+		y++;
+	}
+	return (sp);
+}
+
 int	main(int ac, char **av)
 {
 	t_game game;
@@ -1499,13 +1584,19 @@ int	main(int ac, char **av)
 	if (init_window(&game))
 		return (ft_free_txt(&game.txt), 1);
 	init_player(&game);
+	g_global()->door_count = 0;
 	game.doors = handle_door(game.map);
 	if (init_image(&game, &game.img, WIDTH, HEIGHT))
 	{
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
-	
+	game.sp = init_sprite(game.map, &game);
+	if (game.sp == NULL)
+	{
+		//need to free;
+		return (1);
+	}
 	game.pack.no_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.no_path, &game.pack.no_img.w, &game.pack.no_img.h);
 	game.pack.no_img.addr = mlx_get_data_addr(game.pack.no_img.img_ptr, &game.pack.no_img.bpp, &game.pack.no_img.size_line, &game.pack.no_img.endian);
 	game.pack.so_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.so_path, &game.pack.so_img.w, &game.pack.so_img.h);
@@ -1534,9 +1625,6 @@ int	main(int ac, char **av)
 	game.pack.needle.addr = mlx_get_data_addr(game.pack.needle.img_ptr, &game.pack.needle.bpp, &game.pack.needle.size_line, &game.pack.needle.endian);
 	game.pack.scope.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/scope.xpm", &game.pack.scope.w, &game.pack.scope.h);
 	game.pack.scope.addr = mlx_get_data_addr(game.pack.scope.img_ptr, &game.pack.scope.bpp, &game.pack.scope.size_line, &game.pack.scope.endian);
-
-	game.sp.img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp1.xpm", &game.sp.img.w, &game.sp.img.h);
-	game.sp.img.addr = mlx_get_data_addr(game.sp.img.img_ptr, &game.sp.img.bpp, &game.sp.img.size_line, &game.sp.img.endian);
 
 	t_image scene;
 	scene.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/disaster_war.xpm", &scene.w, &scene.h);
