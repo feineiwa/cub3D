@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/16 14:23:01 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/19 17:48:57 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,6 +240,7 @@ void	check_door_close(t_game *game)
 	static t_vector	prev_door;
 	static	int		prev_index = -1;
 	int	door_index = find_door(game->doors, (int)floor(door_hit.x), (int)floor(door_hit.y));
+	static bool	allow_to_open = false;
 	if (dist_door < 60 && game->player.key.door_check == true && door_index >= 0)
 	{
 		if (game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_c && prev_index < 0)
@@ -271,6 +272,8 @@ void	check_door_close(t_game *game)
 			}
 		}
 	}
+	else
+		game->player.key.door_check = false;
 	if (game->map[(int)floor(game->player.pos.y)][(int)floor(game->player.pos.x)] != door_o && prev_index >= 0 && game->map[(int)floor(prev_door.y)][(int)floor(prev_door.x)] == door_o && get_current_time() - door_time >= 2000)
 	{
 		game->doors[prev_index].door_prog -= 0.1;

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/16 17:26:15 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/19 17:39:27 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -917,6 +917,30 @@ void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height, t_imag
 	}
 }
 
+void	sort_sprites_by_distance(t_sprit *sp)
+{
+	int		i;
+	int		j;
+	t_sprit	temp;
+
+	j = 0;
+	while (j < g_global()->sp_count - 1)
+	{
+		i = 0;
+		while (i < g_global()->sp_count - j - 1)
+		{
+			if (sp[i].dist < sp[i + 1].dist)
+			{
+				temp = sp[i];
+				sp[i] = sp[i + 1];
+				sp[i + 1] = temp;
+			}
+			i++;
+		}
+		j++;
+	}
+}
+
 int	game_loop(t_game *game)
 {
 	t_vector	a;
@@ -1353,42 +1377,58 @@ int	game_loop(t_game *game)
 		game->sp[sp_c].sp.x = game->sp[sp_c].pos.x * TILE_SIZE;
 		game->sp[sp_c].sp.y = game->sp[sp_c].pos.y * TILE_SIZE;
 		game->sp[sp_c].dist = distance_between_points(a, game->sp[sp_c].sp);
+		sp_c++;
+	}
+	sort_sprites_by_distance(game->sp);
+	static int	shoot_ind = -1;
+	static size_t shoot_time = 0;
+	sp_c = g_global()->sp_count - 1;
+	bool in_crosshair;
+	while (sp_c >= 0)
+	{
+		game->sp[sp_c].proj_sp_height = g_global()->project_dist * TILE_SIZE / game->sp[sp_c].dist;
+		int	sprite_height = (int)game->sp[sp_c].proj_sp_height;
+		int	sprite_width = sprite_height;
+		int	start_y = (int)(game->sp[sp_c].sp_screen.y - (sprite_height / 2) * 0.4);
+		int end_y = start_y + sprite_height;
+		int	start_x = (int)(game->sp[sp_c].sp_screen.x - sprite_width / 2);
+		int	end_x = start_x + sprite_width;
+		in_crosshair = (
+			HALF_WIDTH >= start_x && HALF_WIDTH < end_x &&
+			HALF_HEIGHT >= start_y && HALF_HEIGHT < end_y
+		);
+		if (game->player.key.shoot && in_crosshair)
+		{
+			if (shoot_ind == -1)
+			{
+				shoot_ind = sp_c;
+				shoot_time = get_current_time();
+			}
+		}
+		if ((get_current_time() - shoot_time > 500) && game->player.key.recharge == false)
+			shoot_ind = -1;
+		sp_c--;
+	}
+	sp_c = 0;
+	while (sp_c < g_global()->sp_count)
+	{
 		if (game->sp[sp_c].dist > 4)
 		{
-			game->sp[sp_c].proj_sp_height = g_global()->project_dist * TILE_SIZE / game->sp[sp_c].dist;
-			int	in_crosshair = ((WIDTH / 2) - (game->sp[sp_c].proj_sp_height / 2) < game->sp[sp_c].sp_screen.x && (WIDTH / 2) + (game->sp[sp_c].proj_sp_height / 2) > game->sp[sp_c].sp_screen.x) && 
-				(HALF_HEIGHT - (game->sp[sp_c].proj_sp_height / 2) < game->sp[sp_c].sp_screen.y) && (HALF_HEIGHT + (game->sp[sp_c].proj_sp_height / 2) > game->sp[sp_c].sp_screen.y);
-			static bool	shoot = false;
-			static size_t shoot_time = 0;
-			if (game->player.key.recharge == true && in_crosshair)
-			{
-				if (shoot_time == 0)
-					shoot_time = get_current_time();
-				shoot = true;
-			}
-			if (get_current_time() - shoot_time >= 20)
-			{
-				shoot_time = 0;
-				shoot = false;
-			}
-			if (shoot == true)
+			if ((get_current_time() - shoot_time <= 500) && shoot_ind == sp_c)
 				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].pain[0], ray_dist, game->sp[sp_c].dist);
 			else
 				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].walk[0], ray_dist, game->sp[sp_c].dist);
-			if (game->player.key.recharge == false)
-			{
-				shoot_time = 0;
-				shoot = false;
-			}
 		}
 		sp_c++;
 	}
+	
+	
 
-	t_vect center = {(int)(WIDTH / 2), (int)(HEIGHT / 2)};
+	t_vect center = {(int)(HALF_WIDTH), (int)(HALF_HEIGHT)};
 	if (game->player.key.scope == true)
 		paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 	else
-		paint_image_to_win(&game->img, &game->pack.aiming, 32, 30, center, 0xFF0000);
+		paint_image_to_win(&game->img, &game->pack.aiming, 30, 30, center, 0xFF0000);
 	
 	
 	t_vector compass = {WIDTH - 121, 95};
@@ -1444,8 +1484,8 @@ int	ft_mouse_move(int x, int y, t_game *game)
 
 	if (game->player.key.hide_mouse == false)
 		return (1);
-	dx = x - WIDTH / 2;
-	dy = y - HEIGHT / 2;
+	dx = x - HALF_WIDTH;
+	dy = y - HALF_HEIGHT;
 	if (dx != 0 || dy != 0)
 	{
 		game->player.angle += dx * 1e-4;
@@ -1455,7 +1495,7 @@ int	ft_mouse_move(int x, int y, t_game *game)
 		else if (look >= 0.3)
 			look = 0.3;
 		g_global()->updated = true;
-		mlx_mouse_move(game->var.mlx, game->var.win, WIDTH / 2, HEIGHT / 2);
+		mlx_mouse_move(game->var.mlx, game->var.win, HALF_WIDTH, HALF_HEIGHT);
 	}
 	return (0);
 }
@@ -1470,6 +1510,7 @@ int	ft_mouse_pressed(int button, int x, int y, t_game *game)
 		// 	launch_music("sounds/gun1.wav", "0.5");
 		g_global()->one_shoot_music = true;
 		game->player.key.recharge = true;
+		game->player.key.shoot = true;
 		g_global()->updated = true;
 	}
 	if (button == 4 && game->player.key.hide_mouse == true)
@@ -1504,7 +1545,7 @@ int	ft_mouse_release(int button, int x, int y, t_game *game)
 	if (game->player.key.hide_mouse == false)
 		return (1);
 	if (button == 1)
-		game->player.key.recharge = false;
+		game->player.key.shoot = false;
 	return (0);
 }
 
@@ -1649,7 +1690,7 @@ int	main(int ac, char **av)
 	paint_image_to_win(&game.img, &scene, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
 		0);
-	// mlx_string_put(game.var.mlx, game.var.win, WIDTH / 2, HEIGHT - TILE_SIZE,
+	// mlx_string_put(game.var.mlx, game.var.win, HALF_WIDTH, HEIGHT - TILE_SIZE,
 	// 0xFF0000, "PRESS START TO BEGIN");
 	g_global()->updated = false;
 	g_first = false;
@@ -1658,6 +1699,7 @@ int	main(int ac, char **av)
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
 	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);
 	mlx_hook(game.var.win, ButtonPress, ButtonPressMask, ft_mouse_pressed, &game);
+	mlx_hook(game.var.win, ButtonRelease, ButtonReleaseMask, ft_mouse_release, &game);
 	mlx_hook(game.var.win, MotionNotify, PointerMotionMask, ft_mouse_move, &game);
 	mlx_loop_hook(game.var.mlx, game_loop, &game);
 	mlx_loop(game.var.mlx);

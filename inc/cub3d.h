@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/16 15:01:41 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/19 16:45:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@
 # define WIDTH 1600
 # define HEIGHT 960
 # define HALF_HEIGHT 480
+# define HALF_WIDTH	800
 # define FOV 1.0471975512
 # define HALF_FOV 0.523598776
 # define R_NB (WIDTH / RES)
@@ -150,6 +151,7 @@ struct					s_key
 	bool				key_jump;
 	bool				scope;
 	bool				door_check;
+	bool				shoot;
 };
 
 struct					s_player

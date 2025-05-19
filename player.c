@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/16 14:40:01 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/19 14:22:04 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,5 +95,6 @@ void	init_player(t_game *game)
 	game->player.key.key_jump = false;
 	game->player.key.scope = false;
 	game->player.key.door_check = false;
+	game->player.key.shoot = false;
 	get_w_and_h(game->map, &game->player.w, &game->player.h);
 }
