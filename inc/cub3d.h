@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/19 16:45:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/20 05:40:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,6 @@
 #  define BONUS 0
 # endif
 
-// # define WIDTH 1200
-// # define HEIGHT 800
 # define PI 3.14159265359
 # define MOVE_SPEED 0.06
 # define ROT_SPEED 0.05
@@ -204,6 +202,9 @@ typedef	struct s_sprit
 	t_vector	sp_screen;
 	double		dist;
 	double		proj_sp_height;
+	bool		is_died;
+	int			w_frm;
+	size_t		w_fps;
 }	t_sprit;
 
 typedef struct s_door

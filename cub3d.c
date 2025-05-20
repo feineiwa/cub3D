@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/19 17:39:27 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/20 06:34:17 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -345,6 +345,7 @@ int	ft_key_press(int keysym, t_game *game)
 		{
 			game->player.key.hide_mouse = true;
 			mlx_mouse_hide(game->var.mlx, game->var.win);
+			mlx_mouse_move(game->var.mlx, game->var.win, HALF_WIDTH, HALF_HEIGHT);
 		}
 		else
 		{
@@ -966,8 +967,8 @@ int	game_loop(t_game *game)
 	t_vector door_v;
 	t_vector door_h;
 	
-	if (g_global()->updated == false && g_first == false)
-		return (1);
+	// if (g_global()->updated == false && g_first == false)
+	// 	return (1);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	check_door_close(game);
@@ -1372,7 +1373,7 @@ int	game_loop(t_game *game)
 		game->sp[sp_c].d.y = game->sp[sp_c].pos.y - game->player.pos.y;
 		game->sp[sp_c].p = normalize_angle(atan2(game->sp[sp_c].d.y, game->sp[sp_c].d.x));
 		game->sp[sp_c].q = normalize_angle(game->sp[sp_c].p - game->player.angle + HALF_FOV);
-		game->sp[sp_c].sp_screen.x = game->sp[sp_c].q * (WIDTH / FOV);
+		game->sp[sp_c].sp_screen.x = game->sp[sp_c].q * (WIDTH / adjusted_fov);
 		game->sp[sp_c].sp_screen.y = middle;
 		game->sp[sp_c].sp.x = game->sp[sp_c].pos.x * TILE_SIZE;
 		game->sp[sp_c].sp.y = game->sp[sp_c].pos.y * TILE_SIZE;
@@ -1405,7 +1406,7 @@ int	game_loop(t_game *game)
 				shoot_time = get_current_time();
 			}
 		}
-		if ((get_current_time() - shoot_time > 500) && game->player.key.recharge == false)
+		if (game->player.key.recharge == false)
 			shoot_ind = -1;
 		sp_c--;
 	}
@@ -1417,7 +1418,16 @@ int	game_loop(t_game *game)
 			if ((get_current_time() - shoot_time <= 500) && shoot_ind == sp_c)
 				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].pain[0], ray_dist, game->sp[sp_c].dist);
 			else
-				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].walk[0], ray_dist, game->sp[sp_c].dist);
+			{
+				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].walk[game->sp[sp_c].w_frm], ray_dist, game->sp[sp_c].dist);
+				if (get_current_time() - game->sp[sp_c].w_fps >= 300)
+				{
+					game->sp[sp_c].w_frm++;
+					game->sp[sp_c].w_fps = get_current_time();
+				}
+				if (game->sp[sp_c].w_frm > 3)
+				game->sp[sp_c].w_frm = 0;
+			}
 		}
 		sp_c++;
 	}
@@ -1597,8 +1607,18 @@ t_sprit	*init_sprite(char **map, t_game *game)
 				sp[k].pos.y = y;
 				sp[k].walk[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp1.xpm", &sp[k].walk[0].w, &sp[k].walk[0].h);
 				sp[k].walk[0].addr = mlx_get_data_addr(sp[k].walk[0].img_ptr, &sp[k].walk[0].bpp, &sp[k].walk[0].size_line, &sp[k].walk[0].endian);
+				sp[k].walk[1].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp2.xpm", &sp[k].walk[1].w, &sp[k].walk[1].h);
+				sp[k].walk[1].addr = mlx_get_data_addr(sp[k].walk[1].img_ptr, &sp[k].walk[1].bpp, &sp[k].walk[1].size_line, &sp[k].walk[1].endian);
+				sp[k].walk[2].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp3.xpm", &sp[k].walk[2].w, &sp[k].walk[2].h);
+				sp[k].walk[2].addr = mlx_get_data_addr(sp[k].walk[2].img_ptr, &sp[k].walk[2].bpp, &sp[k].walk[2].size_line, &sp[k].walk[2].endian);
+				sp[k].walk[3].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp4.xpm", &sp[k].walk[3].w, &sp[k].walk[3].h);
+				sp[k].walk[3].addr = mlx_get_data_addr(sp[k].walk[3].img_ptr, &sp[k].walk[3].bpp, &sp[k].walk[3].size_line, &sp[k].walk[3].endian);
+				// sp[k].walk[4].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp5.xpm", &sp[k].walk[4].w, &sp[k].walk[4].h);
+				// sp[k].walk[4].addr = mlx_get_data_addr(sp[k].walk[4].img_ptr, &sp[k].walk[4].bpp, &sp[k].walk[4].size_line, &sp[k].walk[4].endian);
 				sp[k].pain[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/pain1.xpm", &sp[k].pain[0].w, &sp[k].pain[0].h);
 				sp[k].pain[0].addr = mlx_get_data_addr(sp[k].pain[0].img_ptr, &sp[k].pain[0].bpp, &sp[k].pain[0].size_line, &sp[k].pain[0].endian);
+				sp[k].w_frm = 0;
+				sp[k].w_fps = get_current_time();
 				k++;
 				///need to fill all
 			}
