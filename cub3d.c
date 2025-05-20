@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 08:59:53 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/20 16:40:27 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,13 @@ bool	is_collision(t_vector move, t_player player, char **map)
 	return (false);
 }
 
+bool	check_collision(t_vector move, t_player player, char **map)
+{
+	if (!is_exceeded(move, player) && !is_collision(move, player, map))
+		return (false);
+	return (true);
+}
+
 void	move_player(t_game *game)
 {
 	t_vector move;
@@ -186,16 +193,16 @@ void	move_player(t_game *game)
 	{
 		move.x = game->player.pos.x + cos(game->player.angle) * game->player.walk_dir * move_speed;
 		move.y = game->player.pos.y + sin(game->player.angle) * game->player.walk_dir * move_speed;
-		if (!is_exceeded(move, game->player) && !is_collision(move, game->player, game->map))
+		if (!check_collision(move, game->player, game->map))
 		{
 			game->player.pos.x = move.x;
 			game->player.pos.y = move.y;
 		}
 		else
 		{
-			if (!is_exceeded((t_vector){move.x, game->player.pos.y}, game->player) && !is_collision((t_vector){move.x, game->player.pos.y}, game->player, game->map))
+			if (!check_collision((t_vector){move.x, game->player.pos.y}, game->player, game->map))
 				game->player.pos.x = move.x;
-			if (!is_exceeded((t_vector){game->player.pos.x, move.y}, game->player) && !is_collision((t_vector){game->player.pos.x, move.y}, game->player, game->map))
+			if (!check_collision((t_vector){game->player.pos.x, move.y}, game->player, game->map))
 				game->player.pos.y = move.y;
 		}
 	}
@@ -755,7 +762,10 @@ void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
 		t_vector relative = {(game->sp[sp_c].pos.x - player.pos.x), (game->sp[sp_c].pos.y - player.pos.y)};
 		t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
 		t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
-		draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0xFF0000, c);
+		if (game->sp[sp_c].is_died == false)
+			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0xFF0000, c);
+		else
+			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0x4D1F1F, c);
 		sp_c++;
 	}
 	// draw_circle(img, c, 1, 0x00FF66);
@@ -1431,7 +1441,7 @@ int	game_loop(t_game *game)
 		int	end_x = start_x + sprite_width;
 		in_crosshair = (
 			HALF_WIDTH >= start_x && HALF_WIDTH < end_x &&
-			HALF_HEIGHT >= start_y && HALF_HEIGHT < end_y
+			HALF_HEIGHT >= start_y && HALF_HEIGHT < end_y && game->sp[sp_c].is_died == false
 		);
 		if (game->player.key.shoot && in_crosshair)
 		{
@@ -1450,8 +1460,33 @@ int	game_loop(t_game *game)
 	{
 		if (game->sp[sp_c].dist > 4)
 		{
-			if ((get_current_time() - shoot_time <= 500) && shoot_ind == sp_c)
+			if (get_current_time() - shoot_time <= 500 && shoot_ind == sp_c && game->sp[sp_c].is_died == false)
+			{
 				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].pain[0], ray_dist, game->sp[sp_c].dist);
+				if (game->sp[sp_c].was_shot == false)
+				{
+					game->sp[sp_c].health--;
+					game->sp[sp_c].was_shot = true;
+					if (game->sp[sp_c].health <= 0 && game->sp[sp_c].was_shot)
+					{
+						game->sp[sp_c].is_died = true;
+						game->sp[sp_c].d_fps = get_current_time();
+						game->sp[sp_c].d_frm = 0;
+					}
+				}
+			}
+			else if (game->sp[sp_c].is_died == true && game->sp[sp_c].d_frm <= 6)
+			{
+				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].death[game->sp[sp_c].d_frm], ray_dist, game->sp[sp_c].dist);
+				if (get_current_time() - game->sp[sp_c].d_fps >= 100)
+				{
+					game->sp[sp_c].d_frm++;
+					game->sp[sp_c].d_fps = get_current_time();
+					if (game->sp[sp_c].d_frm > 6)
+						game->sp[sp_c].d_frm = 6;
+				}
+				game->sp[sp_c].was_shot = false;
+			}
 			else
 			{
 				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].walk[game->sp[sp_c].w_frm], ray_dist, game->sp[sp_c].dist);
@@ -1462,10 +1497,25 @@ int	game_loop(t_game *game)
 				}
 				if (game->sp[sp_c].w_frm > 3)
 				game->sp[sp_c].w_frm = 0;
+				game->sp[sp_c].was_shot = false;
 			}
 		}
-		game->sp[sp_c].pos.x -= cos(game->sp[sp_c].p) * 0.01;
-		game->sp[sp_c].pos.y -= sin(game->sp[sp_c].p) * 0.01;
+		if (game->sp[sp_c].is_died == false)
+		{
+			t_vector move = {game->sp[sp_c].pos.x - cos(game->sp[sp_c].p) * 0.01, game->sp[sp_c].pos.y - sin(game->sp[sp_c].p) * 0.01};
+			if (!check_collision(move, game->player, game->map))
+			{
+				game->sp[sp_c].pos.x = move.x;
+				game->sp[sp_c].pos.y = move.y;
+			}
+			else
+			{
+				if (!check_collision((t_vector){move.x, game->sp[sp_c].pos.y}, game->player, game->map))
+					game->sp[sp_c].pos.x = move.x;
+				if (!check_collision((t_vector){game->sp[sp_c].pos.x, move.y}, game->player, game->map))
+					game->sp[sp_c].pos.y = move.y;
+			}
+		}
 		sp_c++;
 	}
 	
@@ -1654,8 +1704,28 @@ t_sprit	*init_sprite(char **map, t_game *game)
 				// sp[k].walk[4].addr = mlx_get_data_addr(sp[k].walk[4].img_ptr, &sp[k].walk[4].bpp, &sp[k].walk[4].size_line, &sp[k].walk[4].endian);
 				sp[k].pain[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/pain1.xpm", &sp[k].pain[0].w, &sp[k].pain[0].h);
 				sp[k].pain[0].addr = mlx_get_data_addr(sp[k].pain[0].img_ptr, &sp[k].pain[0].bpp, &sp[k].pain[0].size_line, &sp[k].pain[0].endian);
+				
+				sp[k].death[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death1.xpm", &sp[k].death[0].w, &sp[k].death[0].h);
+				sp[k].death[0].addr = mlx_get_data_addr(sp[k].death[0].img_ptr, &sp[k].death[0].bpp, &sp[k].death[0].size_line, &sp[k].death[0].endian);
+				sp[k].death[1].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death2.xpm", &sp[k].death[1].w, &sp[k].death[1].h);
+				sp[k].death[1].addr = mlx_get_data_addr(sp[k].death[1].img_ptr, &sp[k].death[1].bpp, &sp[k].death[1].size_line, &sp[k].death[1].endian);
+				sp[k].death[2].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death3.xpm", &sp[k].death[2].w, &sp[k].death[2].h);
+				sp[k].death[2].addr = mlx_get_data_addr(sp[k].death[2].img_ptr, &sp[k].death[2].bpp, &sp[k].death[2].size_line, &sp[k].death[2].endian);
+				sp[k].death[3].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death4.xpm", &sp[k].death[3].w, &sp[k].death[3].h);
+				sp[k].death[3].addr = mlx_get_data_addr(sp[k].death[3].img_ptr, &sp[k].death[3].bpp, &sp[k].death[3].size_line, &sp[k].death[3].endian);
+				sp[k].death[4].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death5.xpm", &sp[k].death[4].w, &sp[k].death[4].h);
+				sp[k].death[4].addr = mlx_get_data_addr(sp[k].death[4].img_ptr, &sp[k].death[4].bpp, &sp[k].death[4].size_line, &sp[k].death[4].endian);
+				sp[k].death[5].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death6.xpm", &sp[k].death[5].w, &sp[k].death[5].h);
+				sp[k].death[5].addr = mlx_get_data_addr(sp[k].death[5].img_ptr, &sp[k].death[5].bpp, &sp[k].death[5].size_line, &sp[k].death[5].endian);
+				sp[k].death[6].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death7.xpm", &sp[k].death[6].w, &sp[k].death[6].h);
+				sp[k].death[6].addr = mlx_get_data_addr(sp[k].death[6].img_ptr, &sp[k].death[6].bpp, &sp[k].death[6].size_line, &sp[k].death[6].endian);
+				
 				sp[k].w_frm = 0;
 				sp[k].w_fps = get_current_time();
+				sp[k].health = 3;
+				sp[k].d_fps = get_current_time();
+				sp[k].d_frm = 0;
+				sp[k].was_shot = false;
 				k++;
 				///need to fill all
 			}
