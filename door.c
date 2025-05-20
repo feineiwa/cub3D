@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 06:28:06 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/20 18:12:41 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,7 +240,6 @@ void	check_door_close(t_game *game)
 	static t_vector	prev_door;
 	static	int		prev_index = -1;
 	int	door_index = find_door(game->doors, (int)floor(door_hit.x), (int)floor(door_hit.y));
-	static bool	allow_to_open = false;
 	if (dist_door < 60 && game->player.key.door_check == true && door_index >= 0)
 	{
 		if (game->map[(int)floor(door_hit.y)][(int)floor(door_hit.x)] == door_c && prev_index < 0)

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 16:40:27 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/20 19:36:23 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -505,7 +505,7 @@ void	draw_rectangle_rgb_gradient(t_image *image, int	x0, int x1, int y0, int y1,
 			i++;
 		}
 		round++;
-		if (round == 2)
+		if (round == 1)
 		{
 			rgb.r -= 1;
 			rgb.g -= 1;
@@ -987,6 +987,18 @@ void	sort_sprites_by_distance(t_sprit *sp)
 	}
 }
 
+int	get_health_color(int health, int max_health)
+{
+	t_rgb	color;
+	float	ratio = (float)health / max_health;
+	
+	color.r = (int)((1.0f - ratio) * 255);
+	color.g = (int)(ratio * 255);
+	color.b = 0;
+	return(set_color_rgb(color.r, color.g, color.b));
+}
+
+
 int	game_loop(t_game *game)
 {
 	t_vector	a;
@@ -1014,6 +1026,12 @@ int	game_loop(t_game *game)
 	
 	// if (g_global()->updated == false && g_first == false)
 	// 	return (1);
+	if (g_global()->game_over == true)
+	{
+		paint_image_to_win(&game->img, &game->pack.gov, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
+		mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0, 0);
+		return (0);
+	}
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	check_door_close(game);
@@ -1500,7 +1518,7 @@ int	game_loop(t_game *game)
 				game->sp[sp_c].was_shot = false;
 			}
 		}
-		if (game->sp[sp_c].is_died == false)
+		if (game->sp[sp_c].is_died == false && game->sp[sp_c].was_shot == false)
 		{
 			t_vector move = {game->sp[sp_c].pos.x - cos(game->sp[sp_c].p) * 0.01, game->sp[sp_c].pos.y - sin(game->sp[sp_c].p) * 0.01};
 			if (!check_collision(move, game->player, game->map))
@@ -1515,12 +1533,20 @@ int	game_loop(t_game *game)
 				if (!check_collision((t_vector){game->sp[sp_c].pos.x, move.y}, game->player, game->map))
 					game->sp[sp_c].pos.y = move.y;
 			}
+			float dist_for_die = distance_between_points(game->sp[sp_c].pos, game->player.pos);
+			if (dist_for_die < 0.5 && !game->sp[sp_c].is_died)
+			{
+				game->player.health--;
+				paint_image_to_win(&game->img, &game->pack.blood, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
+				// fprintf(stderr, "pv -> %d\n", game->player.health);
+				if (game->player.health <= 0)
+					g_global()->game_over = true;
+			}
 		}
 		sp_c++;
 	}
-	
-	
-
+	if (game->player.health >= 0)
+		draw_rectangle(&game->img, 50, 50 + (game->player.health * 2), 20, 40, get_health_color(game->player.health, 100));
 	t_vect center = {(int)(HALF_WIDTH), (int)(HALF_HEIGHT)};
 	if (game->player.key.scope == true)
 		paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
@@ -1691,7 +1717,7 @@ t_sprit	*init_sprite(char **map, t_game *game)
 			if (map[y][x] == sprite)
 			{
 				sp[k].pos.x = x + 0.5;
-				sp[k].pos.y = y;
+				sp[k].pos.y = y + 0.5;
 				sp[k].walk[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp1.xpm", &sp[k].walk[0].w, &sp[k].walk[0].h);
 				sp[k].walk[0].addr = mlx_get_data_addr(sp[k].walk[0].img_ptr, &sp[k].walk[0].bpp, &sp[k].walk[0].size_line, &sp[k].walk[0].endian);
 				sp[k].walk[1].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp2.xpm", &sp[k].walk[1].w, &sp[k].walk[1].h);
@@ -1794,6 +1820,11 @@ int	main(int ac, char **av)
 	game.pack.scope.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/scope.xpm", &game.pack.scope.w, &game.pack.scope.h);
 	game.pack.scope.addr = mlx_get_data_addr(game.pack.scope.img_ptr, &game.pack.scope.bpp, &game.pack.scope.size_line, &game.pack.scope.endian);
 
+	game.pack.blood.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/blood.xpm", &game.pack.blood.w, &game.pack.blood.h);
+	game.pack.blood.addr = mlx_get_data_addr(game.pack.blood.img_ptr, &game.pack.blood.bpp, &game.pack.blood.size_line, &game.pack.blood.endian);
+	game.pack.gov.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/gov.xpm", &game.pack.gov.w, &game.pack.gov.h);
+	game.pack.gov.addr = mlx_get_data_addr(game.pack.gov.img_ptr, &game.pack.gov.bpp, &game.pack.gov.size_line, &game.pack.gov.endian);
+
 	t_image scene;
 	scene.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/disaster_war.xpm", &scene.w, &scene.h);
 	scene.addr = mlx_get_data_addr(scene.img_ptr, &scene.bpp, &scene.size_line, &scene.endian);
@@ -1821,6 +1852,7 @@ int	main(int ac, char **av)
 	// 0xFF0000, "PRESS START TO BEGIN");
 	g_global()->updated = false;
 	g_first = false;
+	g_global()->game_over = false;
 	mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);

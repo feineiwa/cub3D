@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 16:38:42 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/20 19:33:00 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,7 @@ struct					s_player
 	int					walk_dir;
 	int					w;
 	int					h;
+	int					health;
 };
 
 struct					s_var
@@ -186,6 +187,8 @@ typedef struct s_pack
 	t_image needle;
 	t_image scope;
 	t_image door[2];
+	t_image	blood;
+	t_image	gov;
 }	t_pack;
 
 typedef	struct s_sprit
@@ -241,6 +244,7 @@ typedef	struct s_g
 	bool	updated;
 	int		door_count;
 	int		sp_count;
+	bool	game_over;
 }	t_g;
 
 
