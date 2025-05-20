@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 06:34:17 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/20 08:59:53 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -670,7 +670,33 @@ void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y, t_vect p,
 	}
 }
 
-void	draw_minimap(t_image *img, char **map, t_player player)
+void	draw_circle_enemy(t_image *img, t_vector p, int radius, int color, t_vector c)
+{
+	int	i;
+	int	j;
+	int	dist_squared;
+
+	j = -radius;
+	while (j <= radius)
+	{
+		i = -radius;
+		while (i <= radius)
+		{
+			dist_squared = (i * i) + (j * j);
+			if ( dist_squared <= (radius * radius))
+			{
+				double dist = (p.x + i - c.x) * (p.x + i - c.x) + (p.y + j - c.y) * (p.y + j - c.y);
+
+				if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
+					put_pixel(img, p.x + i, p.y + j, color);
+			}
+			i++;
+		}
+		j++;
+	}
+}
+
+void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
 {
 	int	x1;
 	int	x2;
@@ -722,6 +748,15 @@ void	draw_minimap(t_image *img, char **map, t_player player)
 			i++;
 		}
 		j++;
+	}
+	int	sp_c = 0;
+	while (sp_c < g_global()->sp_count)
+	{
+		t_vector relative = {(game->sp[sp_c].pos.x - player.pos.x), (game->sp[sp_c].pos.y - player.pos.y)};
+		t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
+		t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
+		draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0xFF0000, c);
+		sp_c++;
 	}
 	// draw_circle(img, c, 1, 0x00FF66);
 	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
@@ -1429,6 +1464,8 @@ int	game_loop(t_game *game)
 				game->sp[sp_c].w_frm = 0;
 			}
 		}
+		game->sp[sp_c].pos.x -= cos(game->sp[sp_c].p) * 0.01;
+		game->sp[sp_c].pos.y -= sin(game->sp[sp_c].p) * 0.01;
 		sp_c++;
 	}
 	
@@ -1445,7 +1482,7 @@ int	game_loop(t_game *game)
 	t_vect comp = {WIDTH - 200, 20};
 	paint_image_to_win(&game->img, &game->pack.compass, 150, 150, comp, -1);
 	draw_rotated_texture(&game->img, &game->pack.needle, compass, game->player.angle, 100, 100);
-	draw_minimap(&game->img, game->map, game->player);
+	draw_minimap(&game->img, game->map, game->player, game);
 	t_vect pl = {100 - 7, HEIGHT - 100 - 7};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, pl, 0x00FF00);
 	// draw_circle_full(&game->img, p, 4, 0x00FF00);
