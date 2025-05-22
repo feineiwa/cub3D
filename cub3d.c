@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 19:36:23 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/22 18:24:10 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,6 +246,7 @@ void	move_player(t_game *game)
 		{
 			g_global()->j_croutch = 0;
 			look = 0;
+			game->player.key.key_croutch = false;
 		}
 	}
 	if (game->player.key.key_jump == true)
@@ -390,7 +391,14 @@ int	ft_key_press(int keysym, t_game *game)
 		// if (!is_music_playing())
 		// 	launch_music("./sounds/sliding.mp3", "0.5");
 	}
-	mouse_speed = 1;
+	if (keysym == XK_F1)
+	{
+		if (g_global()->help == false)
+			g_global()->help = true;
+		else
+			g_global()->help = false;
+	}
+	// mouse_speed = 1;
 	g_global()->updated = true;
 	return (0);
 }
@@ -560,10 +568,10 @@ void	draw_rectangle(t_image *image, int	x0, int x1, int y0, int y1, int color)
 
 	while (y0 < y1)
 	{
-		i = 0;
+		i = x0;
 		while (i < x1)
 		{
-			put_pixel(image, i + x0, y0, color);
+			put_pixel(image, i, y0, color);
 			i++;
 		}
 		y0++;
@@ -1029,6 +1037,12 @@ int	game_loop(t_game *game)
 	if (g_global()->game_over == true)
 	{
 		paint_image_to_win(&game->img, &game->pack.gov, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
+		mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0, 0);
+		return (0);
+	}
+	if (g_global()->help == true)
+	{
+		paint_image_to_win(&game->img, &game->pack.help, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 		mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0, 0);
 		return (0);
 	}
@@ -1538,15 +1552,15 @@ int	game_loop(t_game *game)
 			{
 				game->player.health--;
 				paint_image_to_win(&game->img, &game->pack.blood, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
-				// fprintf(stderr, "pv -> %d\n", game->player.health);
 				if (game->player.health <= 0)
 					g_global()->game_over = true;
 			}
 		}
 		sp_c++;
 	}
+	draw_rectangle(&game->img, WIDTH - 301, WIDTH - 99, HEIGHT - 61, HEIGHT - 39, 0x1E1E1E);
 	if (game->player.health >= 0)
-		draw_rectangle(&game->img, 50, 50 + (game->player.health * 2), 20, 40, get_health_color(game->player.health, 100));
+		draw_rectangle(&game->img, WIDTH - 300, WIDTH - 300 + game->player.health, HEIGHT - 60, HEIGHT - 40, get_health_color((game->player.health / 2), 100));
 	t_vect center = {(int)(HALF_WIDTH), (int)(HALF_HEIGHT)};
 	if (game->player.key.scope == true)
 		paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
@@ -1590,12 +1604,14 @@ int	game_loop(t_game *game)
 		paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);
 		g_global()->updated = false;
 	}
+	paint_image_to_win(&game->img, &game->pack.notice, 350, 100, (t_vect){1, 10}, -1);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
 	if (game->player.key.hide_mouse == true)
-		mlx_string_put(game->var.mlx, game->var.win, 50, 50, 0xFF0000, "mouse activate");
+		mlx_string_put(game->var.mlx, game->var.win, 70, 70, 0xFF0000, "mouse activate");
 	if (game->player.key.door_check == true)
 		g_global()->updated = true;
+	mlx_string_put(game->var.mlx, game->var.win, 70, 50, 0, "Press F1 to display the help menu");
 	g_first = false;
 	return (0);
 }
@@ -1647,6 +1663,13 @@ int	ft_mouse_pressed(int button, int x, int y, t_game *game)
 	{
 		g_global()->zoom -= 0.1;
 		g_global()->narrow_look -= 100;
+		g_global()->updated = true;
+	}
+	if (button == 3 && game->player.key.hide_mouse == true)
+	{
+		game->player.key.scope = false;
+		g_global()->zoom = 1.0;
+		g_global()->narrow_look = 875;
 		g_global()->updated = true;
 	}
 	if (g_global()->zoom < 1)
@@ -1824,6 +1847,11 @@ int	main(int ac, char **av)
 	game.pack.blood.addr = mlx_get_data_addr(game.pack.blood.img_ptr, &game.pack.blood.bpp, &game.pack.blood.size_line, &game.pack.blood.endian);
 	game.pack.gov.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/gov.xpm", &game.pack.gov.w, &game.pack.gov.h);
 	game.pack.gov.addr = mlx_get_data_addr(game.pack.gov.img_ptr, &game.pack.gov.bpp, &game.pack.gov.size_line, &game.pack.gov.endian);
+
+	game.pack.help.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/help.xpm", &game.pack.help.w, &game.pack.help.h);
+	game.pack.help.addr = mlx_get_data_addr(game.pack.help.img_ptr, &game.pack.help.bpp, &game.pack.help.size_line, &game.pack.help.endian);
+	game.pack.notice.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/notice.xpm", &game.pack.notice.w, &game.pack.notice.h);
+	game.pack.notice.addr = mlx_get_data_addr(game.pack.notice.img_ptr, &game.pack.notice.bpp, &game.pack.notice.size_line, &game.pack.notice.endian);
 
 	t_image scene;
 	scene.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/disaster_war.xpm", &scene.w, &scene.h);

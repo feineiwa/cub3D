@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 18:23:36 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/22 10:36:07 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,6 @@ void	init_player(t_game *game)
 	game->player.key.scope = false;
 	game->player.key.door_check = false;
 	game->player.key.shoot = false;
-	game->player.health = 100;
+	game->player.health = 200;
 	get_w_and_h(game->map, &game->player.w, &game->player.h);
 }

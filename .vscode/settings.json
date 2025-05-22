@@ -3,6 +3,7 @@
 		"mlx_int.h": "c",
 		"unistd.h": "c",
 		"mlx.h": "c",
-		"cmath": "c"
+		"cmath": "c",
+		"time.h": "c"
 	}
 }

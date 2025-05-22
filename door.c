@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/20 18:12:41 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/22 18:21:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ void	check_door_close(t_game *game)
 			}
 		}
 	}
-	else
+	else if (game->player.key.door_check == true)
 		game->player.key.door_check = false;
 	if (game->map[(int)floor(game->player.pos.y)][(int)floor(game->player.pos.x)] != door_o && prev_index >= 0 && game->map[(int)floor(prev_door.y)][(int)floor(prev_door.x)] == door_o && get_current_time() - door_time >= 2000)
 	{
