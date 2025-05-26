@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/22 18:24:10 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/26 18:33:29 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -308,7 +308,10 @@ int	init_image(t_game *game, t_image *image, int w, int h)
 int	ft_key_press(int keysym, t_game *game)
 {
 	if (keysym == XK_Return)
-		g_first = true;
+	{
+		g_first = false;
+		stop_music();
+	}
 	if (keysym == XK_w)
 	{
 		game->player.key.key_up = true;
@@ -397,6 +400,11 @@ int	ft_key_press(int keysym, t_game *game)
 			g_global()->help = true;
 		else
 			g_global()->help = false;
+	}
+	if (keysym == XK_Escape)
+	{
+		stop_music();
+		exit(1);
 	}
 	// mouse_speed = 1;
 	g_global()->updated = true;
@@ -1034,6 +1042,17 @@ int	game_loop(t_game *game)
 	
 	// if (g_global()->updated == false && g_first == false)
 	// 	return (1);
+	if (g_first == true)
+	{
+		// paint_image_to_win(&game->img, &game->intro.img[game->intro.frm], WIDTH, HEIGHT, (t_vect){0, 0}, -1);
+		mlx_put_image_to_window(game->var.mlx, game->var.win, game->intro.img[game->intro.frm].img_ptr, 0, 0);
+		if (get_current_time() - game->intro.last_time >= 200 && game->intro.frm < 171)
+		{
+			game->intro.frm++;
+			game->intro.last_time = get_current_time();
+		}
+		return (0);
+	}
 	if (g_global()->game_over == true)
 	{
 		paint_image_to_win(&game->img, &game->pack.gov, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
@@ -1853,11 +1872,6 @@ int	main(int ac, char **av)
 	game.pack.notice.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/notice.xpm", &game.pack.notice.w, &game.pack.notice.h);
 	game.pack.notice.addr = mlx_get_data_addr(game.pack.notice.img_ptr, &game.pack.notice.bpp, &game.pack.notice.size_line, &game.pack.notice.endian);
 
-	t_image scene;
-	scene.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/disaster_war.xpm", &scene.w, &scene.h);
-	scene.addr = mlx_get_data_addr(scene.img_ptr, &scene.bpp, &scene.size_line, &scene.endian);
-
-
 	int	i = 0;
 	char file[] = "images/gun/00.xpm";
 	while (i < 15)
@@ -1873,13 +1887,13 @@ int	main(int ac, char **av)
 		game.pack.gun_sp[i].addr = mlx_get_data_addr(game.pack.gun_sp[i].img_ptr, &game.pack.gun_sp[i].bpp, &game.pack.gun_sp[i].size_line, &game.pack.gun_sp[i].endian);
 		i++;
 	}
-	paint_image_to_win(&game.img, &scene, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
+	load_video(&game);
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
 		0);
-	// mlx_string_put(game.var.mlx, game.var.win, HALF_WIDTH, HEIGHT - TILE_SIZE,
-	// 0xFF0000, "PRESS START TO BEGIN");
+	mlx_string_put(game.var.mlx, game.var.win, HALF_WIDTH, HEIGHT - TILE_SIZE,
+	0xFF0000, "PRESS START TO BEGIN");
 	g_global()->updated = false;
-	g_first = false;
+	g_first = true;
 	g_global()->game_over = false;
 	mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
@@ -1889,6 +1903,7 @@ int	main(int ac, char **av)
 	mlx_hook(game.var.win, ButtonRelease, ButtonReleaseMask, ft_mouse_release, &game);
 	mlx_hook(game.var.win, MotionNotify, PointerMotionMask, ft_mouse_move, &game);
 	mlx_loop_hook(game.var.mlx, game_loop, &game);
+	launch_music("./sounds/disaster_war.mp3", "0.5");
 	mlx_loop(game.var.mlx);
 	return (0);
 }

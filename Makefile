@@ -6,14 +6,14 @@ CFLAGS = -g
 
 INCS = -I./inc/ -I$(LIBFT) $(LIBMLX)
 
-LFLAGS = -L$(LIBFT) -lft -L$(LIBMLX) -lmlx -lXext -lX11 -lm -lXfixes
+LFLAGS = -L$(LIBFT) -lft -L$(LIBMLX) -lmlx -lXext -lX11 -lm -lXfixes -o3
 
 LIBFT = ./libft/
 
 LIBMLX = ./mlx/
 
 SRC = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
-	cub3d.c player.c music.c door.c ray_cast.c
+	cub3d.c player.c music.c door.c ray_cast.c video.c
 
 OBJS = $(SRC:.c=.o)
 
