@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 09:55:57 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/26 18:10:05 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/27 09:04:16 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	load_video(t_game *game)
 	i = 0;
 	game->intro.frm = 0;
 	game->intro.last_time = get_current_time();
-	while (i < 172)
+	while (i < 118)
 	{
 		j = i + 1;
 		if (j >= 10 && j <= 99)

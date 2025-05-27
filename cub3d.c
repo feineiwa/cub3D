@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/26 18:33:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/27 09:05:45 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1046,7 +1046,7 @@ int	game_loop(t_game *game)
 	{
 		// paint_image_to_win(&game->img, &game->intro.img[game->intro.frm], WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 		mlx_put_image_to_window(game->var.mlx, game->var.win, game->intro.img[game->intro.frm].img_ptr, 0, 0);
-		if (get_current_time() - game->intro.last_time >= 200 && game->intro.frm < 171)
+		if (get_current_time() - game->intro.last_time >= 80 && game->intro.frm < 117)
 		{
 			game->intro.frm++;
 			game->intro.last_time = get_current_time();
