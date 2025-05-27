@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/27 09:05:45 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/27 18:28:59 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1046,7 +1046,7 @@ int	game_loop(t_game *game)
 	{
 		// paint_image_to_win(&game->img, &game->intro.img[game->intro.frm], WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 		mlx_put_image_to_window(game->var.mlx, game->var.win, game->intro.img[game->intro.frm].img_ptr, 0, 0);
-		if (get_current_time() - game->intro.last_time >= 80 && game->intro.frm < 117)
+		if (get_current_time() - game->intro.last_time >= 90 && game->intro.frm < 383)
 		{
 			game->intro.frm++;
 			game->intro.last_time = get_current_time();
@@ -1851,7 +1851,7 @@ int	main(int ac, char **av)
 	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
 	game.pack.door[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door.xpm", &game.pack.door[0].w, &game.pack.door[0].h);
 	game.pack.door[0].addr = mlx_get_data_addr(game.pack.door[0].img_ptr, &game.pack.door[0].bpp, &game.pack.door[0].size_line, &game.pack.door[0].endian);
-	game.pack.door[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door_side2.xpm", &game.pack.door[1].w, &game.pack.door[1].h);
+	game.pack.door[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door_side3.xpm", &game.pack.door[1].w, &game.pack.door[1].h);
 	game.pack.door[1].addr = mlx_get_data_addr(game.pack.door[1].img_ptr, &game.pack.door[1].bpp, &game.pack.door[1].size_line, &game.pack.door[1].endian);
 
 
@@ -1895,6 +1895,7 @@ int	main(int ac, char **av)
 	g_global()->updated = false;
 	g_first = true;
 	g_global()->game_over = false;
+	launch_music("./sounds/disaster_war.mp3", "0.5");
 	mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
@@ -1903,7 +1904,6 @@ int	main(int ac, char **av)
 	mlx_hook(game.var.win, ButtonRelease, ButtonReleaseMask, ft_mouse_release, &game);
 	mlx_hook(game.var.win, MotionNotify, PointerMotionMask, ft_mouse_move, &game);
 	mlx_loop_hook(game.var.mlx, game_loop, &game);
-	launch_music("./sounds/disaster_war.mp3", "0.5");
 	mlx_loop(game.var.mlx);
 	return (0);
 }

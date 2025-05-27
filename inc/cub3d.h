@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/26 18:10:42 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/27 18:19:45 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,7 +223,7 @@ typedef struct s_door
 
 typedef struct s_intro
 {
-	t_image				img[172];
+	t_image				img[384];
 	int					frm;
 	size_t				last_time;
 }						t_intro;
