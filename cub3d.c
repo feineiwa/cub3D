@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/27 18:28:59 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/30 12:48:44 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,26 +56,21 @@ int	init_window(t_game *game)
 {
 	game->var.mlx = mlx_init();
 	if (!game->var.mlx)
-		return (1);
+		return (0);
 	game->var.win = mlx_new_window(game->var.mlx, WIDTH, HEIGHT, "Cub3d");
 	if (!game->var.win)
 	{
 		mlx_destroy_display(game->var.mlx);
 		ft_free(game->var.mlx);
-		return (1);
+		return (0);
 	}
-	return (0);
+	return (1);
 }
 
 int	leave_windows(t_game *game)
 {
-	ft_free_txt(&game->txt);
-	mlx_clear_window(game->var.mlx, game->var.win);
-	mlx_destroy_image(game->var.mlx, game->img.img_ptr);
-	mlx_destroy_window(game->var.mlx, game->var.win);
-	game->var.win = NULL;
-	mlx_destroy_display(game->var.mlx);
-	game->var.mlx = ft_free(game->var.mlx);
+	free_all(game);
+	stop_music();
 	exit(0);
 }
 
@@ -403,8 +398,9 @@ int	ft_key_press(int keysym, t_game *game)
 	}
 	if (keysym == XK_Escape)
 	{
+		free_all(game);
 		stop_music();
-		exit(1);
+		exit(0);
 	}
 	// mouse_speed = 1;
 	g_global()->updated = true;
@@ -1513,7 +1509,7 @@ int	game_loop(t_game *game)
 		{
 			if (get_current_time() - shoot_time <= 500 && shoot_ind == sp_c && game->sp[sp_c].is_died == false)
 			{
-				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].pain[0], ray_dist, game->sp[sp_c].dist);
+				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->pack.pain, ray_dist, game->sp[sp_c].dist);
 				if (game->sp[sp_c].was_shot == false)
 				{
 					game->sp[sp_c].health--;
@@ -1528,7 +1524,7 @@ int	game_loop(t_game *game)
 			}
 			else if (game->sp[sp_c].is_died == true && game->sp[sp_c].d_frm <= 6)
 			{
-				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].death[game->sp[sp_c].d_frm], ray_dist, game->sp[sp_c].dist);
+				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->pack.death[game->sp[sp_c].d_frm], ray_dist, game->sp[sp_c].dist);
 				if (get_current_time() - game->sp[sp_c].d_fps >= 100)
 				{
 					game->sp[sp_c].d_frm++;
@@ -1540,7 +1536,7 @@ int	game_loop(t_game *game)
 			}
 			else
 			{
-				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->sp[sp_c].walk[game->sp[sp_c].w_frm], ray_dist, game->sp[sp_c].dist);
+				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->pack.walk[game->sp[sp_c].w_frm], ray_dist, game->sp[sp_c].dist);
 				if (get_current_time() - game->sp[sp_c].w_fps >= 300)
 				{
 					game->sp[sp_c].w_frm++;
@@ -1760,48 +1756,29 @@ t_sprit	*init_sprite(char **map, t_game *game)
 			{
 				sp[k].pos.x = x + 0.5;
 				sp[k].pos.y = y + 0.5;
-				sp[k].walk[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp1.xpm", &sp[k].walk[0].w, &sp[k].walk[0].h);
-				sp[k].walk[0].addr = mlx_get_data_addr(sp[k].walk[0].img_ptr, &sp[k].walk[0].bpp, &sp[k].walk[0].size_line, &sp[k].walk[0].endian);
-				sp[k].walk[1].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp2.xpm", &sp[k].walk[1].w, &sp[k].walk[1].h);
-				sp[k].walk[1].addr = mlx_get_data_addr(sp[k].walk[1].img_ptr, &sp[k].walk[1].bpp, &sp[k].walk[1].size_line, &sp[k].walk[1].endian);
-				sp[k].walk[2].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp3.xpm", &sp[k].walk[2].w, &sp[k].walk[2].h);
-				sp[k].walk[2].addr = mlx_get_data_addr(sp[k].walk[2].img_ptr, &sp[k].walk[2].bpp, &sp[k].walk[2].size_line, &sp[k].walk[2].endian);
-				sp[k].walk[3].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp4.xpm", &sp[k].walk[3].w, &sp[k].walk[3].h);
-				sp[k].walk[3].addr = mlx_get_data_addr(sp[k].walk[3].img_ptr, &sp[k].walk[3].bpp, &sp[k].walk[3].size_line, &sp[k].walk[3].endian);
-				// sp[k].walk[4].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/sp5.xpm", &sp[k].walk[4].w, &sp[k].walk[4].h);
-				// sp[k].walk[4].addr = mlx_get_data_addr(sp[k].walk[4].img_ptr, &sp[k].walk[4].bpp, &sp[k].walk[4].size_line, &sp[k].walk[4].endian);
-				sp[k].pain[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/pain1.xpm", &sp[k].pain[0].w, &sp[k].pain[0].h);
-				sp[k].pain[0].addr = mlx_get_data_addr(sp[k].pain[0].img_ptr, &sp[k].pain[0].bpp, &sp[k].pain[0].size_line, &sp[k].pain[0].endian);
-				
-				sp[k].death[0].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death1.xpm", &sp[k].death[0].w, &sp[k].death[0].h);
-				sp[k].death[0].addr = mlx_get_data_addr(sp[k].death[0].img_ptr, &sp[k].death[0].bpp, &sp[k].death[0].size_line, &sp[k].death[0].endian);
-				sp[k].death[1].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death2.xpm", &sp[k].death[1].w, &sp[k].death[1].h);
-				sp[k].death[1].addr = mlx_get_data_addr(sp[k].death[1].img_ptr, &sp[k].death[1].bpp, &sp[k].death[1].size_line, &sp[k].death[1].endian);
-				sp[k].death[2].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death3.xpm", &sp[k].death[2].w, &sp[k].death[2].h);
-				sp[k].death[2].addr = mlx_get_data_addr(sp[k].death[2].img_ptr, &sp[k].death[2].bpp, &sp[k].death[2].size_line, &sp[k].death[2].endian);
-				sp[k].death[3].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death4.xpm", &sp[k].death[3].w, &sp[k].death[3].h);
-				sp[k].death[3].addr = mlx_get_data_addr(sp[k].death[3].img_ptr, &sp[k].death[3].bpp, &sp[k].death[3].size_line, &sp[k].death[3].endian);
-				sp[k].death[4].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death5.xpm", &sp[k].death[4].w, &sp[k].death[4].h);
-				sp[k].death[4].addr = mlx_get_data_addr(sp[k].death[4].img_ptr, &sp[k].death[4].bpp, &sp[k].death[4].size_line, &sp[k].death[4].endian);
-				sp[k].death[5].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death6.xpm", &sp[k].death[5].w, &sp[k].death[5].h);
-				sp[k].death[5].addr = mlx_get_data_addr(sp[k].death[5].img_ptr, &sp[k].death[5].bpp, &sp[k].death[5].size_line, &sp[k].death[5].endian);
-				sp[k].death[6].img_ptr = mlx_xpm_file_to_image(game->var.mlx, "images/Sprites/death7.xpm", &sp[k].death[6].w, &sp[k].death[6].h);
-				sp[k].death[6].addr = mlx_get_data_addr(sp[k].death[6].img_ptr, &sp[k].death[6].bpp, &sp[k].death[6].size_line, &sp[k].death[6].endian);
-				
 				sp[k].w_frm = 0;
 				sp[k].w_fps = get_current_time();
 				sp[k].health = 3;
 				sp[k].d_fps = get_current_time();
 				sp[k].d_frm = 0;
 				sp[k].was_shot = false;
+				sp[k].is_died = false;
 				k++;
-				///need to fill all
 			}
 			x++;
 		}
 		y++;
 	}
 	return (sp);
+}
+
+void	init_game(t_game *game)
+{
+	game->map = NULL;
+	game->var.mlx = NULL;
+	game->var.win = NULL;
+	game->sp = NULL;
+	game->doors = NULL;
 }
 
 int	main(int ac, char **av)
@@ -1813,14 +1790,16 @@ int	main(int ac, char **av)
 		ft_putendl_fd("Error\nArguments should be just 2", 2);
 		return (1);
 	}
-	
+	init_game(&game);
 	game.txt = ft_parsing(av[1], &game.map);
 	if (game.map == NULL)
 		return (0);
-	if (init_window(&game))
+	if (!init_window(&game))
+	{
+		ft_free_arr((void **)game.map);
 		return (ft_free_txt(&game.txt), 1);
+	}
 	init_player(&game);
-	g_global()->door_count = 0;
 	game.doors = handle_door(game.map);
 	if (init_image(&game, &game.img, WIDTH, HEIGHT))
 	{
@@ -1828,11 +1807,6 @@ int	main(int ac, char **av)
 		leave_windows(&game);
 	}
 	game.sp = init_sprite(game.map, &game);
-	if (game.sp == NULL)
-	{
-		//need to free;
-		return (1);
-	}
 	game.pack.no_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.no_path, &game.pack.no_img.w, &game.pack.no_img.h);
 	game.pack.no_img.addr = mlx_get_data_addr(game.pack.no_img.img_ptr, &game.pack.no_img.bpp, &game.pack.no_img.size_line, &game.pack.no_img.endian);
 	game.pack.so_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.so_path, &game.pack.so_img.w, &game.pack.so_img.h);
@@ -1872,6 +1846,34 @@ int	main(int ac, char **av)
 	game.pack.notice.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/notice.xpm", &game.pack.notice.w, &game.pack.notice.h);
 	game.pack.notice.addr = mlx_get_data_addr(game.pack.notice.img_ptr, &game.pack.notice.bpp, &game.pack.notice.size_line, &game.pack.notice.endian);
 
+
+	game.pack.walk[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp1.xpm", &game.pack.walk[0].w, &game.pack.walk[0].h);
+	game.pack.walk[0].addr = mlx_get_data_addr(game.pack.walk[0].img_ptr, &game.pack.walk[0].bpp, &game.pack.walk[0].size_line, &game.pack.walk[0].endian);
+	game.pack.walk[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp2.xpm", &game.pack.walk[1].w, &game.pack.walk[1].h);
+	game.pack.walk[1].addr = mlx_get_data_addr(game.pack.walk[1].img_ptr, &game.pack.walk[1].bpp, &game.pack.walk[1].size_line, &game.pack.walk[1].endian);
+	game.pack.walk[2].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp3.xpm", &game.pack.walk[2].w, &game.pack.walk[2].h);
+	game.pack.walk[2].addr = mlx_get_data_addr(game.pack.walk[2].img_ptr, &game.pack.walk[2].bpp, &game.pack.walk[2].size_line, &game.pack.walk[2].endian);
+	game.pack.walk[3].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp4.xpm", &game.pack.walk[3].w, &game.pack.walk[3].h);
+	game.pack.walk[3].addr = mlx_get_data_addr(game.pack.walk[3].img_ptr, &game.pack.walk[3].bpp, &game.pack.walk[3].size_line, &game.pack.walk[3].endian);
+	
+	game.pack.pain.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/pain1.xpm", &game.pack.pain.w, &game.pack.pain.h);
+	game.pack.pain.addr = mlx_get_data_addr(game.pack.pain.img_ptr, &game.pack.pain.bpp, &game.pack.pain.size_line, &game.pack.pain.endian);
+	
+	game.pack.death[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death1.xpm", &game.pack.death[0].w, &game.pack.death[0].h);
+	game.pack.death[0].addr = mlx_get_data_addr(game.pack.death[0].img_ptr, &game.pack.death[0].bpp, &game.pack.death[0].size_line, &game.pack.death[0].endian);
+	game.pack.death[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death2.xpm", &game.pack.death[1].w, &game.pack.death[1].h);
+	game.pack.death[1].addr = mlx_get_data_addr(game.pack.death[1].img_ptr, &game.pack.death[1].bpp, &game.pack.death[1].size_line, &game.pack.death[1].endian);
+	game.pack.death[2].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death3.xpm", &game.pack.death[2].w, &game.pack.death[2].h);
+	game.pack.death[2].addr = mlx_get_data_addr(game.pack.death[2].img_ptr, &game.pack.death[2].bpp, &game.pack.death[2].size_line, &game.pack.death[2].endian);
+	game.pack.death[3].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death4.xpm", &game.pack.death[3].w, &game.pack.death[3].h);
+	game.pack.death[3].addr = mlx_get_data_addr(game.pack.death[3].img_ptr, &game.pack.death[3].bpp, &game.pack.death[3].size_line, &game.pack.death[3].endian);
+	game.pack.death[4].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death5.xpm", &game.pack.death[4].w, &game.pack.death[4].h);
+	game.pack.death[4].addr = mlx_get_data_addr(game.pack.death[4].img_ptr, &game.pack.death[4].bpp, &game.pack.death[4].size_line, &game.pack.death[4].endian);
+	game.pack.death[5].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death6.xpm", &game.pack.death[5].w, &game.pack.death[5].h);
+	game.pack.death[5].addr = mlx_get_data_addr(game.pack.death[5].img_ptr, &game.pack.death[5].bpp, &game.pack.death[5].size_line, &game.pack.death[5].endian);
+	game.pack.death[6].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death7.xpm", &game.pack.death[6].w, &game.pack.death[6].h);
+	game.pack.death[6].addr = mlx_get_data_addr(game.pack.death[6].img_ptr, &game.pack.death[6].bpp, &game.pack.death[6].size_line, &game.pack.death[6].endian);
+
 	int	i = 0;
 	char file[] = "images/gun/00.xpm";
 	while (i < 15)
@@ -1888,15 +1890,11 @@ int	main(int ac, char **av)
 		i++;
 	}
 	load_video(&game);
-	mlx_put_image_to_window(game.var.mlx, game.var.win, game.img.img_ptr, 0,
-		0);
-	mlx_string_put(game.var.mlx, game.var.win, HALF_WIDTH, HEIGHT - TILE_SIZE,
-	0xFF0000, "PRESS START TO BEGIN");
 	g_global()->updated = false;
 	g_first = true;
 	g_global()->game_over = false;
 	launch_music("./sounds/disaster_war.mp3", "0.5");
-	mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
+	// mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
 	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);

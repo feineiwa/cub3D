@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/27 18:19:45 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/30 11:19:17 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,15 +190,16 @@ typedef struct s_pack
 	t_image				gov;
 	t_image				notice;
 	t_image				help;
-	t_image				scene;
+	t_image				walk[4];
+	t_image				death[7];
+	t_image				pain;
+
 }						t_pack;
 
 typedef struct s_sprit
 {
 	t_vector			pos;
-	t_image				death[7];
-	t_image				pain[5];
-	t_image				walk[5];
+
 	t_vector			d;
 	double				p;
 	double				q;
@@ -313,4 +314,7 @@ bool					is_hit_door(int x, int y, char **map, t_player player);
 // video
 void					load_video(t_game *game);
 
+
+//free
+void	free_all(t_game *game);
 #endif

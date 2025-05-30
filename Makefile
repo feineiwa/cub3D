@@ -13,7 +13,7 @@ LIBFT = ./libft/
 LIBMLX = ./mlx/
 
 SRC = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
-	cub3d.c player.c music.c door.c ray_cast.c video.c
+	cub3d.c player.c music.c door.c ray_cast.c video.c ft_free.c
 
 OBJS = $(SRC:.c=.o)
 
