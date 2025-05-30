@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/30 12:48:44 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/30 14:43:35 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1806,6 +1806,9 @@ int	main(int ac, char **av)
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
+	game.pack.load.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/loading.xpm", &game.pack.load.w, &game.pack.load.h);
+	game.pack.load.addr = mlx_get_data_addr(game.pack.load.img_ptr, &game.pack.load.bpp, &game.pack.load.size_line, &game.pack.load.endian);
+	mlx_put_image_to_window(game.var.mlx, game.var.win, game.pack.load.img_ptr, 0, 0);
 	game.sp = init_sprite(game.map, &game);
 	game.pack.no_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.no_path, &game.pack.no_img.w, &game.pack.no_img.h);
 	game.pack.no_img.addr = mlx_get_data_addr(game.pack.no_img.img_ptr, &game.pack.no_img.bpp, &game.pack.no_img.size_line, &game.pack.no_img.endian);

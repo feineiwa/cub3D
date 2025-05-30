@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/30 11:19:17 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/30 14:41:38 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,7 @@ typedef struct s_pack
 	t_image				walk[4];
 	t_image				death[7];
 	t_image				pain;
+	t_image				load;
 
 }						t_pack;
 

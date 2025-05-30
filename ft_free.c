@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 08:24:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/30 11:30:54 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/05/30 14:41:52 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ void	ft_free_img_packs(t_game *game, t_pack packs)
 	ft_free_img_loop(game, packs.walk, 4);
 	ft_free_img_loop(game, packs.death, 7);
 	ft_free_image(game, packs.pain);
+	ft_free_image(game, packs.load);
 }
 
 void	free_all(t_game *game)
