@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 09:55:57 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/27 18:20:20 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/02 13:59:37 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ void	load_video(t_game *game)
 		}
 		else
 			filename[15] = '0' + j;
-		// fprintf(stderr, "%s\n", filename);
 		game->intro.img[i].img_ptr = mlx_xpm_file_to_image(game->var.mlx, filename, &game->intro.img[i].w, &game->intro.img[i].h);
 		game->intro.img[i].addr = mlx_get_data_addr(game->intro.img[i].img_ptr, &game->intro.img[i].bpp, &game->intro.img[i].size_line, &game->intro.img[i].endian);
 		if (!game->intro.img[i].img_ptr)

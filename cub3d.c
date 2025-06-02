@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/02 11:20:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/02 15:07:08 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,7 +282,7 @@ void	clear_image(t_image *img, int width, int height, int color)
 	}
 }
 
-int	init_image(t_game *game, t_image *image, int w, int h)
+int	init_image_win(t_game *game, t_image *image, int w, int h)
 {
 	image->img_ptr = mlx_new_image(game->var.mlx, w, h);
 	if (!image->img_ptr)
@@ -1774,6 +1774,97 @@ void	init_game(t_game *game)
 	game->doors = NULL;
 }
 
+void	init_img_loop(t_image *img, int nb)
+{
+	int	i;
+
+	i = 0;
+	while (i < nb)
+	{
+		img[i].img_ptr = NULL;
+		i++;
+	}
+}
+
+void	init_all_images(t_game *game)
+{
+	game->pack.aiming.img_ptr = NULL;
+	game->pack.arrow.img_ptr = NULL;
+	game->pack.no_img.img_ptr = NULL;
+	game->pack.so_img.img_ptr = NULL;
+	game->pack.ea_img.img_ptr = NULL;
+	game->pack.we_img.img_ptr = NULL;
+	game->pack.floor.img_ptr = NULL;
+	game->pack.ceil.img_ptr = NULL;
+	game->pack.compass.img_ptr = NULL;
+	game->pack.needle.img_ptr = NULL;
+	game->pack.scope.img_ptr = NULL;
+	game->pack.blood.img_ptr = NULL;
+	game->pack.gov.img_ptr = NULL;
+	game->pack.notice.img_ptr = NULL;
+	game->pack.help.img_ptr = NULL;
+	game->pack.pain.img_ptr = NULL;
+	game->pack.load.img_ptr = NULL;
+	init_img_loop(game->pack.gun_sp, 15);
+	init_img_loop(game->pack.door, 2);
+	init_img_loop(game->pack.walk, 4);
+	init_img_loop(game->pack.death, 7);
+	init_img_loop(game->intro.img, 384);
+}
+
+
+void	load_image(t_game *game, t_image *img, char *path)
+{
+	img->img_ptr = mlx_xpm_file_to_image(game->var.mlx, path, &img->w, &img->h);
+	if (img->img_ptr == NULL)
+	{
+		free_all(game);
+		ft_putendl_fd("Error\nFailed to load image. Please check the file path, format, and permissions.", 2);
+		exit(1);
+	}
+	img->addr = mlx_get_data_addr(img->img_ptr, &img->bpp, &img->size_line, &img->endian);
+}
+
+void	load_image_loop(t_game *game, t_image *img, const char *base_path, int limit)
+{
+	int	i;
+	int	index;
+	int	j;
+	char file[256];
+
+	i = 0;
+	ft_memmove((char *)file, (char *)base_path, ft_strlen(base_path));
+	if (limit == 15)
+		index = 10;
+	else if (limit == 4)
+		index = 15;
+	else if (limit == 7)
+		index = 18;
+	else if (limit == 384)
+		index = 13;
+	while (i < limit)
+	{
+		j = i + 1;
+		if (j >= 10 && j <= 99)
+		{
+			file[index + 1] = '0' + (j / 10);
+			file[index + 2] = '0' + (j % 10);
+		}
+		else if (j > 99)
+		{
+			file[index] = '0' + ((j / 10) / 10);
+			file[index + 1] = '0' + ((j / 10) % 10);
+			file[index + 2] = '0' + (j % 10);
+		}
+		else
+			file[index + 2] = '0' + j;
+		printf("%s\n", file);
+		load_image(game, &img[i], file);
+		i++;
+	}
+}
+
+
 int	main(int ac, char **av)
 {
 	t_game game;
@@ -1794,81 +1885,44 @@ int	main(int ac, char **av)
 	}
 	init_player(&game);
 	game.doors = handle_door(game.map);
-	if (init_image(&game, &game.img, WIDTH, HEIGHT))
+	if (init_image_win(&game, &game.img, WIDTH, HEIGHT))
 	{
 		ft_free_txt(&game.txt);
 		leave_windows(&game);
 	}
-	game.pack.load.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/loading.xpm", &game.pack.load.w, &game.pack.load.h);
-	game.pack.load.addr = mlx_get_data_addr(game.pack.load.img_ptr, &game.pack.load.bpp, &game.pack.load.size_line, &game.pack.load.endian);
+	init_all_images(&game);
+	load_image(&game, &game.pack.no_img, game.txt.no_path);
+	load_image(&game, &game.pack.so_img, game.txt.so_path);
+	load_image(&game, &game.pack.ea_img, game.txt.ea_path);
+	load_image(&game, &game.pack.we_img, game.txt.we_path);
+	load_image(&game, &game.pack.load, "images/loading.xpm");
 	mlx_put_image_to_window(game.var.mlx, game.var.win, game.pack.load.img_ptr, 0, 0);
-	game.sp = init_sprite(game.map, &game);
-	game.pack.no_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.no_path, &game.pack.no_img.w, &game.pack.no_img.h);
-	game.pack.no_img.addr = mlx_get_data_addr(game.pack.no_img.img_ptr, &game.pack.no_img.bpp, &game.pack.no_img.size_line, &game.pack.no_img.endian);
-	game.pack.so_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.so_path, &game.pack.so_img.w, &game.pack.so_img.h);
-	game.pack.so_img.addr = mlx_get_data_addr(game.pack.so_img.img_ptr, &game.pack.so_img.bpp, &game.pack.so_img.size_line, &game.pack.so_img.endian);
-	game.pack.ea_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.ea_path, &game.pack.ea_img.w, &game.pack.ea_img.h);
-	game.pack.ea_img.addr = mlx_get_data_addr(game.pack.ea_img.img_ptr, &game.pack.ea_img.bpp, &game.pack.ea_img.size_line, &game.pack.ea_img.endian);
-	game.pack.we_img.img_ptr = mlx_xpm_file_to_image(game.var.mlx, game.txt.we_path, &game.pack.we_img.w, &game.pack.we_img.h);
-	game.pack.we_img.addr = mlx_get_data_addr(game.pack.we_img.img_ptr, &game.pack.we_img.bpp, &game.pack.we_img.size_line, &game.pack.we_img.endian);
-	game.pack.arrow.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/arrow.xpm", &game.pack.arrow.w, &game.pack.arrow.h);
-	game.pack.arrow.addr = mlx_get_data_addr(game.pack.arrow.img_ptr, &game.pack.arrow.bpp, &game.pack.arrow.size_line, &game.pack.arrow.endian);
-	game.pack.aiming.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/aiming1.xpm", &game.pack.aiming.w, &game.pack.aiming.h);
-	game.pack.aiming.addr = mlx_get_data_addr(game.pack.aiming.img_ptr, &game.pack.aiming.bpp, &game.pack.aiming.size_line, &game.pack.aiming.endian);
-	game.pack.floor.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/floor6.xpm", &game.pack.floor.w, &game.pack.floor.h);
-	game.pack.floor.addr = mlx_get_data_addr(game.pack.floor.img_ptr, &game.pack.floor.bpp, &game.pack.floor.size_line, &game.pack.floor.endian);
-	game.pack.ceil.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/ceil0.xpm", &game.pack.ceil.w, &game.pack.ceil.h);
-	game.pack.ceil.addr = mlx_get_data_addr(game.pack.ceil.img_ptr, &game.pack.ceil.bpp, &game.pack.ceil.size_line, &game.pack.ceil.endian);
-	game.pack.door[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door.xpm", &game.pack.door[0].w, &game.pack.door[0].h);
-	game.pack.door[0].addr = mlx_get_data_addr(game.pack.door[0].img_ptr, &game.pack.door[0].bpp, &game.pack.door[0].size_line, &game.pack.door[0].endian);
-	game.pack.door[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/my_door/door_side3.xpm", &game.pack.door[1].w, &game.pack.door[1].h);
-	game.pack.door[1].addr = mlx_get_data_addr(game.pack.door[1].img_ptr, &game.pack.door[1].bpp, &game.pack.door[1].size_line, &game.pack.door[1].endian);
+	load_image(&game, &game.pack.arrow, "images/arrow.xpm");
+	load_image(&game, &game.pack.aiming, "images/aiming1.xpm");
+	load_image(&game, &game.pack.floor, "images/floor6.xpm");
+	load_image(&game, &game.pack.ceil, "images/ceil0.xpm");
+	load_image(&game, &game.pack.door[0], "images/my_door/door.xpm");
+	load_image(&game, &game.pack.door[1], "images/my_door/door_side3.xpm");
+	load_image(&game, &game.pack.compass, "images/compass2.xpm");
+	load_image(&game, &game.pack.needle, "images/needle.xpm");
+	load_image(&game, &game.pack.scope, "images/scope.xpm");
+	load_image(&game, &game.pack.blood, "images/blood.xpm");
+	load_image(&game, &game.pack.gov, "images/gov.xpm");
+	load_image(&game, &game.pack.help, "images/help.xpm");
+	load_image(&game, &game.pack.notice, "images/notice.xpm");
+	load_image(&game, &game.pack.walk[0], "images/Sprites/sp1.xpm");
+	load_image(&game, &game.pack.walk[1], "images/Sprites/sp2.xpm");
+	load_image(&game, &game.pack.walk[2], "images/Sprites/sp3.xpm");
+	load_image(&game, &game.pack.walk[3], "images/Sprites/sp4.xpm");
+	load_image(&game, &game.pack.pain, "images/Sprites/pain1.xpm");
+	load_image(&game, &game.pack.death[0], "images/Sprites/death1.xpm");
+	load_image(&game, &game.pack.death[1], "images/Sprites/death2.xpm");
+	load_image(&game, &game.pack.death[2], "images/Sprites/death3.xpm");
+	load_image(&game, &game.pack.death[3], "images/Sprites/death4.xpm");
+	load_image(&game, &game.pack.death[4], "images/Sprites/death5.xpm");
+	load_image(&game, &game.pack.death[5], "images/Sprites/death6.xpm");
+	load_image(&game, &game.pack.death[6], "images/Sprites/death7.xpm");
 
-
-	game.pack.compass.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/compass2.xpm", &game.pack.compass.w, &game.pack.compass.h);
-	game.pack.compass.addr = mlx_get_data_addr(game.pack.compass.img_ptr, &game.pack.compass.bpp, &game.pack.compass.size_line, &game.pack.compass.endian);
-	game.pack.needle.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/needle.xpm", &game.pack.needle.w, &game.pack.needle.h);
-	game.pack.needle.addr = mlx_get_data_addr(game.pack.needle.img_ptr, &game.pack.needle.bpp, &game.pack.needle.size_line, &game.pack.needle.endian);
-	game.pack.scope.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/scope.xpm", &game.pack.scope.w, &game.pack.scope.h);
-	game.pack.scope.addr = mlx_get_data_addr(game.pack.scope.img_ptr, &game.pack.scope.bpp, &game.pack.scope.size_line, &game.pack.scope.endian);
-
-	game.pack.blood.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/blood.xpm", &game.pack.blood.w, &game.pack.blood.h);
-	game.pack.blood.addr = mlx_get_data_addr(game.pack.blood.img_ptr, &game.pack.blood.bpp, &game.pack.blood.size_line, &game.pack.blood.endian);
-	game.pack.gov.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/gov.xpm", &game.pack.gov.w, &game.pack.gov.h);
-	game.pack.gov.addr = mlx_get_data_addr(game.pack.gov.img_ptr, &game.pack.gov.bpp, &game.pack.gov.size_line, &game.pack.gov.endian);
-
-	game.pack.help.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/help.xpm", &game.pack.help.w, &game.pack.help.h);
-	game.pack.help.addr = mlx_get_data_addr(game.pack.help.img_ptr, &game.pack.help.bpp, &game.pack.help.size_line, &game.pack.help.endian);
-	game.pack.notice.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/notice.xpm", &game.pack.notice.w, &game.pack.notice.h);
-	game.pack.notice.addr = mlx_get_data_addr(game.pack.notice.img_ptr, &game.pack.notice.bpp, &game.pack.notice.size_line, &game.pack.notice.endian);
-
-
-	game.pack.walk[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp1.xpm", &game.pack.walk[0].w, &game.pack.walk[0].h);
-	game.pack.walk[0].addr = mlx_get_data_addr(game.pack.walk[0].img_ptr, &game.pack.walk[0].bpp, &game.pack.walk[0].size_line, &game.pack.walk[0].endian);
-	game.pack.walk[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp2.xpm", &game.pack.walk[1].w, &game.pack.walk[1].h);
-	game.pack.walk[1].addr = mlx_get_data_addr(game.pack.walk[1].img_ptr, &game.pack.walk[1].bpp, &game.pack.walk[1].size_line, &game.pack.walk[1].endian);
-	game.pack.walk[2].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp3.xpm", &game.pack.walk[2].w, &game.pack.walk[2].h);
-	game.pack.walk[2].addr = mlx_get_data_addr(game.pack.walk[2].img_ptr, &game.pack.walk[2].bpp, &game.pack.walk[2].size_line, &game.pack.walk[2].endian);
-	game.pack.walk[3].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/sp4.xpm", &game.pack.walk[3].w, &game.pack.walk[3].h);
-	game.pack.walk[3].addr = mlx_get_data_addr(game.pack.walk[3].img_ptr, &game.pack.walk[3].bpp, &game.pack.walk[3].size_line, &game.pack.walk[3].endian);
-	
-	game.pack.pain.img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/pain1.xpm", &game.pack.pain.w, &game.pack.pain.h);
-	game.pack.pain.addr = mlx_get_data_addr(game.pack.pain.img_ptr, &game.pack.pain.bpp, &game.pack.pain.size_line, &game.pack.pain.endian);
-	
-	game.pack.death[0].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death1.xpm", &game.pack.death[0].w, &game.pack.death[0].h);
-	game.pack.death[0].addr = mlx_get_data_addr(game.pack.death[0].img_ptr, &game.pack.death[0].bpp, &game.pack.death[0].size_line, &game.pack.death[0].endian);
-	game.pack.death[1].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death2.xpm", &game.pack.death[1].w, &game.pack.death[1].h);
-	game.pack.death[1].addr = mlx_get_data_addr(game.pack.death[1].img_ptr, &game.pack.death[1].bpp, &game.pack.death[1].size_line, &game.pack.death[1].endian);
-	game.pack.death[2].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death3.xpm", &game.pack.death[2].w, &game.pack.death[2].h);
-	game.pack.death[2].addr = mlx_get_data_addr(game.pack.death[2].img_ptr, &game.pack.death[2].bpp, &game.pack.death[2].size_line, &game.pack.death[2].endian);
-	game.pack.death[3].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death4.xpm", &game.pack.death[3].w, &game.pack.death[3].h);
-	game.pack.death[3].addr = mlx_get_data_addr(game.pack.death[3].img_ptr, &game.pack.death[3].bpp, &game.pack.death[3].size_line, &game.pack.death[3].endian);
-	game.pack.death[4].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death5.xpm", &game.pack.death[4].w, &game.pack.death[4].h);
-	game.pack.death[4].addr = mlx_get_data_addr(game.pack.death[4].img_ptr, &game.pack.death[4].bpp, &game.pack.death[4].size_line, &game.pack.death[4].endian);
-	game.pack.death[5].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death6.xpm", &game.pack.death[5].w, &game.pack.death[5].h);
-	game.pack.death[5].addr = mlx_get_data_addr(game.pack.death[5].img_ptr, &game.pack.death[5].bpp, &game.pack.death[5].size_line, &game.pack.death[5].endian);
-	game.pack.death[6].img_ptr = mlx_xpm_file_to_image(game.var.mlx, "images/Sprites/death7.xpm", &game.pack.death[6].w, &game.pack.death[6].h);
-	game.pack.death[6].addr = mlx_get_data_addr(game.pack.death[6].img_ptr, &game.pack.death[6].bpp, &game.pack.death[6].size_line, &game.pack.death[6].endian);
 
 	int	i = 0;
 	char file[] = "images/gun/00.xpm";
@@ -1881,11 +1935,15 @@ int	main(int ac, char **av)
 			file[12] = ((i + 1) % 10) + '0';
 			file[11] = ((i + 1) / 10) + '0';
 		}
-		game.pack.gun_sp[i].img_ptr = mlx_xpm_file_to_image(game.var.mlx, file, &game.pack.gun_sp[i].w, &game.pack.gun_sp[i].h);
-		game.pack.gun_sp[i].addr = mlx_get_data_addr(game.pack.gun_sp[i].img_ptr, &game.pack.gun_sp[i].bpp, &game.pack.gun_sp[i].size_line, &game.pack.gun_sp[i].endian);
+		load_image(&game, &game.pack.gun_sp[i], file);
 		i++;
 	}
+	// load_image_loop(&game, game.pack.walk, "images/Sprites/sp0.xpm", 4);
+	// load_image_loop(&game, game.pack.death, "images/Sprites/death0.xpm", 7);
+	// load_image_loop(&game, game.pack.gun_sp, "images/gun/00.xpm", 15);
+	
 	load_video(&game);
+	game.sp = init_sprite(game.map, &game);
 	g_global()->updated = false;
 	g_global()->first = true;
 	g_global()->game_over = false;
