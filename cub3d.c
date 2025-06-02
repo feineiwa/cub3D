@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/02 15:07:08 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/02 17:31:25 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,9 +296,9 @@ int	ft_key_press(int keysym, t_game *game)
 {
 	if (keysym == XK_Return)
 	{
-		g_global()->first = false;
 		if (g_global()->first == true)
 			stop_music();
+		g_global()->first = false;
 	}
 	if (keysym == XK_w)
 	{
@@ -1608,7 +1608,6 @@ int	game_loop(t_game *game)
 	}
 	else if (game->player.key.key_jump == false && game->player.key.scope == false)
 	{
-		g_global()->music_pid = false;
 		paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);
 		g_global()->updated = false;
 	}
@@ -1772,6 +1771,7 @@ void	init_game(t_game *game)
 	game->var.win = NULL;
 	game->sp = NULL;
 	game->doors = NULL;
+	game->img.img_ptr = NULL;
 }
 
 void	init_img_loop(t_image *img, int nb)
@@ -1864,16 +1864,72 @@ void	load_image_loop(t_game *game, t_image *img, const char *base_path, int limi
 	}
 }
 
+void	load_pack(t_game *game)
+{
+	load_image(game, &game->pack.arrow, "images/arrow.xpm");
+	load_image(game, &game->pack.aiming, "images/aiming1.xpm");
+	load_image(game, &game->pack.floor, "images/floor6.xpm");
+	load_image(game, &game->pack.ceil, "images/ceil0.xpm");
+	load_image(game, &game->pack.door[0], "images/my_door/door.xpm");
+	load_image(game, &game->pack.door[1], "images/my_door/door_side3.xpm");
+	load_image(game, &game->pack.compass, "images/compass2.xpm");
+	load_image(game, &game->pack.needle, "images/needle.xpm");
+	load_image(game, &game->pack.scope, "images/scope.xpm");
+	load_image(game, &game->pack.blood, "images/blood.xpm");
+	load_image(game, &game->pack.gov, "images/gov.xpm");
+	load_image(game, &game->pack.help, "images/help.xpm");
+	load_image(game, &game->pack.notice, "images/notice.xpm");
+	load_image(game, &game->pack.walk[0], "images/Sprites/sp1.xpm");
+	load_image(game, &game->pack.walk[1], "images/Sprites/sp2.xpm");
+	load_image(game, &game->pack.walk[2], "images/Sprites/sp3.xpm");
+	load_image(game, &game->pack.walk[3], "images/Sprites/sp4.xpm");
+	load_image(game, &game->pack.pain, "images/Sprites/pain1.xpm");
+	load_image(game, &game->pack.death[0], "images/Sprites/death1.xpm");
+	load_image(game, &game->pack.death[1], "images/Sprites/death2.xpm");
+	load_image(game, &game->pack.death[2], "images/Sprites/death3.xpm");
+	load_image(game, &game->pack.death[3], "images/Sprites/death4.xpm");
+	load_image(game, &game->pack.death[4], "images/Sprites/death5.xpm");
+	load_image(game, &game->pack.death[5], "images/Sprites/death6.xpm");
+	load_image(game, &game->pack.death[6], "images/Sprites/death7.xpm");
+}
+
+void	load_wall_texture(t_game *game)
+{
+	load_image(game, &game->pack.no_img, game->txt.no_path);
+	load_image(game, &game->pack.so_img, game->txt.so_path);
+	load_image(game, &game->pack.ea_img, game->txt.ea_path);
+	load_image(game, &game->pack.we_img, game->txt.we_path);
+	load_image(game, &game->pack.load, "images/loading.xpm");
+	mlx_put_image_to_window(game->var.mlx, game->var.win, game->pack.load.img_ptr, 0, 0);
+}
+
+void	load_gun_sp(t_game *game)
+{
+	char	file[18];
+	int		i;
+
+	ft_memmove((void *)file, (const void *)"images/gun/00.xpm", 18);
+	i = 0;
+	while (i < 15)
+	{
+		if (i <= 8)
+			file[12] = (i + 1) + '0';
+		else
+		{
+			file[12] = ((i + 1) % 10) + '0';
+			file[11] = ((i + 1) / 10) + '0';
+		}
+		load_image(game, &game->pack.gun_sp[i], file);
+		i++;
+	}
+}
 
 int	main(int ac, char **av)
 {
 	t_game game;
 
 	if (ac != 2)
-	{
-		ft_putendl_fd("Error\nArguments should be just 2", 2);
-		return (1);
-	}
+		return (ft_putendl_fd("Error\nArguments should be just 2", 2), 1);
 	init_game(&game);
 	game.txt = ft_parsing(av[1], &game.map);
 	if (game.map == NULL)
@@ -1891,64 +1947,12 @@ int	main(int ac, char **av)
 		leave_windows(&game);
 	}
 	init_all_images(&game);
-	load_image(&game, &game.pack.no_img, game.txt.no_path);
-	load_image(&game, &game.pack.so_img, game.txt.so_path);
-	load_image(&game, &game.pack.ea_img, game.txt.ea_path);
-	load_image(&game, &game.pack.we_img, game.txt.we_path);
-	load_image(&game, &game.pack.load, "images/loading.xpm");
-	mlx_put_image_to_window(game.var.mlx, game.var.win, game.pack.load.img_ptr, 0, 0);
-	load_image(&game, &game.pack.arrow, "images/arrow.xpm");
-	load_image(&game, &game.pack.aiming, "images/aiming1.xpm");
-	load_image(&game, &game.pack.floor, "images/floor6.xpm");
-	load_image(&game, &game.pack.ceil, "images/ceil0.xpm");
-	load_image(&game, &game.pack.door[0], "images/my_door/door.xpm");
-	load_image(&game, &game.pack.door[1], "images/my_door/door_side3.xpm");
-	load_image(&game, &game.pack.compass, "images/compass2.xpm");
-	load_image(&game, &game.pack.needle, "images/needle.xpm");
-	load_image(&game, &game.pack.scope, "images/scope.xpm");
-	load_image(&game, &game.pack.blood, "images/blood.xpm");
-	load_image(&game, &game.pack.gov, "images/gov.xpm");
-	load_image(&game, &game.pack.help, "images/help.xpm");
-	load_image(&game, &game.pack.notice, "images/notice.xpm");
-	load_image(&game, &game.pack.walk[0], "images/Sprites/sp1.xpm");
-	load_image(&game, &game.pack.walk[1], "images/Sprites/sp2.xpm");
-	load_image(&game, &game.pack.walk[2], "images/Sprites/sp3.xpm");
-	load_image(&game, &game.pack.walk[3], "images/Sprites/sp4.xpm");
-	load_image(&game, &game.pack.pain, "images/Sprites/pain1.xpm");
-	load_image(&game, &game.pack.death[0], "images/Sprites/death1.xpm");
-	load_image(&game, &game.pack.death[1], "images/Sprites/death2.xpm");
-	load_image(&game, &game.pack.death[2], "images/Sprites/death3.xpm");
-	load_image(&game, &game.pack.death[3], "images/Sprites/death4.xpm");
-	load_image(&game, &game.pack.death[4], "images/Sprites/death5.xpm");
-	load_image(&game, &game.pack.death[5], "images/Sprites/death6.xpm");
-	load_image(&game, &game.pack.death[6], "images/Sprites/death7.xpm");
-
-
-	int	i = 0;
-	char file[] = "images/gun/00.xpm";
-	while (i < 15)
-	{
-		if (i <= 8)
-			file[12] = (i + 1) + '0';
-		else
-		{
-			file[12] = ((i + 1) % 10) + '0';
-			file[11] = ((i + 1) / 10) + '0';
-		}
-		load_image(&game, &game.pack.gun_sp[i], file);
-		i++;
-	}
-	// load_image_loop(&game, game.pack.walk, "images/Sprites/sp0.xpm", 4);
-	// load_image_loop(&game, game.pack.death, "images/Sprites/death0.xpm", 7);
-	// load_image_loop(&game, game.pack.gun_sp, "images/gun/00.xpm", 15);
-	
+	load_wall_texture(&game);
+	load_pack(&game);
+	load_gun_sp(&game);
 	load_video(&game);
 	game.sp = init_sprite(game.map, &game);
-	g_global()->updated = false;
-	g_global()->first = true;
-	g_global()->game_over = false;
 	launch_music("./sounds/disaster_war.mp3", "0.5");
-	// mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
 	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
 	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
 	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);
