@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/30 14:41:38 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/02 11:20:01 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,7 @@ struct					s_player
 	double				angle;
 	int					turn_dir;
 	int					walk_dir;
+	int					walk_dir_side;
 	int					w;
 	int					h;
 	int					health;
@@ -256,6 +257,10 @@ typedef struct s_g
 	int					sp_count;
 	bool				game_over;
 	bool				help;
+	int					gun_frm;
+	float				look;
+	int					jump;
+	bool				first;
 }						t_g;
 
 // PARSE

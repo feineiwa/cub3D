@@ -6,19 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/30 14:43:35 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/02 11:20:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./inc/cub3d.h"
-
-bool	g_first = false;
-int		gun_frame = 0;
-float	look = 0;
-int		mouse_x = 0;
-int		mouse_y = 0;
-float		mouse_speed = 1;
-int		jump_scale = 100;
 
 void	put_pixel(t_image *img, int x, int y, int color)
 {
@@ -178,9 +170,9 @@ void	move_player(t_game *game)
 	t_vector	player;
 
 	if (game->player.key.rot_l == true)
-		game->player.angle += game->player.turn_dir * ROT_SPEED * mouse_speed;
+		game->player.angle += game->player.turn_dir * ROT_SPEED;
 	if (game->player.key.rot_r == true)
-		game->player.angle += game->player.turn_dir * ROT_SPEED * mouse_speed;
+		game->player.angle += game->player.turn_dir * ROT_SPEED;
 	move_speed = MOVE_SPEED;
 	if (game->player.key.speed == true)
 		move_speed += MOVE_SPEED;
@@ -201,10 +193,10 @@ void	move_player(t_game *game)
 				game->player.pos.y = move.y;
 		}
 	}
-	if (game->player.key.key_left == true || game->player.key.key_right == true)
+	if (game->player.key.key_right == true || game->player.key.key_left == true)
 	{
-		move.x = game->player.pos.x + cos(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
-		move.y = game->player.pos.y + sin(game->player.angle + 0.5 * PI) * game->player.walk_dir * move_speed;
+		move.x = game->player.pos.x + cos(game->player.angle + 0.5 * PI) * game->player.walk_dir_side * move_speed;
+		move.y = game->player.pos.y + sin(game->player.angle + 0.5 * PI) * game->player.walk_dir_side * move_speed;
 		if (!is_exceeded(move, game->player) && !is_collision(move, game->player, game->map))
 		{
 			game->player.pos.x = move.x;
@@ -220,47 +212,47 @@ void	move_player(t_game *game)
 	}
 	if (game->player.key.look_up == true)
 	{
-		look += (float)(ROT_SPEED);
-		if (look >= 0.3)
-			look = 0.3;
+		g_global()->look += (float)(ROT_SPEED);
+		if (g_global()->look >= 0.3)
+			g_global()->look = 0.3;
 	}
 	if (game->player.key.look_down == true)
 	{
-		look -= (float)(ROT_SPEED);
-		if (look <= -0.3)
-			look = -0.3;
+		g_global()->look -= (float)(ROT_SPEED);
+		if (g_global()->look <= -0.3)
+			g_global()->look = -0.3;
 	}
 	if (game->player.key.key_croutch == true)
 	{
 		if (g_global()->j_croutch == 0)
 		{
 			g_global()->j_croutch = -300;
-			look += 0.2;
+			g_global()->look += 0.2;
 		}
 		else
 		{
 			g_global()->j_croutch = 0;
-			look = 0;
+			g_global()->look = 0;
 			game->player.key.key_croutch = false;
 		}
 	}
 	if (game->player.key.key_jump == true)
 	{
-		if (jump_scale > 0 && g_global()->j_croutch < 500)
+		if (g_global()->jump > 0 && g_global()->j_croutch < 500)
 		{
-			g_global()->j_croutch += jump_scale;
-			look -= 0.08;
+			g_global()->j_croutch += g_global()->jump;
+			g_global()->look -= 0.08;
 			if (g_global()->j_croutch >= 500)
-				jump_scale *= -1;
+				g_global()->jump *= -1;
 		}
-		else if (jump_scale < 0)
+		else if (g_global()->jump < 0)
 		{
-			g_global()->j_croutch += jump_scale;
-			look += 0.08;
+			g_global()->j_croutch += g_global()->jump;
+			g_global()->look += 0.08;
 			if (g_global()->j_croutch <= 0)
 			{
 				g_global()->j_croutch = 0;
-				jump_scale = 100;
+				g_global()->jump = 100;
 				g_global()->updated = false;
 				game->player.key.key_jump = false;
 			}
@@ -304,8 +296,9 @@ int	ft_key_press(int keysym, t_game *game)
 {
 	if (keysym == XK_Return)
 	{
-		g_first = false;
-		stop_music();
+		g_global()->first = false;
+		if (g_global()->first == true)
+			stop_music();
 	}
 	if (keysym == XK_w)
 	{
@@ -320,12 +313,12 @@ int	ft_key_press(int keysym, t_game *game)
 	if (keysym == XK_d)
 	{
 		game->player.key.key_right = true;
-		game->player.walk_dir = 1;
+		game->player.walk_dir_side = 1;
 	}
 	if (keysym == XK_a)
 	{
 		game->player.key.key_left = true;
-		game->player.walk_dir = -1;
+		game->player.walk_dir_side = -1;
 	}
 	if (keysym == XK_Left)
 	{
@@ -1036,9 +1029,9 @@ int	game_loop(t_game *game)
 	t_vector door_v;
 	t_vector door_h;
 	
-	// if (g_global()->updated == false && g_first == false)
+	// if (g_global()->updated == false && g_global()->first == false)
 	// 	return (1);
-	if (g_first == true)
+	if (g_global()->first == true)
 	{
 		// paint_image_to_win(&game->img, &game->intro.img[game->intro.frm], WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 		mlx_put_image_to_window(game->var.mlx, game->var.win, game->intro.img[game->intro.frm].img_ptr, 0, 0);
@@ -1443,7 +1436,7 @@ int	game_loop(t_game *game)
 		ray_dist[ray] = dist_wall;
 		waves = 5 + (cos (20 * (game->player.pos.x + game->player.pos.y)));
 		double	line_height = (TILE_SIZE / dist_wall) * (g_global()->project_dist);
-		middle = (0.5 + look) * HEIGHT + g_global()->j_croutch + waves;
+		middle = (0.5 + g_global()->look) * HEIGHT + g_global()->j_croutch + waves;
 		double draw_begin = middle - 0.5 * line_height;
 		draw_begin += waves;
 		double	draw_end = draw_begin + line_height;
@@ -1591,24 +1584,24 @@ int	game_loop(t_game *game)
 	t_vect pl = {100 - 7, HEIGHT - 100 - 7};
 	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, pl, 0x00FF00);
 	// draw_circle_full(&game->img, p, 4, 0x00FF00);
-	t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (look * 50) - (waves * 10))};
+	t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (g_global()->look * 50) - (waves * 10))};
 	if (game->player.key.recharge == true)
 	{
 		g_global()->updated = true;
 		static size_t last_update = 0;
-		if (gun_frame < 15)
+		if (g_global()->gun_frm < 15)
 		{
-			paint_image_to_win(&game->img, &game->pack.gun_sp[gun_frame], 500, 500, g, -1);
+			paint_image_to_win(&game->img, &game->pack.gun_sp[g_global()->gun_frm], 500, 500, g, -1);
 			if (get_current_time() - last_update >= FPS)
 			{
-				gun_frame++;
+				g_global()->gun_frm++;
 				last_update = get_current_time();
 			}
 		}
 		else
 		{
 			game->player.key.recharge = false;
-			gun_frame = 0;
+			g_global()->gun_frm = 0;
 			last_update = 0;
 			g_global()->updated = true;
 		}
@@ -1627,7 +1620,7 @@ int	game_loop(t_game *game)
 	if (game->player.key.door_check == true)
 		g_global()->updated = true;
 	mlx_string_put(game->var.mlx, game->var.win, 70, 50, 0, "Press F1 to display the help menu");
-	g_first = false;
+	g_global()->first = false;
 	return (0);
 }
 
@@ -1643,11 +1636,11 @@ int	ft_mouse_move(int x, int y, t_game *game)
 	if (dx != 0 || dy != 0)
 	{
 		game->player.angle += dx * 1e-4;
-		look -= dy * 1e-4;
-		if (look <= -0.3)
-			look = -0.3;
-		else if (look >= 0.3)
-			look = 0.3;
+		g_global()->look -= dy * 1e-4;
+		if (g_global()->look <= -0.3)
+			g_global()->look = -0.3;
+		else if (g_global()->look >= 0.3)
+			g_global()->look = 0.3;
 		g_global()->updated = true;
 		mlx_mouse_move(game->var.mlx, game->var.win, HALF_WIDTH, HALF_HEIGHT);
 	}
@@ -1894,7 +1887,7 @@ int	main(int ac, char **av)
 	}
 	load_video(&game);
 	g_global()->updated = false;
-	g_first = true;
+	g_global()->first = true;
 	g_global()->game_over = false;
 	launch_music("./sounds/disaster_war.mp3", "0.5");
 	// mlx_mouse_get_pos(game.var.mlx, game.var.win, &mouse_x, &mouse_y);
