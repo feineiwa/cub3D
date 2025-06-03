@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/02 11:20:01 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/03 14:45:54 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,10 +317,16 @@ bool					is_hit_door_close(int x, int y, char **map,
 							t_player player);
 bool					is_hit_door(int x, int y, char **map, t_player player);
 
-// video
+// load_images
+void					load_image(t_game *game, t_image *img, char *path);
 void					load_video(t_game *game);
+void					load_image_loop(t_game *game, t_image *img,
+							const char *base_path, int limit);
+void					load_pack(t_game *game);
+void					load_pack(t_game *game);
+void					load_gun_sp(t_game *game);
+void					load_all_images(t_game *game);
 
-
-//free
-void	free_all(t_game *game);
+// free
+void					free_all(t_game *game);
 #endif

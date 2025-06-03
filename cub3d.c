@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/02 17:31:25 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/03 14:48:27 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,10 +286,10 @@ int	init_image_win(t_game *game, t_image *image, int w, int h)
 {
 	image->img_ptr = mlx_new_image(game->var.mlx, w, h);
 	if (!image->img_ptr)
-		return (1);
+		return (0);
 	image->addr = mlx_get_data_addr(image->img_ptr, &image->bpp,
 			&image->size_line, &image->endian);
-	return (0);
+	return (1);
 }
 
 int	ft_key_press(int keysym, t_game *game)
@@ -332,8 +332,6 @@ int	ft_key_press(int keysym, t_game *game)
 	}
 	if (keysym == XK_Shift_L)
 		game->player.key.speed = true;
-	if (keysym == XK_g)
-		game->player.key.recharge = true;
 	if (keysym == XK_Up)
 		game->player.key.look_up = true;
 	if (keysym == XK_Down)
@@ -428,8 +426,6 @@ int	ft_key_release(int keysym, t_game *game)
 		game->player.key.look_down = false;
 	if (keysym == XK_c)
 		game->player.key.key_croutch = false;
-	// if (keysym == XK_f)
-	// 	game->player.key.door_check = false;
 	game->player.walk_dir = 0;
 	game->player.dir.x = 0;
 	game->player.dir.y = 0;
@@ -1515,15 +1511,17 @@ int	game_loop(t_game *game)
 					}
 				}
 			}
-			else if (game->sp[sp_c].is_died == true && game->sp[sp_c].d_frm <= 6)
+			else if (game->sp[sp_c].is_died == true)
 			{
-				draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->pack.death[game->sp[sp_c].d_frm], ray_dist, game->sp[sp_c].dist);
+				if (game->sp[sp_c].d_frm <= 6 && get_current_time() - game->sp[sp_c].d_fps <= 10000)
+					draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height, &game->pack.death[game->sp[sp_c].d_frm], ray_dist, game->sp[sp_c].dist);
 				if (get_current_time() - game->sp[sp_c].d_fps >= 100)
 				{
-					game->sp[sp_c].d_frm++;
-					game->sp[sp_c].d_fps = get_current_time();
-					if (game->sp[sp_c].d_frm > 6)
-						game->sp[sp_c].d_frm = 6;
+					if (game->sp[sp_c].d_frm < 6)
+					{
+						game->sp[sp_c].d_frm++;
+						game->sp[sp_c].d_fps = get_current_time();
+					}
 				}
 				game->sp[sp_c].was_shot = false;
 			}
@@ -1812,116 +1810,17 @@ void	init_all_images(t_game *game)
 	init_img_loop(game->intro.img, 384);
 }
 
-
-void	load_image(t_game *game, t_image *img, char *path)
+void	event_listener(t_game *game)
 {
-	img->img_ptr = mlx_xpm_file_to_image(game->var.mlx, path, &img->w, &img->h);
-	if (img->img_ptr == NULL)
-	{
-		free_all(game);
-		ft_putendl_fd("Error\nFailed to load image. Please check the file path, format, and permissions.", 2);
-		exit(1);
-	}
-	img->addr = mlx_get_data_addr(img->img_ptr, &img->bpp, &img->size_line, &img->endian);
-}
-
-void	load_image_loop(t_game *game, t_image *img, const char *base_path, int limit)
-{
-	int	i;
-	int	index;
-	int	j;
-	char file[256];
-
-	i = 0;
-	ft_memmove((char *)file, (char *)base_path, ft_strlen(base_path));
-	if (limit == 15)
-		index = 10;
-	else if (limit == 4)
-		index = 15;
-	else if (limit == 7)
-		index = 18;
-	else if (limit == 384)
-		index = 13;
-	while (i < limit)
-	{
-		j = i + 1;
-		if (j >= 10 && j <= 99)
-		{
-			file[index + 1] = '0' + (j / 10);
-			file[index + 2] = '0' + (j % 10);
-		}
-		else if (j > 99)
-		{
-			file[index] = '0' + ((j / 10) / 10);
-			file[index + 1] = '0' + ((j / 10) % 10);
-			file[index + 2] = '0' + (j % 10);
-		}
-		else
-			file[index + 2] = '0' + j;
-		printf("%s\n", file);
-		load_image(game, &img[i], file);
-		i++;
-	}
-}
-
-void	load_pack(t_game *game)
-{
-	load_image(game, &game->pack.arrow, "images/arrow.xpm");
-	load_image(game, &game->pack.aiming, "images/aiming1.xpm");
-	load_image(game, &game->pack.floor, "images/floor6.xpm");
-	load_image(game, &game->pack.ceil, "images/ceil0.xpm");
-	load_image(game, &game->pack.door[0], "images/my_door/door.xpm");
-	load_image(game, &game->pack.door[1], "images/my_door/door_side3.xpm");
-	load_image(game, &game->pack.compass, "images/compass2.xpm");
-	load_image(game, &game->pack.needle, "images/needle.xpm");
-	load_image(game, &game->pack.scope, "images/scope.xpm");
-	load_image(game, &game->pack.blood, "images/blood.xpm");
-	load_image(game, &game->pack.gov, "images/gov.xpm");
-	load_image(game, &game->pack.help, "images/help.xpm");
-	load_image(game, &game->pack.notice, "images/notice.xpm");
-	load_image(game, &game->pack.walk[0], "images/Sprites/sp1.xpm");
-	load_image(game, &game->pack.walk[1], "images/Sprites/sp2.xpm");
-	load_image(game, &game->pack.walk[2], "images/Sprites/sp3.xpm");
-	load_image(game, &game->pack.walk[3], "images/Sprites/sp4.xpm");
-	load_image(game, &game->pack.pain, "images/Sprites/pain1.xpm");
-	load_image(game, &game->pack.death[0], "images/Sprites/death1.xpm");
-	load_image(game, &game->pack.death[1], "images/Sprites/death2.xpm");
-	load_image(game, &game->pack.death[2], "images/Sprites/death3.xpm");
-	load_image(game, &game->pack.death[3], "images/Sprites/death4.xpm");
-	load_image(game, &game->pack.death[4], "images/Sprites/death5.xpm");
-	load_image(game, &game->pack.death[5], "images/Sprites/death6.xpm");
-	load_image(game, &game->pack.death[6], "images/Sprites/death7.xpm");
-}
-
-void	load_wall_texture(t_game *game)
-{
-	load_image(game, &game->pack.no_img, game->txt.no_path);
-	load_image(game, &game->pack.so_img, game->txt.so_path);
-	load_image(game, &game->pack.ea_img, game->txt.ea_path);
-	load_image(game, &game->pack.we_img, game->txt.we_path);
-	load_image(game, &game->pack.load, "images/loading.xpm");
-	mlx_put_image_to_window(game->var.mlx, game->var.win, game->pack.load.img_ptr, 0, 0);
-}
-
-void	load_gun_sp(t_game *game)
-{
-	char	file[18];
-	int		i;
-
-	ft_memmove((void *)file, (const void *)"images/gun/00.xpm", 18);
-	i = 0;
-	while (i < 15)
-	{
-		if (i <= 8)
-			file[12] = (i + 1) + '0';
-		else
-		{
-			file[12] = ((i + 1) % 10) + '0';
-			file[11] = ((i + 1) / 10) + '0';
-		}
-		load_image(game, &game->pack.gun_sp[i], file);
-		i++;
-	}
+	launch_music("./sounds/disaster_war.mp3", "0.5");
+	mlx_hook(game->var.win, DestroyNotify, 0, leave_windows, game);
+	mlx_hook(game->var.win, KeyPress, KeyPressMask, ft_key_press, game);
+	mlx_hook(game->var.win, KeyRelease, KeyReleaseMask, ft_key_release, game);
+	mlx_hook(game->var.win, ButtonPress, ButtonPressMask, ft_mouse_pressed, game);
+	mlx_hook(game->var.win, ButtonRelease, ButtonReleaseMask, ft_mouse_release, game);
+	mlx_hook(game->var.win, MotionNotify, PointerMotionMask, ft_mouse_move, game);
+	mlx_loop_hook(game->var.mlx, game_loop, game);
+	mlx_loop(game->var.mlx);
 }
 
 int	main(int ac, char **av)
@@ -1941,25 +1840,14 @@ int	main(int ac, char **av)
 	}
 	init_player(&game);
 	game.doors = handle_door(game.map);
-	if (init_image_win(&game, &game.img, WIDTH, HEIGHT))
+	if (!init_image_win(&game, &game.img, WIDTH, HEIGHT))
 	{
 		ft_free_txt(&game.txt);
-		leave_windows(&game);
+		return (leave_windows(&game), 1);
 	}
 	init_all_images(&game);
-	load_wall_texture(&game);
-	load_pack(&game);
-	load_gun_sp(&game);
-	load_video(&game);
+	load_all_images(&game);
 	game.sp = init_sprite(game.map, &game);
-	launch_music("./sounds/disaster_war.mp3", "0.5");
-	mlx_hook(game.var.win, DestroyNotify, 0, leave_windows, &game);
-	mlx_hook(game.var.win, KeyPress, KeyPressMask, ft_key_press, &game);
-	mlx_hook(game.var.win, KeyRelease, KeyReleaseMask, ft_key_release, &game);
-	mlx_hook(game.var.win, ButtonPress, ButtonPressMask, ft_mouse_pressed, &game);
-	mlx_hook(game.var.win, ButtonRelease, ButtonReleaseMask, ft_mouse_release, &game);
-	mlx_hook(game.var.win, MotionNotify, PointerMotionMask, ft_mouse_move, &game);
-	mlx_loop_hook(game.var.mlx, game_loop, &game);
-	mlx_loop(game.var.mlx);
+	event_listener(&game);
 	return (0);
 }
