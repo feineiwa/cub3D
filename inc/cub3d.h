@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 14:45:54 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/03 18:08:28 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,6 @@ struct					s_key
 struct					s_player
 {
 	t_vector			pos;
-	t_vect				dir;
 	t_vector			plan;
 	t_key				key;
 	double				angle;
@@ -277,6 +276,16 @@ void					ft_free_arr(void **arr);
 void					ft_free_txt(t_text *txt);
 void					init_player(t_game *game);
 
+// KEY_EVENTS
+int						ft_key_press(int keysym, t_game *game);
+int						ft_key_release(int keysym, t_game *game);
+// mouse events
+int						ft_mouse_pressed(int button, int x, int y,
+							t_game *game);
+int						ft_mouse_release(int button, int x, int y,
+							t_game *game);
+int						ft_mouse_move(int x, int y, t_game *game);
+
 // music
 t_g						*g_global(void);
 void					stop_music(void);
@@ -329,4 +338,35 @@ void					load_all_images(t_game *game);
 
 // free
 void					free_all(t_game *game);
+void					free_game_var(t_game *game);
+
+// drawing
+void					draw_line(t_image *img, t_vector a, t_vector b,
+							int color);
+void					draw_square(t_image *img, int x, int y, int size,
+							int color);
+void					draw_circle(t_image *img, t_vector p, int radius,
+							int color);
+void					draw_rectangle_rgb_gradient(t_image *image, int x0,
+							int x1, int y0, int y1, t_rgb rgb);
+void					draw_rectangle_rgb_rgradient(t_image *image, int x0,
+							int x1, int y0, int y1, t_rgb rgb);
+void					draw_rectangle(t_image *image, int x0, int x1, int y0,
+							int y1, int color);
+void					draw_circle_full(t_image *img, t_vector p, int radius,
+							int color);
+void					draw_square_at_edge(t_image *img, int x, int y,
+							int size, t_vector c, int color);
+void					draw_rotated_square(t_image *img, t_vect s_p,
+							t_vector c, int size, double angle, int color);
+void					put_pixel(t_image *img, int x, int y, int color);
+int						set_color_rgb(int r, int g, int b);
+
+// collision
+bool					is_exceeded(t_vector move, t_player player);
+bool					is_hit_wall(int tile_x, int tile_y, char **map);
+bool					is_collision(t_vector move, t_player player,
+							char **map);
+bool					check_collision(t_vector move, t_player player,
+							char **map);
 #endif

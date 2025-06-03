@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/22 10:36:07 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/03 15:13:30 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,18 +64,26 @@ void	get_w_and_h(char **map, int *w, int *h)
 	*w = ft_strlen(map[0]);
 }
 
+double	get_player_angle(char **map, t_player player)
+{
+	double	angle;
+
+	if (map[(int)player.pos.y][(int)player.pos.x] == p_n)
+		angle = 1.5 * PI;
+	else if (map[(int)player.pos.y][(int)player.pos.x] == p_s)
+		angle = 0.5 * PI;
+	else if (map[(int)player.pos.y][(int)player.pos.x] == p_e)
+		angle = 0;
+	else if (map[(int)player.pos.y][(int)player.pos.x] == p_w)
+		angle = PI;
+	return (angle);
+}
+
 void	init_player(t_game *game)
 {
 	game->txt.p = get_player_cell(game->map);
 	get_axis(game->map, game->txt.p, &game->player.pos.x, &game->player.pos.y);
-	if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_n)
-		game->player.angle = 1.5 * PI;
-	else if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_s)
-		game->player.angle = 0.5 * PI;
-	else if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_e)
-		game->player.angle = 0;
-	else if (game->map[(int)game->player.pos.y][(int)game->player.pos.x] == p_w)
-		game->player.angle = PI;
+	game->player.angle = get_player_angle(game->map, game->player);
 	game->player.key.speed = false;
 	game->player.key.key_up = false;
 	game->player.key.key_down = false;

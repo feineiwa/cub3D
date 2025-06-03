@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 08:24:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/30 14:41:52 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/03 15:24:10 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,9 @@ void	ft_free_img_packs(t_game *game, t_pack packs)
 	ft_free_image(game, packs.load);
 }
 
-void	free_all(t_game *game)
-{	
+void	free_game_var(t_game *game)
+{
 	ft_free_image(game, game->img);
-	ft_free_img_packs(game , game->pack);
-	ft_free(game->sp);
-	ft_free(game->doors);
-	ft_free_img_loop(game, game->intro.img, 384);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	if (game->var.win != NULL)
 		mlx_destroy_window(game->var.mlx, game->var.win);
@@ -72,4 +68,13 @@ void	free_all(t_game *game)
 	}
 	ft_free_txt(&game->txt);
 	ft_free_arr((void **)game->map);
+}
+
+void	free_all(t_game *game)
+{	
+	ft_free_img_packs(game , game->pack);
+	ft_free(game->sp);
+	ft_free(game->doors);
+	ft_free_img_loop(game, game->intro.img, 384);
+	free_game_var(game);
 }

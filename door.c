@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/22 18:21:11 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/03 15:16:15 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,9 +106,9 @@ t_door	*handle_door(char **map)
 	doors = malloc(sizeof(t_door) * g_global()->door_count);
 	if (doors == NULL)
 		return (NULL);
-	j = 0;
+	j = -1;
 	k = 0;
-	while (map[j])
+	while (map[++j])
 	{
 		i = 0;
 		while (map[j][i])
@@ -119,7 +119,6 @@ t_door	*handle_door(char **map)
 				init_door(&doors[k++], door_o, i, j);
 			i++;
 		}
-		j++;
 	}
 	return (doors);
 }

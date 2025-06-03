@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 14:48:27 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/03 18:07:12 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,101 +66,12 @@ int	leave_windows(t_game *game)
 	exit(0);
 }
 
-void	draw_line(t_image *img, t_vector a, t_vector b, int color)
-{
-	double	dx;
-	double	dy;
-	double	steps;
-	double	xinc;
-	double	yinc;
-	int		i;
-
-	dx = (b.x - a.x);
-	dy = (b.y - a.y);
-	steps = fmax(fabs(dx), fabs(dy));
-	xinc = dx / steps;
-	yinc = dy / steps;
-	i = 0;
-	while (i <= steps)
-	{
-		a.x += xinc;
-		a.y += yinc;
-		put_pixel(img, a.x, a.y, color);
-		i++;
-	}
-}
-
 double	normalize_angle(double angle)
 {
 	angle = fmod(angle, 2 * PI);
 	if (angle < 0)
 		angle += 2 * PI;
 	return (angle);
-}
-
-bool is_exceeded(t_vector move, t_player player)
-{
-	t_vect top_left;
-	t_vect top_right;
-	t_vect bottom_left;
-	t_vect bottom_right;
-	double	collider = 0.1;
-
-	top_left.x = (int)(move.x - collider);
-	top_left.y = (int)(move.y - collider);
-	top_right.x = (int)(move.x + collider);
-	top_right.y = (int)(move.y - collider);
-	bottom_left.x = (int)(move.x - collider);
-	bottom_left.y = (int)(move.y + collider);
-	bottom_right.x = (int)(move.x + collider);
-	bottom_right.y = (int)(move.y + collider);
-	if (top_left.x >= player.w || top_left.x < 0 || top_left.y < 0 || top_left.y >= player.h)
-		return (true);
-	if (top_right.x >= player.w || top_right.x < 0 || top_right.y < 0 || top_right.y >= player.h)
-		return (true);
-	if (bottom_left.x >= player.w || bottom_left.x < 0 || bottom_left.y < 0 || bottom_left.y >= player.h)
-		return (true);
-	if (bottom_right.x >= player.w || bottom_right.x < 0 || bottom_right.y < 0 || bottom_right.y >= player.h)
-		return (true);
-	return(false);
-}
-
-bool	is_hit_wall(int tile_x, int tile_y, char **map)
-{
-	if (map[tile_y][tile_x] == wall || map[tile_y][tile_x] == door_c)
-		return (true);
-	return (false);	
-}
-
-bool	is_collision(t_vector move, t_player player, char **map)
-{
-	t_vect top_left;
-	t_vect top_right;
-	t_vect bottom_left;
-	t_vect bottom_right;
-	double	collider = 0.1;
-
-	top_left.x = (int)(move.x - collider);
-	top_left.y = (int)(move.y - collider);
-	top_right.x = (int)(move.x + collider);
-	top_right.y = (int)(move.y - collider);
-	bottom_left.x = (int)(move.x - collider);
-	bottom_left.y = (int)(move.y + collider);
-	bottom_right.x = (int)(move.x + collider);
-	bottom_right.y = (int)(move.y + collider);
-	if (is_hit_wall(top_left.x, top_left.y, map) ||
-		is_hit_wall(top_right.x, top_right.y, map) ||
-		is_hit_wall(bottom_left.x, bottom_left.y, map) ||
-		is_hit_wall(bottom_right.x, bottom_right.y, map))
-		return (true);
-	return (false);
-}
-
-bool	check_collision(t_vector move, t_player player, char **map)
-{
-	if (!is_exceeded(move, player) && !is_collision(move, player, map))
-		return (false);
-	return (true);
 }
 
 void	move_player(t_game *game)
@@ -292,164 +203,6 @@ int	init_image_win(t_game *game, t_image *image, int w, int h)
 	return (1);
 }
 
-int	ft_key_press(int keysym, t_game *game)
-{
-	if (keysym == XK_Return)
-	{
-		if (g_global()->first == true)
-			stop_music();
-		g_global()->first = false;
-	}
-	if (keysym == XK_w)
-	{
-		game->player.key.key_up = true;
-		game->player.walk_dir = 1;
-	}
-	if (keysym == XK_s)
-	{
-		game->player.key.key_down = true;
-		game->player.walk_dir = -1;
-	}
-	if (keysym == XK_d)
-	{
-		game->player.key.key_right = true;
-		game->player.walk_dir_side = 1;
-	}
-	if (keysym == XK_a)
-	{
-		game->player.key.key_left = true;
-		game->player.walk_dir_side = -1;
-	}
-	if (keysym == XK_Left)
-	{
-		game->player.key.rot_l = true;
-		game->player.turn_dir = -1;
-	}
-	if (keysym == XK_Right)
-	{
-		game->player.key.rot_r = true;
-		game->player.turn_dir = 1;
-	}
-	if (keysym == XK_Shift_L)
-		game->player.key.speed = true;
-	if (keysym == XK_Up)
-		game->player.key.look_up = true;
-	if (keysym == XK_Down)
-		game->player.key.look_down = true;
-	if (keysym == XK_Alt_L)
-	{
-		if (game->player.key.hide_mouse == false)
-		{
-			game->player.key.hide_mouse = true;
-			mlx_mouse_hide(game->var.mlx, game->var.win);
-			mlx_mouse_move(game->var.mlx, game->var.win, HALF_WIDTH, HALF_HEIGHT);
-		}
-		else
-		{
-			game->player.key.hide_mouse = false;
-			mlx_mouse_show(game->var.mlx, game->var.win);
-		}
-	}
-	if (keysym == XK_c)
-		game->player.key.key_croutch = true;
-	if (keysym == XK_space && game->player.key.key_jump == false)
-		game->player.key.key_jump = true;
-	if (keysym == XK_i)
-	{
-		g_global()->zoom += 0.1;
-		g_global()->narrow_look += 100;
-	}
-	if (keysym == XK_o)
-	{
-		g_global()->zoom -= 0.1;
-		g_global()->narrow_look -= 100;
-	}
-	if (g_global()->zoom < 1)
-	{
-		g_global()->zoom = 1;
-		g_global()->narrow_look = 875;
-	}
-	if (g_global()->zoom > 3.0)
-	{
-		g_global()->zoom = 3.0;
-		g_global()->narrow_look = 2875;
-	}
-	if (keysym == XK_f && game->player.key.door_check == false)
-	{
-		game->player.key.door_check = true;
-		// if (!is_music_playing())
-		// 	launch_music("./sounds/sliding.mp3", "0.5");
-	}
-	if (keysym == XK_F1)
-	{
-		if (g_global()->help == false)
-			g_global()->help = true;
-		else
-			g_global()->help = false;
-	}
-	if (keysym == XK_Escape)
-	{
-		free_all(game);
-		stop_music();
-		exit(0);
-	}
-	// mouse_speed = 1;
-	g_global()->updated = true;
-	return (0);
-}
-
-int	ft_key_release(int keysym, t_game *game)
-{
-	if (keysym == XK_w)
-		game->player.key.key_up = false;
-	if (keysym == XK_s)
-		game->player.key.key_down = false;
-	if (keysym == XK_d)
-		game->player.key.key_right = false;
-	if (keysym == XK_a)
-		game->player.key.key_left = false;
-	if (keysym == XK_Left)
-	{
-		game->player.key.rot_l = false;
-		game->player.turn_dir = 0;
-	}
-	if (keysym == XK_Right)
-	{
-		game->player.key.rot_r = false;
-		game->player.turn_dir = 0;
-	}
-	if (keysym == XK_Shift_L)
-		game->player.key.speed = false;
-	if (keysym == XK_Up)
-		game->player.key.look_up = false;
-	if (keysym == XK_Down)
-		game->player.key.look_down = false;
-	if (keysym == XK_c)
-		game->player.key.key_croutch = false;
-	game->player.walk_dir = 0;
-	game->player.dir.x = 0;
-	game->player.dir.y = 0;
-	return (0);
-}
-
-void	draw_square(t_image *img, int x, int y, int size, int color)
-{
-	int	j;
-	int	i;
-
-	j = 0;
-	while (j < size)
-	{
-		i = 0;
-		while (i < size)
-		{
-			put_pixel(img, i + x, j + y, color);
-			i++;
-		}
-		j++;
-	}
-}
-
 bool	is_wall_door(int x, int y, char **map, t_player player)
 {
 	int	x1;
@@ -464,185 +217,9 @@ bool	is_wall_door(int x, int y, char **map, t_player player)
 	return (false);
 }
 
-void	draw_circle(t_image *img, t_vector p, int radius, int color)
-{
-	int	i;
-	int	j;
-	int	dist_squared;
-
-	j = -radius;
-	// put_pixel(img, p.x, p.y, color);
-	while (j <= radius)
-	{
-		i = -radius;
-		while (i <= radius)
-		{
-			dist_squared = (i * i) + (j * j);
-			if ((dist_squared >= ((radius * radius) - radius)) && (dist_squared <= ((radius * radius) + radius)))
-				put_pixel(img, p.x + i, p.y + j, color);
-			i++;
-		}
-		j++;
-	}
-}
-
 double	distance_between_points(t_vector a, t_vector b)
 {
 	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
-}
-
-void	draw_rectangle_rgb_gradient(t_image *image, int	x0, int x1, int y0, int y1, t_rgb rgb)
-{
-	int	i;
-	int	round;
-
-	round = 0;
-	while (y0 < y1)
-	{
-		i = 0;
-		while (i < x1)
-		{
-			put_pixel(image, i + x0, y0, set_color_rgb(rgb.r, rgb.g, rgb.b));
-			i++;
-		}
-		round++;
-		if (round == 1)
-		{
-			rgb.r -= 1;
-			rgb.g -= 1;
-			rgb.b -= 1;
-			if (rgb.r < 0)
-				rgb.r = 0;
-			if (rgb.g < 0)
-				rgb.g = 0;
-			if (rgb.b < 0)
-				rgb.b = 0;
-			round = 0;
-		}
-		y0++;
-	}
-}
-
-void	draw_rectangle_rgb_rgradient(t_image *image, int x0, int x1, int y0, int y1, t_rgb rgb)
-{
-	int	i;
-	int	round;
-
-	round = 0;
-	while (y1 > y0)
-	{
-		i = 0;
-		while (i < x1)
-		{
-			put_pixel(image, i + x0, y1, set_color_rgb(rgb.r, rgb.g, rgb.b));
-			i++;
-		}
-		round++;
-		if (round == 3)
-		{
-			rgb.r -= 1;
-			rgb.g -= 1;
-			rgb.b -= 1;
-			if (rgb.r < 0)
-				rgb.r = 0;
-			if (rgb.g < 0)
-				rgb.g = 0;
-			if (rgb.b < 0)
-				rgb.b = 0;
-			round = 0;
-		}
-		y1--;
-	}
-}
-
-void	draw_rectangle(t_image *image, int	x0, int x1, int y0, int y1, int color)
-{
-	int	i;
-
-	while (y0 < y1)
-	{
-		i = x0;
-		while (i < x1)
-		{
-			put_pixel(image, i, y0, color);
-			i++;
-		}
-		y0++;
-	}
-}
-
-void	draw_circle_full(t_image *img, t_vector p, int radius, int color)
-{
-	int	i;
-	int	j;
-	int	dist_squared;
-
-	j = -radius;
-	while (j <= radius)
-	{
-		i = -radius;
-		while (i <= radius)
-		{
-			dist_squared = (i * i) + (j * j);
-			if ( dist_squared <= (radius * radius))
-				put_pixel(img, p.x + i, p.y + j, color);
-			i++;
-		}
-		j++;
-	}
-}
-
-void	draw_square_at_edge(t_image *img, int x, int y, int size, t_vector c, int color)
-{
-	int	j;
-	int	i;
-	int	px;
-	int	py;
-	double	dist;
-
-	j = 0;
-	while (j < size)
-	{
-		i = 0;
-		while (i < size)
-		{
-			px = i + x;
-			py = j + y;
-			dist = (px - c.x) * (px - c.x) + (py - c.y) * (py - c.y);
-			if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
-				put_pixel(img, px, py, color);
-			i++;
-		}
-		j++;
-	}
-}
-
-void	draw_rotated_square(t_image *img, t_vect s_p, t_vector c, int size, double angle, int color)
-{
-	int	half;
-	int	x;
-	int	y;
-	t_vect draw;
-	t_vector rot;
-	double dist;
-
-	y = 0;
-	while (y < size)
-	{
-		x = 0;
-		while (x < size)
-		{
-			rot.x = x * cos(angle) + y * sin(angle);
-			rot.y = -x * sin(angle) + y * cos(angle);
-			draw.x = (int)(s_p.x + rot.x);
-			draw.y = (int)(s_p.y + rot.y);
-			dist = (draw.x - c.x) * (draw.x - c.x) + (draw.y - c.y) * (draw.y - c.y);
-			if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
-				put_pixel(img, draw.x, draw.y, color);
-			x++;
-		}
-		y++;
-	}
 }
 
 int	get_img_color(t_image *img, int x, int y)
@@ -1621,85 +1198,6 @@ int	game_loop(t_game *game)
 	return (0);
 }
 
-int	ft_mouse_move(int x, int y, t_game *game)
-{
-	int	dx;
-	int	dy;
-
-	if (game->player.key.hide_mouse == false)
-		return (1);
-	dx = x - HALF_WIDTH;
-	dy = y - HALF_HEIGHT;
-	if (dx != 0 || dy != 0)
-	{
-		game->player.angle += dx * 1e-4;
-		g_global()->look -= dy * 1e-4;
-		if (g_global()->look <= -0.3)
-			g_global()->look = -0.3;
-		else if (g_global()->look >= 0.3)
-			g_global()->look = 0.3;
-		g_global()->updated = true;
-		mlx_mouse_move(game->var.mlx, game->var.win, HALF_WIDTH, HALF_HEIGHT);
-	}
-	return (0);
-}
-
-int	ft_mouse_pressed(int button, int x, int y, t_game *game)
-{
-	if (game->player.key.hide_mouse == false && g_global()->one_shoot_music == true)
-		return (1);
-	if (button == 1 && game->player.key.hide_mouse == true)
-	{
-		// if (!is_music_playing())
-		// 	launch_music("sounds/gun1.wav", "0.5");
-		g_global()->one_shoot_music = true;
-		game->player.key.recharge = true;
-		game->player.key.shoot = true;
-		g_global()->updated = true;
-	}
-	if (button == 4 && game->player.key.hide_mouse == true)
-	{
-		game->player.key.scope = true;
-		g_global()->zoom += 0.1;
-		g_global()->narrow_look += 100;
-		g_global()->updated = true;
-	}
-	if (button == 5 && game->player.key.hide_mouse == true)
-	{
-		g_global()->zoom -= 0.1;
-		g_global()->narrow_look -= 100;
-		g_global()->updated = true;
-	}
-	if (button == 3 && game->player.key.hide_mouse == true)
-	{
-		game->player.key.scope = false;
-		g_global()->zoom = 1.0;
-		g_global()->narrow_look = 875;
-		g_global()->updated = true;
-	}
-	if (g_global()->zoom < 1)
-	{
-		game->player.key.scope = false;
-		g_global()->zoom = 1;
-		g_global()->narrow_look = 875;
-	}
-	if (g_global()->zoom > 3.0)
-	{
-		g_global()->zoom = 3.0;
-		g_global()->narrow_look = 2875;
-	}
-	return (0);
-}
-
-int	ft_mouse_release(int button, int x, int y, t_game *game)
-{
-	if (game->player.key.hide_mouse == false)
-		return (1);
-	if (button == 1)
-		game->player.key.shoot = false;
-	return (0);
-}
-
 int	count_sprite(char **map)
 {
 	int i;
@@ -1722,16 +1220,29 @@ int	count_sprite(char **map)
 	return (count);
 }
 
+t_sprit init_sprite_data(int x, int y)
+{
+	t_sprit	sp;
+
+	sp.pos.x = x + 0.5;
+	sp.pos.y = y + 0.5;
+	sp.w_frm = 0;
+	sp.w_fps = get_current_time();
+	sp.health = 3;
+	sp.d_fps = get_current_time();
+	sp.d_frm = 0;
+	sp.was_shot = false;
+	sp.is_died = false;
+	return (sp);
+}
+
 t_sprit	*init_sprite(char **map, t_game *game)
 {
-	int	x;
-	int	y;
+	int		x;
+	int		y;
 	t_sprit *sp;
-	int	k;
+	int		k;
 
-	g_global()->sp_count = count_sprite(map);
-	if (g_global()->sp_count <= 0)
-		return (NULL);
 	sp  = malloc(sizeof(t_sprit) * g_global()->sp_count);
 	if (!sp)
 		return (NULL);
@@ -1744,15 +1255,7 @@ t_sprit	*init_sprite(char **map, t_game *game)
 		{
 			if (map[y][x] == sprite)
 			{
-				sp[k].pos.x = x + 0.5;
-				sp[k].pos.y = y + 0.5;
-				sp[k].w_frm = 0;
-				sp[k].w_fps = get_current_time();
-				sp[k].health = 3;
-				sp[k].d_fps = get_current_time();
-				sp[k].d_frm = 0;
-				sp[k].was_shot = false;
-				sp[k].is_died = false;
+				sp[k] = init_sprite_data(x, y);
 				k++;
 			}
 			x++;
@@ -1841,12 +1344,10 @@ int	main(int ac, char **av)
 	init_player(&game);
 	game.doors = handle_door(game.map);
 	if (!init_image_win(&game, &game.img, WIDTH, HEIGHT))
-	{
-		ft_free_txt(&game.txt);
-		return (leave_windows(&game), 1);
-	}
+		return (free_game_var(&game), 1);
 	init_all_images(&game);
 	load_all_images(&game);
+	g_global()->sp_count = count_sprite(game.map);
 	game.sp = init_sprite(game.map, &game);
 	event_listener(&game);
 	return (0);
