@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 14:11:45 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 16:50:17 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,10 +233,16 @@ typedef struct s_intro
 typedef struct s_r
 {
 	t_vector			a;
+	t_vector			s;
+	t_vector			horiz_p;
+	t_vector			vert_p;
+	t_vector			wall_hit;
 	bool				is_facing_down;
 	bool				is_facing_left;
 	bool				is_facing_right;
 	bool				is_facing_up;
+	bool				found_horizontal;
+	bool				found_vertical;
 	double				ray_angle;
 	int					ray;
 	double				middle;
@@ -244,6 +250,9 @@ typedef struct s_r
 	double				waves;
 	double				horizontal_dist;
 	double				vertical_dist;
+	double				dist_wall;
+	double				o;
+	int					offset;
 }						t_r;
 
 typedef struct s_game
@@ -329,8 +338,7 @@ bool					is_hit_door_close(int x, int y, char **map,
 bool					is_hit_door_open(int x, int y, char **map,
 							t_player player);
 // ray_cast
-void					compute_ray_orientation(double angle, bool *up,
-							bool *down, bool *left, bool *right);
+void					compute_ray_orientation(double angle, t_r *r);
 t_vector				ray_cast_horizontal(t_game *game, double ray_angle,
 							bool is_facing_up, bool is_facing_down,
 							bool *found_h_o_door, bool *found_horizontal);
@@ -432,6 +440,8 @@ void					move_player(t_game *game);
 // sprites
 void					sort_sprites_by_distance(t_sprit *sp);
 int						count_sprite(char **map);
+void					render_sprites(t_game *game, t_r r,
+							double adjusted_fov);
 
 // game_loop
 int						game_loop(t_game *game);

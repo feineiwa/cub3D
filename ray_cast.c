@@ -6,22 +6,26 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 13:50:42 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 14:55:41 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc/cub3d.h"
 
-void	compute_ray_orientation(double angle, bool	*up, bool *down, bool *left, bool *right)
+void	compute_ray_orientation(double angle, t_r *r)
 {
+	r->is_facing_up = false;
+	r->is_facing_down = false;
+	r->is_facing_right = false;
+	r->is_facing_left = false;
 	if (angle > 0 && angle < PI)
-		*down = true;
+		r->is_facing_down = true;
 	else
-		*up = true;
+		r->is_facing_up = true;
 	if (angle < 1.57079632679 || angle > 4.71238898038) // 0.5 * PI || 1.5 * PI
-		*right = true;
+		r->is_facing_right = true;
 	else
-		*left = true;
+		r->is_facing_left = true;
 }
 
 t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up, bool is_facing_down, bool *found_h_o_door, bool *found_horizontal)
