@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:55:52 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 17:59:19 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 08:21:46 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,5 +227,31 @@ void	draw_rotated_square(t_image *img, t_vect s_p, t_vector c, int size, double 
 			x++;
 		}
 		y++;
+	}
+}
+
+void	draw_circle_enemy(t_image *img, t_vector p, int radius, int color, t_vector c)
+{
+	int	i;
+	int	j;
+	int	dist_squared;
+
+	j = -radius;
+	while (j <= radius)
+	{
+		i = -radius;
+		while (i <= radius)
+		{
+			dist_squared = (i * i) + (j * j);
+			if ( dist_squared <= (radius * radius))
+			{
+				double dist = (p.x + i - c.x) * (p.x + i - c.x) + (p.y + j - c.y) * (p.y + j - c.y);
+
+				if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
+					put_pixel(img, p.x + i, p.y + j, color);
+			}
+			i++;
+		}
+		j++;
 	}
 }

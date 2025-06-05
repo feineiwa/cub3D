@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 18:06:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 18:07:15 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 08:18:23 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,18 @@ bool	check_collision(t_vector move, t_player player, char **map)
 	if (!is_exceeded(move, player) && !is_collision(move, player, map))
 		return (false);
 	return (true);
+}
+
+bool	is_wall_door(int x, int y, char **map, t_player player)
+{
+	int	x1;
+	int	y1;
+
+	x1 = x / TILE_SIZE;
+	y1 = y / TILE_SIZE;
+	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
+		return (false);
+	if (map[y1][x1] == wall || map[y1][x1] == door_c)
+		return (true);
+	return (false);
 }

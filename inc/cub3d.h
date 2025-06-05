@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 18:08:28 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 08:23:51 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,8 +359,15 @@ void					draw_square_at_edge(t_image *img, int x, int y,
 							int size, t_vector c, int color);
 void					draw_rotated_square(t_image *img, t_vect s_p,
 							t_vector c, int size, double angle, int color);
+void	draw_circle_enemy(t_image *img, t_vector p, int radius, int color, t_vector c);
+
+//render utils
 void					put_pixel(t_image *img, int x, int y, int color);
 int						set_color_rgb(int r, int g, int b);
+void	clear_image(t_image *img, int width, int height, int color);
+int	get_img_color(t_image *img, int x, int y);
+void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y, t_vect p, int color);
+
 
 // collision
 bool					is_exceeded(t_vector move, t_player player);
@@ -369,4 +376,12 @@ bool					is_collision(t_vector move, t_player player,
 							char **map);
 bool					check_collision(t_vector move, t_player player,
 							char **map);
+bool	is_wall_door(int x, int y, char **map, t_player player);
+
+//calcul
+double	distance_between_points(t_vector a, t_vector b);
+
+//minimap.c
+void	draw_minimap(t_image *img, char **map, t_player player, t_game *game);
+
 #endif

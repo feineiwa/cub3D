@@ -6,42 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 15:16:15 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 08:13:03 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc/cub3d.h"
-
-// void	update_doors(t_game *game, double delta_time)
-// {
-// 	int	i;
-// 	t_door *door;
-
-// 	i = 0;
-// 	while (i < g_global()->door_count)
-// 	{
-// 		door = &game->doors[i];
-// 		if (door->is_opening && door->slide_progress < 1.0)
-// 		{
-// 			door->slide_progress += delta_time;
-// 			if (door->slide_progress >= 1.0)
-// 			{
-// 				door->slide_progress = 1.0;
-// 				door->is_opening = false;
-// 			}
-// 		}
-// 		else if (door->is_closing && door->slide_progress > 0.0)
-// 		{
-// 			door->slide_progress -= delta_time;
-// 			if (door->slide_progress <= 1.0)
-// 			{
-// 				door->slide_progress = 0.0;
-// 				door->is_closing = false;
-// 			}
-// 		}
-// 		i++;
-// 	}
-// }
 
 int	count_door(char **map)
 {

@@ -6,31 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 18:07:12 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 08:24:30 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./inc/cub3d.h"
-
-void	put_pixel(t_image *img, int x, int y, int color)
-{
-	int	offset;
-
-	// char	*offset;
-	if (x >= WIDTH || y >= HEIGHT || x < 0 || y < 0)
-		return ;
-	offset = (y * img->size_line) + (x * img->bpp / 8);
-	img->addr[offset] = color & 0xFF;
-	img->addr[offset + 1] = (color >> 8) & 0xFF;
-	img->addr[offset + 2] = (color >> 16) & 0xFF;
-	// offset = img->img_ptr + (y * img->size_line + x * (img->bpp / 8));
-	// *(int *)offset = color;
-}
-
-int	set_color_rgb(int r, int g, int b)
-{
-	return (r << 16 | g << 8 | b);
-}
 
 void	ft_putarr_endl(char **arr, int fd)
 {
@@ -175,24 +155,6 @@ void	move_player(t_game *game)
 	game->player.key.look_down = false;
 }
 
-void	clear_image(t_image *img, int width, int height, int color)
-{
-	int	x;
-	int	y;
-
-	y = 0;
-	while (y < height)
-	{
-		x = 0;
-		while (x < width)
-		{
-			put_pixel(img, x, y, color);
-			x++;
-		}
-		y++;
-	}
-}
-
 int	init_image_win(t_game *game, t_image *image, int w, int h)
 {
 	image->img_ptr = mlx_new_image(game->var.mlx, w, h);
@@ -201,153 +163,6 @@ int	init_image_win(t_game *game, t_image *image, int w, int h)
 	image->addr = mlx_get_data_addr(image->img_ptr, &image->bpp,
 			&image->size_line, &image->endian);
 	return (1);
-}
-
-bool	is_wall_door(int x, int y, char **map, t_player player)
-{
-	int	x1;
-	int	y1;
-
-	x1 = x / TILE_SIZE;
-	y1 = y / TILE_SIZE;
-	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
-		return (false);
-	if (map[y1][x1] == wall || map[y1][x1] == door_c)
-		return (true);
-	return (false);
-}
-
-double	distance_between_points(t_vector a, t_vector b)
-{
-	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
-}
-
-int	get_img_color(t_image *img, int x, int y)
-{
-	return (*(int *)(img->addr + ((y * img->size_line) + (x * (img->bpp
-						/ 8)))));
-}
-
-void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y, t_vect p, int color)
-{
-	int		x;
-	int		y;
-	int		img_color;
-
-	y = 0;
-	while (y < s_y)
-	{
-		x = 0;
-		while (x < s_x)
-		{
-			int src_x = (int)(double)x * ((double)img1->w / (double)s_x);
-			int src_y = (int)(double)y * ((double)img1->h / (double)s_y);
-			img_color = get_img_color(img1, src_x, src_y);
-			if (img_color >= 0)
-			{
-				if (color >= 0)
-					img_color = color;
-				put_pixel(img, x + p.x, y + p.y, img_color);
-			}
-			x++;
-		}
-		y++;
-	}
-}
-
-void	draw_circle_enemy(t_image *img, t_vector p, int radius, int color, t_vector c)
-{
-	int	i;
-	int	j;
-	int	dist_squared;
-
-	j = -radius;
-	while (j <= radius)
-	{
-		i = -radius;
-		while (i <= radius)
-		{
-			dist_squared = (i * i) + (j * j);
-			if ( dist_squared <= (radius * radius))
-			{
-				double dist = (p.x + i - c.x) * (p.x + i - c.x) + (p.y + j - c.y) * (p.y + j - c.y);
-
-				if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
-					put_pixel(img, p.x + i, p.y + j, color);
-			}
-			i++;
-		}
-		j++;
-	}
-}
-
-void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
-{
-	int	x1;
-	int	x2;
-	int	y1;
-	int	y2;
-	int	side = 7;
-	double angle;
-	
-	angle = normalize_angle(player.angle + (0.5 * PI));
-	x1 = (int)floor(player.pos.x) - side;
-	if (x1 < 0)
-		x1 = 0;
-	x2 = player.pos.x + side;
-	if (x2 > player.w)
-		x2 = player.w;
-	y1 = (int)floor(player.pos.y) - side;
-	if (y1 < 0)
-		y1 = 0;
-	y2 = player.pos.y + side;
-	if (y2 > player.h)
-		y2 = player.h;
-	t_vector c = {100, HEIGHT - 100};
-	draw_circle_full(img, c, MINI_WIDTH / 2, 0x1E1E1E);
-	draw_circle(img, c, MINI_WIDTH / 2, 0x333333);
-	draw_circle(img, c, MINI_WIDTH / 2 + 1, 0x555555);
-	draw_circle(img, c, MINI_WIDTH / 2 + 2, 0x777777);
-	draw_circle(img, c, MINI_WIDTH / 2 + 3, 0x999999);
-	double cos_angle = cos(angle);
-    double sin_angle = sin(angle);
-	int	j = y1;
-	int	i;
-	while (j < y2)
-	{
-		i = x1;
-		while (i < x2)
-		{
-			t_vector relative = {(i - player.pos.x), (j - player.pos.y)};
-			t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
-			t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
-			if (map[j][i] == wall)
-				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
-			else if (map[j][i] == door_c)
-				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x00FFFF);
-			else if (map[j][i] == door_o)
-				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x007070);
-				// draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xFF0000);
-			// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
-			
-			i++;
-		}
-		j++;
-	}
-	int	sp_c = 0;
-	while (sp_c < g_global()->sp_count)
-	{
-		t_vector relative = {(game->sp[sp_c].pos.x - player.pos.x), (game->sp[sp_c].pos.y - player.pos.y)};
-		t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
-		t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
-		if (game->sp[sp_c].is_died == false)
-			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0xFF0000, c);
-		else
-			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0x4D1F1F, c);
-		sp_c++;
-	}
-	// draw_circle(img, c, 1, 0x00FF66);
-	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
 }
 
 void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, int offset, double dist_wall)
