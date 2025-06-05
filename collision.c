@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 18:06:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 08:18:23 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 13:54:00 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ bool	is_hit_wall(int tile_x, int tile_y, char **map)
 	return (false);	
 }
 
-bool	is_collision(t_vector move, t_player player, char **map)
+bool	is_collision(t_vector move, char **map)
 {
 	t_vect top_left;
 	t_vect top_right;
@@ -72,7 +72,7 @@ bool	is_collision(t_vector move, t_player player, char **map)
 
 bool	check_collision(t_vector move, t_player player, char **map)
 {
-	if (!is_exceeded(move, player) && !is_collision(move, player, map))
+	if (!is_exceeded(move, player) && !is_collision(move, map))
 		return (false);
 	return (true);
 }

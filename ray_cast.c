@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/12 14:18:46 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 13:50:42 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,10 @@ t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left,
 	t_vector s;
 	t_vector	a = {.x = game->player.pos.x * TILE_SIZE, .y = game->player.pos.y * TILE_SIZE};
 	
+	first_int.x = 0.f;
+	first_int.y = 0.f;
+	s.x = 0.f;
+	s.y = 0.f;
 	if (is_facing_right == 1)
 		first_int.x = floor(game->player.pos.x) * TILE_SIZE + TILE_SIZE;
 	else if (is_facing_left == 1)

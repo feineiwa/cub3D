@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 08:23:51 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 14:11:45 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 # endif
 
 # define PI 3.14159265359
-# define MOVE_SPEED 0.06
+# define MOVE_SPEED 0.04
 # define ROT_SPEED 0.05
 # define MOUSE_SPEED 0.0005;
 # define RES 1
@@ -230,6 +230,22 @@ typedef struct s_intro
 	size_t				last_time;
 }						t_intro;
 
+typedef struct s_r
+{
+	t_vector			a;
+	bool				is_facing_down;
+	bool				is_facing_left;
+	bool				is_facing_right;
+	bool				is_facing_up;
+	double				ray_angle;
+	int					ray;
+	double				middle;
+	double				ray_dist[R_NB];
+	double				waves;
+	double				horizontal_dist;
+	double				vertical_dist;
+}						t_r;
+
 typedef struct s_game
 {
 	t_player			player;
@@ -298,7 +314,6 @@ bool					is_music_playing(void);
 bool					is_wall_door(int x, int y, char **map, t_player player);
 double					normalize_angle(double angle);
 double					distance_between_points(t_vector a, t_vector b);
-bool					is_hit_door(int x, int y, char **map, t_player player);
 
 // door
 
@@ -306,10 +321,13 @@ t_door					*handle_door(char **map);
 void					init_door(t_door *door, t_cell cell, int pos_x,
 							int pos_y);
 int						count_door(char **map);
-// void	update_doors(t_game *game, double delta_time);
 int						find_door(t_door *doors, int x, int y);
 void					check_door_close(t_game *game);
-
+bool					is_hit_door(int x, int y, char **map, t_player player);
+bool					is_hit_door_close(int x, int y, char **map,
+							t_player player);
+bool					is_hit_door_open(int x, int y, char **map,
+							t_player player);
 // ray_cast
 void					compute_ray_orientation(double angle, bool *up,
 							bool *down, bool *left, bool *right);
@@ -339,6 +357,7 @@ void					load_all_images(t_game *game);
 // free
 void					free_all(t_game *game);
 void					free_game_var(t_game *game);
+int						leave_windows(t_game *game);
 
 // drawing
 void					draw_line(t_image *img, t_vector a, t_vector b,
@@ -359,29 +378,61 @@ void					draw_square_at_edge(t_image *img, int x, int y,
 							int size, t_vector c, int color);
 void					draw_rotated_square(t_image *img, t_vect s_p,
 							t_vector c, int size, double angle, int color);
-void	draw_circle_enemy(t_image *img, t_vector p, int radius, int color, t_vector c);
+void					draw_circle_enemy(t_image *img, t_vector p, int radius,
+							int color, t_vector c);
+void					draw_sprite(t_game *game, t_vector sp_screen,
+							double proj_sp_height, t_image *img,
+							double ray_dist[WIDTH], double dist);
+void					draw_rotated_texture(t_image *dest, t_image *src,
+							t_vector center, double angle, int s_x, int s_y);
+void					draw_floor_and_ceil(t_game *game, t_image *texture,
+							int ray, double ray_angle, int start, int end,
+							double middle, bool fl);
+void					draw_texture(t_image *img, t_image *txt, int x0, int x1,
+							int y0, int y1, int offset, double dist_wall);
 
-//render utils
+// render utils
 void					put_pixel(t_image *img, int x, int y, int color);
 int						set_color_rgb(int r, int g, int b);
-void	clear_image(t_image *img, int width, int height, int color);
-int	get_img_color(t_image *img, int x, int y);
-void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y, t_vect p, int color);
-
-
+void					clear_image(t_image *img, int width, int height,
+							int color);
+int						get_img_color(t_image *img, int x, int y);
+void					paint_image_to_win(t_image *img, t_image *img1, int s_x,
+							int s_y, t_vect p, int color);
+int						get_health_color(int health, int max_health);
 // collision
 bool					is_exceeded(t_vector move, t_player player);
 bool					is_hit_wall(int tile_x, int tile_y, char **map);
-bool					is_collision(t_vector move, t_player player,
-							char **map);
+bool					is_collision(t_vector move, char **map);
 bool					check_collision(t_vector move, t_player player,
 							char **map);
-bool	is_wall_door(int x, int y, char **map, t_player player);
+bool					is_wall_door(int x, int y, char **map, t_player player);
 
-//calcul
-double	distance_between_points(t_vector a, t_vector b);
+// calcul
+double					distance_between_points(t_vector a, t_vector b);
+double					normalize_angle(double angle);
 
-//minimap.c
-void	draw_minimap(t_image *img, char **map, t_player player, t_game *game);
+// minimap.c
+void					draw_minimap(t_image *img, char **map, t_player player,
+							t_game *game);
 
+// init
+int						init_window(t_game *game);
+t_sprit					init_sprite_data(int x, int y);
+t_sprit					*init_sprite(char **map);
+void					init_game(t_game *game);
+void					init_img_loop(t_image *img, int nb);
+void					init_all_images(t_game *game);
+int						init_image_win(t_game *game, t_image *image, int w,
+							int h);
+
+// move
+void					move_player(t_game *game);
+
+// sprites
+void					sort_sprites_by_distance(t_sprit *sp);
+int						count_sprite(char **map);
+
+// game_loop
+int						game_loop(t_game *game);
 #endif

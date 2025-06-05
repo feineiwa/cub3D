@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 11:27:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 14:46:12 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 13:51:08 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ void	load_image_loop(t_game *game, t_image *img, const char *base_path, int limi
 	char file[256];
 
 	i = 0;
+	index = -1;
 	ft_memmove((char *)file, (char *)base_path, ft_strlen(base_path));
 	if (limit == 15)
 		index = 10;

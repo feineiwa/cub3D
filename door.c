@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 08:13:03 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 13:20:38 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,48 @@ t_door	*handle_door(char **map)
 		}
 	}
 	return (doors);
+}
+
+bool	is_hit_door(int x, int y, char **map, t_player player)
+{
+	int	x1;
+	int	y1;
+
+	x1 = x / TILE_SIZE;
+	y1 = y / TILE_SIZE;
+	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
+		return (false);
+	if (map[y1][x1] == door_c || map[y1][x1] == door_o)
+		return (true);
+	return (false);
+}
+
+bool	is_hit_door_close(int x, int y, char **map, t_player player)
+{
+	int	x1;
+	int	y1;
+
+	x1 = x / TILE_SIZE;
+	y1 = y / TILE_SIZE;
+	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
+		return (false);
+	if (map[y1][x1] == door_c)
+		return (true);
+	return (false);
+}
+
+bool	is_hit_door_open(int x, int y, char **map, t_player player)
+{
+	int	x1;
+	int	y1;
+
+	x1 = x / TILE_SIZE;
+	y1 = y / TILE_SIZE;
+	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
+		return (false);
+	if (map[y1][x1] == door_o)
+		return (true);
+	return (false);
 }
 
 void	check_door_close(t_game *game)

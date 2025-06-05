@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 08:24:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 15:24:10 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 13:25:48 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,4 +77,11 @@ void	free_all(t_game *game)
 	ft_free(game->doors);
 	ft_free_img_loop(game, game->intro.img, 384);
 	free_game_var(game);
+}
+
+int	leave_windows(t_game *game)
+{
+	free_all(game);
+	stop_music();
+	exit(0);
 }

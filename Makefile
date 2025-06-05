@@ -1,8 +1,8 @@
 NAME = cub3d
 
-CC = cc
+CC = gcc
 
-CFLAGS = -g
+CFLAGS = -Wall -Wextra -Werror -g
 
 INCS = -I./inc/ -I$(LIBFT) $(LIBMLX)
 
@@ -14,7 +14,7 @@ LIBMLX = ./mlx/
 
 SRC = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
 	cub3d.c player.c music.c door.c ray_cast.c video.c ft_free.c load_images.c key_event.c mouse_event.c drawing.c \
-	collision.c render_utils.c calcul.c minimap.c
+	collision.c render_utils.c calcul.c minimap.c init.c move.c sprites.c game_loop.c
 
 OBJS = $(SRC:.c=.o)
 

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 08:13:26 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 08:20:38 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 13:29:44 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,4 +81,15 @@ void	paint_image_to_win(t_image *img, t_image *img1, int s_x, int s_y, t_vect p,
 		}
 		y++;
 	}
+}
+
+int	get_health_color(int health, int max_health)
+{
+	t_rgb	color;
+	float	ratio = (float)health / max_health;
+	
+	color.r = (int)((1.0f - ratio) * 255);
+	color.g = (int)(ratio * 255);
+	color.b = 0;
+	return(set_color_rgb(color.r, color.g, color.b));
 }

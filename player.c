@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/03 15:13:30 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/05 13:48:48 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,17 +66,15 @@ void	get_w_and_h(char **map, int *w, int *h)
 
 double	get_player_angle(char **map, t_player player)
 {
-	double	angle;
-
 	if (map[(int)player.pos.y][(int)player.pos.x] == p_n)
-		angle = 1.5 * PI;
+		return (1.5 * PI);
 	else if (map[(int)player.pos.y][(int)player.pos.x] == p_s)
-		angle = 0.5 * PI;
+		return (0.5 * PI);
 	else if (map[(int)player.pos.y][(int)player.pos.x] == p_e)
-		angle = 0;
+		return (0);
 	else if (map[(int)player.pos.y][(int)player.pos.x] == p_w)
-		angle = PI;
-	return (angle);
+		return (PI);
+	return (361);
 }
 
 void	init_player(t_game *game)
