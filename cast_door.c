@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/06 10:56:20 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 11:23:55 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/06 11:48:51 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ t_image	*cast_ray_door(t_game *game, t_r *r)
 			r->found_horizontal = false;
 			game->player.pos.x = (r->horiz_p.x / TILE_SIZE);
 			game->player.pos.y = (r->horiz_p.y / TILE_SIZE);
-			r->horiz_p = ray_cast_horizontal(game, r->ray_angle, r->is_facing_up, r->is_facing_down, &r->found_horizontal);
+			r->horiz_p = ray_cast_horizontal(game, r);
 			if (r->found_horizontal == true)
 				r->horizontal_dist = distance_between_points(r->a, r->horiz_p);
 			else
@@ -74,7 +74,7 @@ t_image	*cast_ray_door(t_game *game, t_r *r)
 			r->found_vertical = false;
 			game->player.pos.x = (r->vert_p.x / TILE_SIZE);
 			game->player.pos.y = (r->vert_p.y / TILE_SIZE);
-			r->vert_p = ray_cast_vertical(game, r->ray_angle, r->is_facing_left, r->is_facing_right, &r->found_vertical);
+			r->vert_p = ray_cast_vertical(game, r);
 			if (r->found_vertical == true)
 				r->vertical_dist = distance_between_points(r->a, r->vert_p);
 			else

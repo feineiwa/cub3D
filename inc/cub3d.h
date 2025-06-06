@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 11:22:07 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/06 11:46:07 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 # define PI 3.14159265359
 # define MOVE_SPEED 0.04
 # define ROT_SPEED 0.05
-# define MOUSE_SPEED 0.0005;
+# define MOUSE_SPEED 0.0005
 # define RES 1
 # define TILE_SIZE 32
 # define WIDTH 1600
@@ -43,11 +43,9 @@
 # define HALF_WIDTH 800
 # define FOV 1.0471975512
 # define HALF_FOV 0.523598776
-# define R_NB (WIDTH / RES)
-# define MINI_SIZE (20)
-# define MINI_WIDTH (180)
-# define MINI_X (MINI_WIDTH - (MINI_WIDTH - 15))
-# define MINI_Y (HEIGHT - MINI_WIDTH - 10)
+# define R_NB 1600
+# define MINI_SIZE 20
+# define MINI_WIDTH 180
 
 # define FPS 80
 
@@ -253,6 +251,9 @@ typedef struct s_r
 	double				dist_wall;
 	double				o;
 	int					offset;
+	double				line_height;
+	double				draw_begin;
+	double				draw_end;
 }						t_r;
 
 typedef struct s_game
@@ -339,12 +340,8 @@ bool					is_hit_door_open(int x, int y, char **map,
 							t_player player);
 // ray_cast
 void					compute_ray_orientation(double angle, t_r *r);
-t_vector				ray_cast_horizontal(t_game *game, double ray_angle,
-							bool is_facing_up, bool is_facing_down,
-							bool *found_horizontal);
-t_vector				ray_cast_vertical(t_game *game, double ray_angle,
-							bool is_facing_left, bool is_facing_right,
-							bool *found_vertical);
+t_vector				ray_cast_horizontal(t_game *game, t_r *r);
+t_vector				ray_cast_vertical(t_game *game, t_r *r);
 
 bool					is_hit_door_open(int x, int y, char **map,
 							t_player player);

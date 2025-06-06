@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 11:21:38 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/06 11:48:13 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,11 @@ t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 int	game_loop(t_game *game)
 {
 	t_r r;
+	t_image *img;
+	
 	r.ray = 0;
 	r.horizontal_dist = 0;
 	r.vertical_dist = 0;
-	t_image *img;
 	
 	// if (g_global()->updated == false && g_global()->first == false)
 	// 	return (1);
@@ -127,8 +128,8 @@ int	game_loop(t_game *game)
 		compute_ray_orientation(r.ray_angle, &r);
 		r.found_horizontal = false;
 		r.found_vertical = false;
-		r.horiz_p = ray_cast_horizontal(game , r.ray_angle, r.is_facing_up, r.is_facing_down, &r.found_horizontal);
-		r.vert_p = ray_cast_vertical(game , r.ray_angle, r.is_facing_left, r.is_facing_right, &r.found_vertical);
+		r.horiz_p = ray_cast_horizontal(game , &r);
+		r.vert_p = ray_cast_vertical(game , &r);
 		// // distance calculation
 		r.dist_wall = 0;
 		r.horizontal_dist = set_dist(r.found_horizontal, r.a, r.horiz_p);
@@ -157,17 +158,16 @@ int	game_loop(t_game *game)
 			r.dist_wall = 0.001;
 		r.ray_dist[r.ray] = r.dist_wall;
 		r.waves = 5 + (cos (20 * (game->player.pos.x + game->player.pos.y)));
-		double	line_height = (TILE_SIZE / r.dist_wall) * (g_global()->project_dist);
+		r.line_height = (TILE_SIZE / r.dist_wall) * (g_global()->project_dist);
 		r.middle = (0.5 + g_global()->look) * HEIGHT + g_global()->j_croutch + r.waves;
-		double draw_begin = r.middle - 0.5 * line_height;
-		draw_begin += r.waves;
-		double	draw_end = draw_begin + line_height;
-		// draw_rectangle_rgb_gradient(&game->img, r.ray * RES, RES, 0, (int)draw_begin, game->txt.c);
-		// draw_rectangle_rgb_rgradient(&game->img, r.ray * RES, RES, (int)draw_end, HEIGHT, game->txt.f);
+		r.draw_begin = r.middle - 0.5 * r.line_height + r.waves;
+		r.draw_end = r.draw_begin + r.line_height;
+		// draw_rectangle_rgb_gradient(&game->img, r.ray * RES, RES, 0, (int)r.draw_begin, game->txt.c);
+		// draw_rectangle_rgb_rgradient(&game->img, r.ray * RES, RES, (int)r.draw_end, HEIGHT, game->txt.f);
 		if (img != NULL)
-			draw_texture(&game->img, img, r.ray * RES, RES, (int)(draw_begin), (int)(draw_end), r.offset, r.dist_wall);
-		draw_floor_and_ceil(game, &game->pack.ceil, r.ray, r.ray_angle, 0, (int)draw_begin, r.middle, false);
-		draw_floor_and_ceil(game, &game->pack.floor, r.ray, r.ray_angle, (int)draw_end + 1, HEIGHT, r.middle, true);
+			draw_texture(&game->img, img, r.ray * RES, RES, (int)(r.draw_begin), (int)(r.draw_end), r.offset, r.dist_wall);
+		draw_floor_and_ceil(game, &game->pack.ceil, r.ray, r.ray_angle, 0, (int)r.draw_begin, r.middle, false);
+		draw_floor_and_ceil(game, &game->pack.floor, r.ray, r.ray_angle, (int)r.draw_end + 1, HEIGHT, r.middle, true);
 
 		r.ray_angle += adjusted_fov / R_NB;
 		r.ray++;
