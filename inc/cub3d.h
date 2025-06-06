@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 16:50:17 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/06 11:22:07 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,10 +341,10 @@ bool					is_hit_door_open(int x, int y, char **map,
 void					compute_ray_orientation(double angle, t_r *r);
 t_vector				ray_cast_horizontal(t_game *game, double ray_angle,
 							bool is_facing_up, bool is_facing_down,
-							bool *found_h_o_door, bool *found_horizontal);
+							bool *found_horizontal);
 t_vector				ray_cast_vertical(t_game *game, double ray_angle,
 							bool is_facing_left, bool is_facing_right,
-							bool *found_v_o_door, bool *found_vertical);
+							bool *found_vertical);
 
 bool					is_hit_door_open(int x, int y, char **map,
 							t_player player);
@@ -445,4 +445,7 @@ void					render_sprites(t_game *game, t_r r,
 
 // game_loop
 int						game_loop(t_game *game);
+
+// cast_door
+t_image					*cast_ray_door(t_game *game, t_r *r);
 #endif

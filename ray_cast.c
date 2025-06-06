@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 14:55:41 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/06 11:19:33 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	compute_ray_orientation(double angle, t_r *r)
 		r->is_facing_left = true;
 }
 
-t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up, bool is_facing_down, bool *found_h_o_door, bool *found_horizontal)
+t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up, bool is_facing_down, bool *found_horizontal)
 {
 	t_vector horiz_p = {0, 0};
 	t_vector first_int = {0, 0};
@@ -51,7 +51,6 @@ t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up,
 		if (is_hit_door_open((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
 		{
 			*found_horizontal = true;
-			*found_h_o_door = true;
 			horiz_p = next_horiz;
 			break ;
 		}
@@ -70,7 +69,7 @@ t_vector	ray_cast_horizontal(t_game *game , double ray_angle, bool is_facing_up,
 	return (horiz_p);
 }
 
-t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left, bool is_facing_right, bool *found_v_o_door, bool *found_vertical)
+t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left, bool is_facing_right, bool *found_vertical)
 {
 	t_vector vert_p = {0, 0};
 	t_vector first_int;
@@ -98,7 +97,6 @@ t_vector	ray_cast_vertical(t_game *game , double ray_angle, bool is_facing_left,
 		if (is_hit_door_open((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
 		{
 			*found_vertical = true;
-			*found_v_o_door = true;
 			vert_p = next_vert;
 			break ;
 		}
