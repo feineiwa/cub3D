@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 23:42:00 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/06 23:53:20 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,6 +177,23 @@ void	extra_for_bonus(t_game *game, t_r *r, double adjusted_fov)
 	paint_image_to_win(&game->img, &game->pack.notice, 350, 100, (t_vect){1, 10}, -1);
 }
 
+void	correct_dist(t_game *game, t_r *r)
+{
+	r->dist_wall *= cos(game->player.angle - r->ray_angle);
+	if (r->dist_wall < 0.001)
+		r->dist_wall = 0.001;
+	r->ray_dist[r->ray] = r->dist_wall;
+}
+
+void	calcul_draw_begin_end_middle_line_heigt(t_game *game, t_r *r)
+{
+	r->waves = 5 + (cos (20 * (game->player.pos.x + game->player.pos.y)));
+	r->line_height = (TILE_SIZE / r->dist_wall) * (g_global()->project_dist);
+	r->middle = (0.5 + g_global()->look) * HEIGHT + g_global()->j_croutch + r->waves;
+	r->draw_begin = r->middle - 0.5 * r->line_height + r->waves;
+	r->draw_end = r->draw_begin + r->line_height;
+}
+
 int	game_loop(t_game *game)
 {
 	t_r r;
@@ -206,7 +223,6 @@ int	game_loop(t_game *game)
 		compute_ray_orientation(r.ray_angle, &r);
 		r.horiz_p = ray_cast_horizontal(game , &r);
 		r.vert_p = ray_cast_vertical(game , &r);
-		// // distance calculation
 		r.horizontal_dist = set_dist(r.found_horizontal, r.a, r.horiz_p);
 		r.vertical_dist = set_dist(r.found_vertical, r.a, r.vert_p);
 		r.o = set_hit_and_dist_wall(&r);
@@ -217,15 +233,8 @@ int	game_loop(t_game *game)
 			img = cast_ray_door(game, &r);
 			img = get_image_by_side(game, &r, img);
 		}
-		r.dist_wall *= cos(game->player.angle - r.ray_angle);
-		if (r.dist_wall < 0.001)
-			r.dist_wall = 0.001;
-		r.ray_dist[r.ray] = r.dist_wall;
-		r.waves = 5 + (cos (20 * (game->player.pos.x + game->player.pos.y)));
-		r.line_height = (TILE_SIZE / r.dist_wall) * (g_global()->project_dist);
-		r.middle = (0.5 + g_global()->look) * HEIGHT + g_global()->j_croutch + r.waves;
-		r.draw_begin = r.middle - 0.5 * r.line_height + r.waves;
-		r.draw_end = r.draw_begin + r.line_height;
+		correct_dist(game, &r);
+		calcul_draw_begin_end_middle_line_heigt(game, &r);
 		draw_texture(&game->img, img, r.ray * RES, RES, (int)(r.draw_begin), (int)(r.draw_end), r.offset, r.dist_wall);
 		draw_floor_and_ceil(game, &game->pack.ceil, r.ray, r.ray_angle, 0, (int)r.draw_begin, r.middle, false);
 		draw_floor_and_ceil(game, &game->pack.floor, r.ray, r.ray_angle, (int)r.draw_end + 1, HEIGHT, r.middle, true);
