@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 11:48:13 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/06 12:08:31 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,63 +162,69 @@ int	game_loop(t_game *game)
 		r.middle = (0.5 + g_global()->look) * HEIGHT + g_global()->j_croutch + r.waves;
 		r.draw_begin = r.middle - 0.5 * r.line_height + r.waves;
 		r.draw_end = r.draw_begin + r.line_height;
-		// draw_rectangle_rgb_gradient(&game->img, r.ray * RES, RES, 0, (int)r.draw_begin, game->txt.c);
-		// draw_rectangle_rgb_rgradient(&game->img, r.ray * RES, RES, (int)r.draw_end, HEIGHT, game->txt.f);
 		if (img != NULL)
 			draw_texture(&game->img, img, r.ray * RES, RES, (int)(r.draw_begin), (int)(r.draw_end), r.offset, r.dist_wall);
 		draw_floor_and_ceil(game, &game->pack.ceil, r.ray, r.ray_angle, 0, (int)r.draw_begin, r.middle, false);
 		draw_floor_and_ceil(game, &game->pack.floor, r.ray, r.ray_angle, (int)r.draw_end + 1, HEIGHT, r.middle, true);
+		if (BONUS == 0)
+		{
+			draw_rectangle_rgb_gradient(&game->img, r.ray * RES, RES, 0, (int)r.draw_begin, game->txt.c);
+			draw_rectangle_rgb_rgradient(&game->img, r.ray * RES, RES, (int)r.draw_end, HEIGHT, game->txt.f);
+		}
 
 		r.ray_angle += adjusted_fov / R_NB;
 		r.ray++;
 	}
-	render_sprites(game, r, adjusted_fov);
-	draw_rectangle(&game->img, WIDTH - 301, WIDTH - 99, HEIGHT - 61, HEIGHT - 39, 0x1E1E1E);
-	if (game->player.health >= 0)
-		draw_rectangle(&game->img, WIDTH - 300, WIDTH - 300 + game->player.health, HEIGHT - 60, HEIGHT - 40, get_health_color((game->player.health / 2), 100));
-	t_vect center = {(int)(HALF_WIDTH), (int)(HALF_HEIGHT)};
-	if (game->player.key.scope == true)
-		paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
-	else
-		paint_image_to_win(&game->img, &game->pack.aiming, 30, 30, center, 0xFF0000);
-	
-	
-	t_vector compass = {WIDTH - 121, 95};
-	t_vect comp = {WIDTH - 200, 20};
-	paint_image_to_win(&game->img, &game->pack.compass, 150, 150, comp, -1);
-	draw_rotated_texture(&game->img, &game->pack.needle, compass, game->player.angle, 100, 100);
-	draw_minimap(&game->img, game->map, game->player, game);
-	t_vect pl = {100 - 7, HEIGHT - 100 - 7};
-	paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, pl, 0x00FF00);
-	// draw_circle_full(&game->img, p, 4, 0x00FF00);
-	t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (g_global()->look * 50) - (r.waves * 10))};
-	if (game->player.key.recharge == true)
-	{
-		g_global()->updated = true;
-		static size_t last_update = 0;
-		if (g_global()->gun_frm < 15)
+	if (BONUS != 0)
+	{	
+		render_sprites(game, r, adjusted_fov);
+		draw_rectangle(&game->img, WIDTH - 301, WIDTH - 99, HEIGHT - 61, HEIGHT - 39, 0x1E1E1E);
+		if (game->player.health >= 0)
+			draw_rectangle(&game->img, WIDTH - 300, WIDTH - 300 + game->player.health, HEIGHT - 60, HEIGHT - 40, get_health_color((game->player.health / 2), 100));
+		t_vect center = {(int)(HALF_WIDTH), (int)(HALF_HEIGHT)};
+		if (game->player.key.scope == true)
+			paint_image_to_win(&game->img, &game->pack.scope, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
+		else
+			paint_image_to_win(&game->img, &game->pack.aiming, 30, 30, center, 0xFF0000);
+		
+		
+		t_vector compass = {WIDTH - 121, 95};
+		t_vect comp = {WIDTH - 200, 20};
+		paint_image_to_win(&game->img, &game->pack.compass, 150, 150, comp, -1);
+		draw_rotated_texture(&game->img, &game->pack.needle, compass, game->player.angle, 100, 100);
+		draw_minimap(&game->img, game->map, game->player, game);
+		t_vect pl = {100 - 7, HEIGHT - 100 - 7};
+		paint_image_to_win(&game->img, &game->pack.arrow, 12, 12, pl, 0x00FF00);
+		// draw_circle_full(&game->img, p, 4, 0x00FF00);
+		t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (g_global()->look * 50) - (r.waves * 10))};
+		if (game->player.key.recharge == true)
 		{
-			paint_image_to_win(&game->img, &game->pack.gun_sp[g_global()->gun_frm], 500, 500, g, -1);
-			if (get_current_time() - last_update >= FPS)
+			g_global()->updated = true;
+			static size_t last_update = 0;
+			if (g_global()->gun_frm < 15)
 			{
-				g_global()->gun_frm++;
-				last_update = get_current_time();
+				paint_image_to_win(&game->img, &game->pack.gun_sp[g_global()->gun_frm], 500, 500, g, -1);
+				if (get_current_time() - last_update >= FPS)
+				{
+					g_global()->gun_frm++;
+					last_update = get_current_time();
+				}
+			}
+			else
+			{
+				game->player.key.recharge = false;
+				g_global()->gun_frm = 0;
+				last_update = 0;
+				g_global()->updated = true;
 			}
 		}
-		else
+		else if (game->player.key.key_jump == false && game->player.key.scope == false)
 		{
-			game->player.key.recharge = false;
-			g_global()->gun_frm = 0;
-			last_update = 0;
-			g_global()->updated = true;
+			paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);
+			g_global()->updated = false;
 		}
+		paint_image_to_win(&game->img, &game->pack.notice, 350, 100, (t_vect){1, 10}, -1);
 	}
-	else if (game->player.key.key_jump == false && game->player.key.scope == false)
-	{
-		paint_image_to_win(&game->img, &game->pack.gun_sp[0], 500, 500, g, -1);
-		g_global()->updated = false;
-	}
-	paint_image_to_win(&game->img, &game->pack.notice, 350, 100, (t_vect){1, 10}, -1);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
 	if (game->player.key.hide_mouse == true)
