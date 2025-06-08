@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 11:46:07 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/07 12:02:57 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,6 +254,7 @@ typedef struct s_r
 	double				line_height;
 	double				draw_begin;
 	double				draw_end;
+	double				adjusted_fov;
 }						t_r;
 
 typedef struct s_game
@@ -445,4 +446,8 @@ int						game_loop(t_game *game);
 
 // cast_door
 t_image					*cast_ray_door(t_game *game, t_r *r);
+
+
+//
+double	set_dist(bool flag, t_vector a, t_vector b);
 #endif

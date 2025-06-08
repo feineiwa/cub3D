@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 23:53:20 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/07 13:12:29 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
 				img = &game->pack.door[1];
 			r->offset = img->w - (int)(r->o * img->w) - 1;
+
 		}
 	}
 	else if (r->is_facing_right && r->horizontal_dist > r->vertical_dist)
@@ -83,6 +84,7 @@ t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
 				img = &game->pack.door[1];
 			r->offset = (int)(r->o * img->w);
+
 		}
 	}
 	else if (r->is_facing_left && r->horizontal_dist > r->vertical_dist)
@@ -194,15 +196,22 @@ void	calcul_draw_begin_end_middle_line_heigt(t_game *game, t_r *r)
 	r->draw_end = r->draw_begin + r->line_height;
 }
 
+void	init_ray(t_game *game, t_r *r)
+{
+	r->ray = 0;
+	r->horizontal_dist = 0;
+	r->vertical_dist = 0;
+	r->a.x = game->player.pos.x * TILE_SIZE;
+	r->a.y = game->player.pos.y * TILE_SIZE;
+	r->adjusted_fov = FOV / g_global()->zoom;
+	g_global()->project_dist = (800 / tan(r->adjusted_fov / 2)) - g_global()->narrow_look;
+	r->ray_angle = game->player.angle - (r->adjusted_fov / 2);
+}
+
 int	game_loop(t_game *game)
 {
 	t_r r;
 	t_image *img;
-	double	adjusted_fov;
-	
-	r.ray = 0;
-	r.horizontal_dist = 0;
-	r.vertical_dist = 0;
 	
 	// if (g_global()->updated == false && g_global()->first == false)
 	// 	return (1);
@@ -212,11 +221,7 @@ int	game_loop(t_game *game)
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
 	check_door_close(game);
 	move_player(game);
-	r.a.x = game->player.pos.x * TILE_SIZE;
-	r.a.y = game->player.pos.y * TILE_SIZE;
-	adjusted_fov = FOV / g_global()->zoom;
-	g_global()->project_dist = (800 / tan(adjusted_fov / 2)) - g_global()->narrow_look;
-	r.ray_angle = game->player.angle - (adjusted_fov / 2);
+	init_ray(game, &r);
 	while (r.ray < R_NB)
 	{
 		r.ray_angle = normalize_angle(r.ray_angle);
@@ -240,11 +245,10 @@ int	game_loop(t_game *game)
 		draw_floor_and_ceil(game, &game->pack.floor, r.ray, r.ray_angle, (int)r.draw_end + 1, HEIGHT, r.middle, true);
 			// draw_rectangle_rgb_gradient(&game->img, r.ray * RES, RES, 0, (int)r.draw_begin, game->txt.c);
 			// draw_rectangle_rgb_rgradient(&game->img, r.ray * RES, RES, (int)r.draw_end, HEIGHT, game->txt.f);
-
-		r.ray_angle += adjusted_fov / R_NB;
+		r.ray_angle += r.adjusted_fov / R_NB;
 		r.ray++;
 	}
-	extra_for_bonus(game, &r, adjusted_fov);
+	extra_for_bonus(game, &r, r.adjusted_fov);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
 	print_notice(game);
