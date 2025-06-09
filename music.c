@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 08:38:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/02 17:35:02 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 15:47:26 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,19 +57,15 @@ void	launch_music(char const *file, char *vol)
 		return ;
 	else if (pid == 0)
 	{
-		execlp("cvlc", "cvlc", "--gain", vol, file, (char *)NULL);
+		execlp("cvlc", "cvlc", "--gain", vol, file, (char *) NULL);
 		// execlp("cvlc", "cvlc", "--volume", "5", file, (char *)NULL);
 		// execlp("ffplay", "ffplay", "-volume", "50", "-nodisp", "-autoexit",
-			// file, (char *)NULL);
+		// file, (char *)NULL);
 		// execlp("mpv", "mpv", "--volume=50", "--no-video", file,
-			// (char *)NULL);
+		// (char *)NULL);
 	}
 	else
 		g_global()->music_pid = pid;
-	// system(last);
-	// sleep(1);
-	// ft_free(sound);
-	// ft_free(last);
 }
 
 void	stop_music(void)
@@ -84,14 +80,14 @@ void	stop_music(void)
 t_g	*g_global(void)
 {
 	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875, false, 0, 0, false,
-			false, 0, 0.f, 100, true};
+		false, 0, 0.f, 100, true, 0, -1};
 
 	return (&value);
 }
 
 size_t	get_current_time(void)
 {
-	struct timeval time;
+	struct timeval	time;
 
 	if (gettimeofday(&time, NULL) == -1)
 		printf("Error gettimeofday()\n");

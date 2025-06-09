@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 11:27:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/07 13:12:19 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 16:53:00 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,51 +18,15 @@ void	load_image(t_game *game, t_image *img, char *path)
 	if (img->img_ptr == NULL)
 	{
 		free_all(game);
-		ft_putendl_fd("Error\nFailed to load image. Please check the file path, format, and permissions.", 2);
+		ft_putendl_fd("Error", 2);
+		ft_putstr_fd("Failed to load image. Please ", 2);
+		ft_putendl_fd("check the file path, format, and permissions.", 2);
 		exit(1);
 	}
-	img->addr = mlx_get_data_addr(img->img_ptr, &img->bpp, &img->size_line, &img->endian);
+	img->addr = mlx_get_data_addr(img->img_ptr, &img->bpp,
+			&img->size_line, &img->endian);
 }
 
-void	load_image_loop(t_game *game, t_image *img, const char *base_path, int limit)
-{
-	int	i;
-	int	index;
-	int	j;
-	char file[256];
-
-	i = 0;
-	index = -1;
-	ft_memmove((char *)file, (char *)base_path, ft_strlen(base_path));
-	if (limit == 15)
-		index = 10;
-	else if (limit == 4)
-		index = 15;
-	else if (limit == 7)
-		index = 18;
-	else if (limit == 384)
-		index = 13;
-	while (i < limit)
-	{
-		j = i + 1;
-		if (j >= 10 && j <= 99)
-		{
-			file[index + 1] = '0' + (j / 10);
-			file[index + 2] = '0' + (j % 10);
-		}
-		else if (j > 99)
-		{
-			file[index] = '0' + ((j / 10) / 10);
-			file[index + 1] = '0' + ((j / 10) % 10);
-			file[index + 2] = '0' + (j % 10);
-		}
-		else
-			file[index + 2] = '0' + j;
-		printf("%s\n", file);
-		load_image(game, &img[i], file);
-		i++;
-	}
-}
 void	load_pack(t_game *game)
 {
 	load_image(game, &game->pack.arrow, "images/arrow.xpm");
@@ -120,9 +84,9 @@ void	load_all_images(t_game *game)
 	load_image(game, &game->pack.ea_img, game->txt.ea_path);
 	load_image(game, &game->pack.we_img, game->txt.we_path);
 	load_image(game, &game->pack.load, "images/loading.xpm");
-	mlx_put_image_to_window(game->var.mlx, game->var.win, game->pack.load.img_ptr, 0, 0);
+	mlx_put_image_to_window(game->var.mlx, game->var.win,
+		game->pack.load.img_ptr, 0, 0);
 	load_pack(game);
 	load_gun_sp(game);
 	load_video(game);
 }
-

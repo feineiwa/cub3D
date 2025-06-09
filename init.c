@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:15:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 13:55:02 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 13:02:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ int	init_image_win(t_game *game, t_image *image, int w, int h)
 	return (1);
 }
 
-t_sprit init_sprite_data(int x, int y)
+t_sprit	init_sprite_data(int x, int y)
 {
 	t_sprit	sp;
 
@@ -57,10 +57,10 @@ t_sprit	*init_sprite(char **map)
 {
 	int		x;
 	int		y;
-	t_sprit *sp;
+	t_sprit	*sp;
 	int		k;
 
-	sp  = malloc(sizeof(t_sprit) * g_global()->sp_count);
+	sp = malloc(sizeof(t_sprit) * g_global()->sp_count);
 	if (!sp)
 		return (NULL);
 	y = 0;

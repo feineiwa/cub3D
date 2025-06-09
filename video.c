@@ -6,11 +6,28 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 09:55:57 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/02 13:59:37 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 16:59:00 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc/cub3d.h"
+
+void	set_filename(char *filename, int j)
+{
+	if (j >= 10 && j <= 99)
+	{
+		filename[14] = '0' + (j / 10);
+		filename[15] = '0' + (j % 10);
+	}
+	else if (j > 99)
+	{
+		filename[13] = '0' + ((j / 10) / 10);
+		filename[14] = '0' + ((j / 10) % 10);
+		filename[15] = '0' + (j % 10);
+	}
+	else
+		filename[15] = '0' + j;
+}
 
 void	load_video(t_game *game)
 {
@@ -25,21 +42,12 @@ void	load_video(t_game *game)
 	while (i < 384)
 	{
 		j = i + 1;
-		if (j >= 10 && j <= 99)
-		{
-			filename[14] = '0' + (j / 10);
-			filename[15] = '0' + (j % 10);
-		}
-		else if (j > 99)
-		{
-			filename[13] = '0' + ((j / 10) / 10);
-			filename[14] = '0' + ((j / 10) % 10);
-			filename[15] = '0' + (j % 10);
-		}
-		else
-			filename[15] = '0' + j;
-		game->intro.img[i].img_ptr = mlx_xpm_file_to_image(game->var.mlx, filename, &game->intro.img[i].w, &game->intro.img[i].h);
-		game->intro.img[i].addr = mlx_get_data_addr(game->intro.img[i].img_ptr, &game->intro.img[i].bpp, &game->intro.img[i].size_line, &game->intro.img[i].endian);
+		set_filename(filename, j);
+		game->intro.img[i].img_ptr = mlx_xpm_file_to_image(game->var.mlx,
+				filename, &game->intro.img[i].w, &game->intro.img[i].h);
+		game->intro.img[i].addr = mlx_get_data_addr(game->intro.img[i].img_ptr,
+				&game->intro.img[i].bpp, &game->intro.img[i].size_line,
+				&game->intro.img[i].endian);
 		if (!game->intro.img[i].img_ptr)
 			return ;
 		i++;

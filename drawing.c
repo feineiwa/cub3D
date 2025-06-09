@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:55:52 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 08:57:25 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 16:34:03 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,17 +255,27 @@ void	draw_circle_enemy(t_image *img, t_vector p, int radius, int color, t_vector
 	}
 }
 
+int	color_by_distance(int color, double distance, int light_level)
+{
+	t_rgb	col;
+	double 	light;
+
+	light = light_level / distance;
+	col.r = (color >> 16) & 0xFF;
+	col.g = (color >> 8) & 0xFF;
+	col.b = color & 0xFF;
+	col.r = fmin(fmax(col.r * light, 0), col.r);
+	col.g = fmin(fmax(col.g * light, 0), col.g);
+	col.b = fmin(fmax(col.b * light, 0), col.b);
+	return (set_color_rgb(col.r, col.g, col.b));
+}
+
 void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, int offset, double dist_wall)
 {
 	int	i;
 	int color;
 	double scale;
 	int	texture_y;
-	double	light = 40 / dist_wall;
-	t_rgb col;
-	int	r;
-	int	g;
-	int	b;
 	double	tex_pos = 0;
 
 	scale = (double)txt->h / (double)(y1 - y0);
@@ -279,18 +289,7 @@ void	draw_texture(t_image *img, t_image *txt, int x0, int x1, int y0, int y1, in
 		{
 			color = get_img_color(txt, offset, texture_y);
 			if (color >= 0)
-			{
-				r = (color >> 16) & 0xFF;
-				g = (color >> 8) & 0xFF;
-				b = color & 0xFF;
-				// col.r = r;
-				// col.g = g;
-				// col.b = b;
-				col.r = fmin(fmax(r * light, 0), r);
-				col.g = fmin(fmax(g * light, 0), g);
-				col.b = fmin(fmax(b * light, 0), b);
-				put_pixel(img, i + x0, y0, set_color_rgb(col.r, col.g, col.b));
-			}
+				put_pixel(img, i + x0, y0, color_by_distance(color, dist_wall, 60));
 			i++;
 		}
 		tex_pos += scale;
@@ -330,7 +329,7 @@ void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray, double ray_ang
 		tex_x = abs(tex_x); 
         tex_y = abs(tex_y);
 		color = get_img_color(texture, tex_x, tex_y);
-		put_pixel(&game->img, ray, start, color);
+		put_pixel(&game->img, ray, start, color_by_distance(color, distance, 60));
 		start++;
 	}
 }
@@ -395,7 +394,7 @@ void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height, t_imag
 					int tex_y = (y - start_y) * img->h / sprite_height;
 					int	color = get_img_color(img, tex_x, tex_y);
 					if (color >= 0)
-						put_pixel(&game->img, x, y, color);
+						put_pixel(&game->img, x, y, color_by_distance(color, dist, 60));
 				}
 				y++;
 			}

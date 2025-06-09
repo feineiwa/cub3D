@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 18:06:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 13:54:00 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 13:29:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ bool	is_wall_door(int x, int y, char **map, t_player player)
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 		return (false);
-	if (map[y1][x1] == wall || map[y1][x1] == door_c)
+	if (map[y1][x1] == wall || map[y1][x1] == door_c || map[y1][x1] == door_o)
 		return (true);
 	return (false);
 }

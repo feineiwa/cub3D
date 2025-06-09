@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 08:24:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 13:25:48 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 16:45:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,8 @@ void	free_game_var(t_game *game)
 }
 
 void	free_all(t_game *game)
-{	
-	ft_free_img_packs(game , game->pack);
+{
+	ft_free_img_packs(game, game->pack);
 	ft_free(game->sp);
 	ft_free(game->doors);
 	ft_free_img_loop(game, game->intro.img, 384);

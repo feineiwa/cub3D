@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/07 12:02:57 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 15:46:57 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,6 +287,8 @@ typedef struct s_g
 	float				look;
 	int					jump;
 	bool				first;
+	size_t				door_time;
+	int					prev_index ;
 }						t_g;
 
 // PARSE
@@ -403,8 +405,12 @@ int						set_color_rgb(int r, int g, int b);
 void					clear_image(t_image *img, int width, int height,
 							int color);
 int						get_img_color(t_image *img, int x, int y);
-void					paint_image_to_win(t_image *img, t_image *img1, int s_x,
-							int s_y, t_vect p, int color);
+void					paint_image_to_win(t_image *img, t_image *img1,
+							t_vect s, t_vect p);
+void					paint_image_to_win_arrow(t_image *img, t_image *img1,
+							t_vect s, t_vect p);
+void					paint_image_to_win_aiming(t_image *img, t_image *img1,
+							t_vect s, t_vect p);
 int						get_health_color(int health, int max_health);
 // collision
 bool					is_exceeded(t_vector move, t_player player);
@@ -447,7 +453,11 @@ int						game_loop(t_game *game);
 // cast_door
 t_image					*cast_ray_door(t_game *game, t_r *r);
 
-
 //
-double	set_dist(bool flag, t_vector a, t_vector b);
+double					set_dist(bool flag, t_vector a, t_vector b);
+// game_loop
+
+void					init_ray(t_game *game, t_r *r);
+double					set_hit_and_dist_wall(t_r *r);
+
 #endif

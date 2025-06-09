@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/05 13:55:26 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 13:01:29 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	event_listener(t_game *game)
 
 int	main(int ac, char **av)
 {
-	t_game game;
+	t_game	game;
 
 	if (ac != 2)
 		return (ft_putendl_fd("Error\nArguments should be just 2", 2), 1);

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/06 23:20:28 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 13:29:44 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,12 +51,6 @@ t_vector	ray_cast_horizontal(t_game *game , t_r *r)
 	r->s.x = r->s.y / tan(r->ray_angle);
 	while (next_horiz.x < (game->player.w * TILE_SIZE) && next_horiz.x >= 0 && next_horiz.y < (game->player.h * TILE_SIZE) && next_horiz.y >= 0)
 	{
-		if (is_hit_door_open((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
-		{
-			r->found_horizontal = true;
-			horiz_p = next_horiz;
-			break ;
-		}
 		if (is_wall_door((int)floor(next_horiz.x), (int)floor(next_horiz.y), game->map, game->player))
 		{
 			r->found_horizontal = true;
@@ -96,12 +90,6 @@ t_vector	ray_cast_vertical(t_game *game , t_r *r)
 	r->s.y = r->s.x * tan(r->ray_angle);
 	while (next_vert.x < (game->player.w * TILE_SIZE)  && next_vert.x >= 0 && next_vert.y < (game->player.h * TILE_SIZE)  && next_vert.y >= 0)
 	{
-		if (is_hit_door_open((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
-		{
-			r->found_vertical = true;
-			vert_p = next_vert;
-			break ;
-		}
 		if (is_wall_door((int)floor(next_vert.x), (int)floor(next_vert.y), game->map, game->player))
 		{
 			r->found_vertical = true;
