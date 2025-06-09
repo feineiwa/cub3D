@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/08 07:14:04 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 08:52:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,6 +208,17 @@ void	init_ray(t_game *game, t_r *r)
 	r->ray_angle = game->player.angle - (r->adjusted_fov / 2);
 }
 
+t_image	*check_if_hit_door(t_game *game, t_r *r, t_image *img)
+{
+	if (is_hit_door((int)floor(r->wall_hit.x), (int)floor(r->wall_hit.y), game->map, game->player))
+	{
+		img = cast_ray_door(game, r);
+		img = get_image_by_side(game, r, img);
+	}
+	return (img);
+}
+
+
 void	ray_cast_loop(t_game *game, t_r *r)
 {
 	t_image *img;
@@ -223,11 +234,7 @@ void	ray_cast_loop(t_game *game, t_r *r)
 		r->o = set_hit_and_dist_wall(r);
 		img = NULL;
 		img = get_image_by_side(game, r, img);
-		if (is_hit_door((int)floor(r->wall_hit.x), (int)floor(r->wall_hit.y), game->map, game->player))
-		{
-			img = cast_ray_door(game, r);
-			img = get_image_by_side(game, r, img);
-		}
+		img = check_if_hit_door(game, r, img);
 		correct_dist(game, r);
 		calcul_draw_begin_end_middle_line_heigt(game, r);
 		draw_texture(&game->img, img, r->ray * RES, RES, (int)(r->draw_begin), (int)(r->draw_end), r->offset, r->dist_wall);
