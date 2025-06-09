@@ -15,8 +15,8 @@ LIBMLX = ./mlx/
 B_FLAG = 0
 
 SRC = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
-	cub3d.c player.c music.c door.c ray_cast.c video.c ft_free.c load_images.c key_event.c mouse_event.c drawing.c \
-	collision.c render_utils.c calcul.c minimap.c init.c move.c sprites.c game_loop.c cast_door.c
+	./src/cub3d.c ./src/player.c ./src/music.c ./src/door.c ./src/ray_cast.c ./src/video.c ./src/ft_free.c ./src/load_images.c ./src/key_event.c ./src/mouse_event.c ./src/drawing.c \
+	./src/collision.c ./src/render_utils.c ./src/calcul.c ./src/minimap.c ./src/init.c ./src/move.c ./src/sprites.c ./src/game_loop.c ./src/cast_door.c
 
 OBJS = $(SRC:.c=.o)
 

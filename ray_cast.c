@@ -6,11 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 13:29:44 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "inc/cub3d.h"
+#include "../inc/cub3d.h"
 
 void	compute_ray_orientation(double angle, t_r *r)
 {
