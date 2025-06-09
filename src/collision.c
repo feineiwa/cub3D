@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 18:06:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 17:47:43 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,10 @@ bool	is_exceeded(t_vector move, t_player player)
 	double	collider;
 
 	collider = 0.1;
-	top_left.x = (int)(move.x - collider);
-	top_left.y = (int)(move.y - collider);
-	top_right.x = (int)(move.x + collider);
-	top_right.y = (int)(move.y - collider);
-	bottom_left.x = (int)(move.x - collider);
-	bottom_left.y = (int)(move.y + collider);
-	bottom_right.x = (int)(move.x + collider);
-	bottom_right.y = (int)(move.y + collider);
+	top_left = (t_vect){(int)(move.x - collider), (int)(move.y - collider)};
+	top_right = (t_vect){(int)(move.x + collider), (int)(move.y - collider)};
+	bottom_left = (t_vect){(int)(move.x - collider), (int)(move.y + collider)};
+	bottom_right = (t_vect){(int)(move.x + collider), (int)(move.y + collider)};
 	if (top_left.x >= player.w || top_left.x < 0 || top_left.y < 0
 		|| top_left.y >= player.h)
 		return (true);

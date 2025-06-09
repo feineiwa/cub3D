@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:30:31 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 17:49:13 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ void	check_sprites_fired(t_game *game, int *shoot_ind, size_t *shoot_time)
 	int		sprite_height;
 	t_vect	start;
 	t_vect	end;
-	
+
 	sp_c = g_global()->sp_count - 1;
 	while (sp_c >= 0)
 	{
