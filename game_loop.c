@@ -6,14 +6,13 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 08:52:11 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 09:35:23 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "inc/cub3d.h"
 
-int	start_render(t_game *game)
+int	video_running(t_game *game)
 {
 	if (g_global()->first == true)
 	{
@@ -26,12 +25,26 @@ int	start_render(t_game *game)
 		}
 		return (0);
 	}
+	return (1);
+}
+
+int	game_over(t_game *game)
+{
 	if (g_global()->game_over == true)
 	{
 		paint_image_to_win(&game->img, &game->pack.gov, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
 		mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0, 0);
 		return (0);
 	}
+	return (1);
+}
+
+int	start_render(t_game *game)
+{
+	if (!video_running(game))
+		return (0);
+	if (!game_over(game))
+		return (0);
 	if (g_global()->help == true)
 	{
 		paint_image_to_win(&game->img, &game->pack.help, WIDTH, HEIGHT, (t_vect){0, 0}, -1);
@@ -40,6 +53,7 @@ int	start_render(t_game *game)
 	}
 	return (1);
 }
+
 double	set_dist(bool flag, t_vector a, t_vector b)
 {
 	if (flag == true)
@@ -49,13 +63,16 @@ double	set_dist(bool flag, t_vector a, t_vector b)
 
 t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 {
+	int	map_x;
+	int	map_y;
+
 	if (r->is_facing_up && r->horizontal_dist < r->vertical_dist)
 	{
 		if (img == NULL)
 		{
 			img = &game->pack.no_img;
-			int map_x = (int)floor((r->wall_hit.x / TILE_SIZE));
-			int map_y = (int)floor(r->wall_hit.y / TILE_SIZE) + 1;
+			map_x = (int)floor((r->wall_hit.x / TILE_SIZE));
+			map_y = (int)floor(r->wall_hit.y / TILE_SIZE) + 1;
 			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
 				img = &game->pack.door[1];
 			r->offset = (int)(r->o * img->w);
@@ -66,12 +83,11 @@ t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 		if (img == NULL)
 		{
 			img = &game->pack.so_img;
-			int map_x = (int)floor((r->wall_hit.x / TILE_SIZE));
-			int map_y = (int)floor(r->wall_hit.y / TILE_SIZE) - 1;
+			map_x = (int)floor((r->wall_hit.x / TILE_SIZE));
+			map_y = (int)floor(r->wall_hit.y / TILE_SIZE) - 1;
 			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
 				img = &game->pack.door[1];
 			r->offset = img->w - (int)(r->o * img->w) - 1;
-
 		}
 	}
 	else if (r->is_facing_right && r->horizontal_dist > r->vertical_dist)
@@ -79,12 +95,11 @@ t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 		if (img == NULL)
 		{
 			img = &game->pack.ea_img;
-			int map_x = (int)floor((r->wall_hit.x / TILE_SIZE) - 1);
-			int map_y = (int)floor(r->wall_hit.y / TILE_SIZE);
+			map_x = (int)floor((r->wall_hit.x / TILE_SIZE) - 1);
+			map_y = (int)floor(r->wall_hit.y / TILE_SIZE);
 			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
 				img = &game->pack.door[1];
 			r->offset = (int)(r->o * img->w);
-
 		}
 	}
 	else if (r->is_facing_left && r->horizontal_dist > r->vertical_dist)
@@ -92,8 +107,8 @@ t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 		if (img == NULL)
 		{
 			img = &game->pack.we_img;
-			int map_x = (int)floor((r->wall_hit.x / TILE_SIZE) + 1);
-			int map_y = (int)floor(r->wall_hit.y / TILE_SIZE);
+			map_x = (int)floor((r->wall_hit.x / TILE_SIZE) + 1);
+			map_y = (int)floor(r->wall_hit.y / TILE_SIZE);
 			if (game->map[map_y][map_x] == door_c || game->map[map_y][map_x] == door_o)
 				img = &game->pack.door[1];
 			r->offset = img->w - (int)(r->o * img->w) - 1;
@@ -104,9 +119,8 @@ t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img)
 
 void	render_gun(t_game *game, t_r *r)
 {
-	static size_t last_update = 0;
-	t_vect g = {800 - 100, (int)(HEIGHT  - 300 - (g_global()->look * 50) - (r->waves * 10))};
-
+	static size_t	last_update = 0;
+	t_vect			g = {800 - 100, (int)(HEIGHT  - 300 - (g_global()->look * 50) - (r->waves * 10))};
 
 	if (game->player.key.recharge == true)
 	{
