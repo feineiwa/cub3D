@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 15:46:57 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 23:14:06 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -382,8 +382,8 @@ void					draw_rectangle(t_image *image, int x0, int x1, int y0,
 							int y1, int color);
 void					draw_circle_full(t_image *img, t_vector p, int radius,
 							int color);
-void					draw_square_at_edge(t_image *img, int x, int y,
-							int size, t_vector c, int color);
+// void					draw_square_at_edge(t_image *img, int x, int y,
+// 							int size, t_vector c, int color);
 void					draw_rotated_square(t_image *img, t_vect s_p,
 							t_vector c, int size, double angle, int color);
 void					draw_circle_enemy(t_image *img, t_vector p, int radius,

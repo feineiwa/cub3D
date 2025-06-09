@@ -6,77 +6,100 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 08:23:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/09 23:34:32 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
+t_vect	clamp(t_vect point, t_player player)
 {
-	int	x1;
-	int	x2;
-	int	y1;
-	int	y2;
-	int	side = 7;
-	double angle;
-	
-	angle = normalize_angle(player.angle + (0.5 * PI));
-	x1 = (int)floor(player.pos.x) - side;
-	if (x1 < 0)
-		x1 = 0;
-	x2 = player.pos.x + side;
-	if (x2 > player.w)
-		x2 = player.w;
-	y1 = (int)floor(player.pos.y) - side;
-	if (y1 < 0)
-		y1 = 0;
-	y2 = player.pos.y + side;
-	if (y2 > player.h)
-		y2 = player.h;
-	t_vector c = {100, HEIGHT - 100};
-	draw_circle_full(img, c, MINI_WIDTH / 2, 0x1E1E1E);
-	draw_circle(img, c, MINI_WIDTH / 2, 0x333333);
-	draw_circle(img, c, MINI_WIDTH / 2 + 1, 0x555555);
-	draw_circle(img, c, MINI_WIDTH / 2 + 2, 0x777777);
-	draw_circle(img, c, MINI_WIDTH / 2 + 3, 0x999999);
-	double cos_angle = cos(angle);
-    double sin_angle = sin(angle);
-	int	j = y1;
-	int	i;
-	while (j < y2)
+	if (point.x < 0)
+		point.x = 0;
+	if (point.x > player.w)
+		point.x = player.w;
+	if (point.y < 0)
+		point.y = 0;
+	if (point.y > player.h)
+		point.y = player.h;
+	return (point);
+}
+
+void	draw_grid(t_game *game, t_vector c, t_vect s1, t_vect s2)
+{
+	int			i;
+	double		angle;
+	t_vector	rotated;
+	t_vector	relative;
+	t_vect		draw;
+
+	angle = normalize_angle(game->player.angle + (0.5 * PI));
+	while (s1.y < s2.y)
 	{
-		i = x1;
-		while (i < x2)
+		i = s1.x;
+		while (i < s2.x)
 		{
-			t_vector relative = {(i - player.pos.x), (j - player.pos.y)};
-			t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
-			t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
-			if (map[j][i] == wall)
-				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
-			else if (map[j][i] == door_c)
-				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x00FFFF);
-			else if (map[j][i] == door_o)
-				draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0x007070);
-				// draw_rotated_square(img, draw, c, MINI_SIZE - 1, angle, 0xFF0000);
-			// draw_square_at_edge(img, draw.x, draw.y, MINI_SIZE, c, 0xE0E0E0);
-			
+			relative = (t_vector){(i - game->player.pos.x), (s1.y - game->player.pos.y)};
+			rotated = (t_vector){relative.x * cos(angle) + relative.y * sin(angle), -relative.x * sin(angle) + relative.y * cos(angle)};
+			draw = (t_vect){(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
+			if (game->map[s1.y][i] == wall)
+				draw_rotated_square(&game->img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
+			else if (game->map[s1.y][i] == door_c)
+				draw_rotated_square(&game->img, draw, c, MINI_SIZE - 1, angle, 0x00FFFF);
+			else if (game->map[s1.y][i] == door_o)
+				draw_rotated_square(&game->img, draw, c, MINI_SIZE - 1, angle, 0x007070);
 			i++;
 		}
-		j++;
+		s1.y++;
 	}
-	int	sp_c = 0;
+}
+
+void	draw_door_grid(t_game *game, t_image *img, t_vector c, t_player player)
+{
+	int			sp_c;
+	double		angle;
+	t_vector	relative;
+	t_vector	rotated;
+	t_vect		draw;
+
+	sp_c = 0;
+	angle = normalize_angle(player.angle + (0.5 * PI));
 	while (sp_c < g_global()->sp_count)
 	{
-		t_vector relative = {(game->sp[sp_c].pos.x - player.pos.x), (game->sp[sp_c].pos.y - player.pos.y)};
-		t_vector rotated = {relative.x * cos_angle + relative.y * sin_angle, -relative.x * sin_angle + relative.y * cos_angle};
-		t_vect draw = {(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
+		relative = (t_vector){(game->sp[sp_c].pos.x - player.pos.x), (game->sp[sp_c].pos.y - player.pos.y)};
+		rotated = (t_vector){relative.x * cos(angle) + relative.y * sin(angle), -relative.x * sin(angle) + relative.y * cos(angle)};
+		draw = (t_vect){(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
 		if (game->sp[sp_c].is_died == false)
 			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0xFF0000, c);
 		else
 			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0x4D1F1F, c);
 		sp_c++;
 	}
+}
+
+void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
+{
+	int			side;
+	t_vect		s1;
+	t_vect		s2;
+	t_vector	c;
+
+	side = 7;
+	s1.x = (int)floor(player.pos.x) - side;
+	s2.x = (int)floor(player.pos.x) + side;
+	s1.y = (int)floor(player.pos.y) - side;
+	s2.y = (int)floor(player.pos.y) + side;
+	s1 = clamp(s1, game->player);
+	s2 = clamp(s2, game->player);
+	c = (t_vector){100, HEIGHT - 100};
+	draw_circle_full(img, c, MINI_WIDTH / 2, 0x1E1E1E);
+	draw_circle(img, c, MINI_WIDTH / 2, 0x333333);
+	draw_circle(img, c, MINI_WIDTH / 2 + 1, 0x555555);
+	draw_circle(img, c, MINI_WIDTH / 2 + 2, 0x777777);
+	draw_circle(img, c, MINI_WIDTH / 2 + 3, 0x999999);
+	draw_grid(game, c, s1, s2);
+	draw_door_grid(game, img, c, player);
+	(void)map;
 	// draw_circle(img, c, 1, 0x00FF66);
 	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
 }
