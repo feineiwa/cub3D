@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 13:29:25 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 17:03:10 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,15 +257,23 @@ typedef struct s_r
 	double				adjusted_fov;
 }						t_r;
 
-typedef	struct s_d
+typedef struct s_d
 {
-	t_vector	door_v;
-	t_vector	door_h;
-	double		door_v_dist;
-	double		door_h_dist;
-	int			door_index;
-}	t_d;
+	t_vector			door_v;
+	t_vector			door_h;
+	double				door_v_dist;
+	double				door_h_dist;
+	int					door_index;
+}						t_d;
 
+typedef struct s_squ
+{
+	double				angle;
+	t_vector			rotated;
+	t_vector			relative;
+	t_vect				draw;
+	t_vector			c;
+}						t_squ;
 
 typedef struct s_game
 {
@@ -298,7 +306,7 @@ typedef struct s_g
 	int					jump;
 	bool				first;
 	size_t				door_time;
-	int					prev_index ;
+	int					prev_index;
 }						t_g;
 
 // PARSE
@@ -365,8 +373,6 @@ bool					is_hit_door(int x, int y, char **map, t_player player);
 // load_images
 void					load_image(t_game *game, t_image *img, char *path);
 void					load_video(t_game *game);
-void					load_image_loop(t_game *game, t_image *img,
-							const char *base_path, int limit);
 void					load_pack(t_game *game);
 void					load_pack(t_game *game);
 void					load_gun_sp(t_game *game);
@@ -378,26 +384,26 @@ void					free_game_var(t_game *game);
 int						leave_windows(t_game *game);
 
 // drawing
-void					draw_line(t_image *img, t_vector a, t_vector b,
-							int color);
-void					draw_square(t_image *img, int x, int y, int size,
-							int color);
+// void					draw_line(t_image *img, t_vector a, t_vector b,
+// 							int color);
+// void					draw_square(t_image *img, int x, int y, int size,
+// 							int color);
 void					draw_circle(t_image *img, t_vector p, int radius,
 							int color);
-void					draw_rectangle_rgb_gradient(t_image *image, int x0,
-							int x1, int y0, int y1, t_rgb rgb);
-void					draw_rectangle_rgb_rgradient(t_image *image, int x0,
-							int x1, int y0, int y1, t_rgb rgb);
-void					draw_rectangle(t_image *image, int x0, int x1, int y0,
-							int y1, int color);
+// void					draw_rectangle_rgb_gradient(t_image *image, int x0,
+// 							int x1, int y0, int y1, t_rgb rgb);
+// void					draw_rectangle_rgb_rgradient(t_image *image, int x0,
+// 							int x1, int y0, int y1, t_rgb rgb);
+void					draw_rectangle(t_image *image, t_vect a, t_vect b,
+							int color);
 void					draw_circle_full(t_image *img, t_vector p, int radius,
 							int color);
 // void					draw_square_at_edge(t_image *img, int x, int y,
 // 							int size, t_vector c, int color);
-void					draw_rotated_square(t_image *img, t_vect s_p,
-							t_vector c, int size, double angle, int color);
-void					draw_circle_enemy(t_image *img, t_vector p, int radius,
-							int color, t_vector c);
+void					draw_rotated_square(t_image *img, t_squ squ, int size,
+							int color);
+void					draw_circle_enemy(t_image *img, t_squ squ, int radius,
+							int color);
 void					draw_sprite(t_game *game, t_vector sp_screen,
 							double proj_sp_height, t_image *img,
 							double ray_dist[WIDTH], double dist);
@@ -406,8 +412,7 @@ void					draw_rotated_texture(t_image *dest, t_image *src,
 void					draw_floor_and_ceil(t_game *game, t_image *texture,
 							int ray, double ray_angle, int start, int end,
 							double middle, bool fl);
-void					draw_texture(t_image *img, t_image *txt, int x0, int x1,
-							int y0, int y1, int offset, double dist_wall);
+void					draw_texture(t_image *img, t_image *txt, t_r *r);
 
 // render utils
 void					put_pixel(t_image *img, int x, int y, int color);
@@ -459,7 +464,7 @@ void					render_sprites(t_game *game, t_r r,
 
 // game_loop
 int						game_loop(t_game *game);
-t_image	*check_if_hit_door(t_game *game, t_r *r, t_image *img);
+t_image					*check_if_hit_door(t_game *game, t_r *r, t_image *img);
 // cast_door
 t_image					*cast_ray_door(t_game *game, t_r *r);
 

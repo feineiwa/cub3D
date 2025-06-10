@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 11:39:08 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 16:48:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,12 +220,12 @@ double	set_hit_and_dist_wall(t_r *r)
 void	extra_for_bonus(t_game *game, t_r *r, double adjusted_fov)
 {
 	render_sprites(game, *r, adjusted_fov);
-	draw_rectangle(&game->img, WIDTH - 301, WIDTH - 99, HEIGHT - 61, HEIGHT
-		- 39, 0x1E1E1E);
+	draw_rectangle(&game->img, (t_vect){WIDTH - 301, HEIGHT - 61},
+		(t_vect){WIDTH - 99, HEIGHT - 39}, 0x1E1E1E);
 	if (game->player.health >= 0)
 	{
-		draw_rectangle(&game->img, WIDTH - 300, WIDTH - 300
-			+ game->player.health, HEIGHT - 60, HEIGHT - 40,
+		draw_rectangle(&game->img, (t_vect){WIDTH - 300, HEIGHT - 60},
+			(t_vect){WIDTH - 300 + game->player.health, HEIGHT - 40},
 			get_health_color((game->player.health / 2), 100));
 	}
 	if (game->player.key.scope == true)
@@ -306,8 +306,7 @@ void	ray_cast_loop(t_game *game, t_r *r)
 		img = check_if_hit_door(game, r, img);
 		correct_dist(game, r);
 		calcul_draw_begin_end_middle_line_heigt(game, r);
-		draw_texture(&game->img, img, r->ray * RES, RES, (int)(r->draw_begin),
-			(int)(r->draw_end), r->offset, r->dist_wall);
+		draw_texture(&game->img, img, r);
 		draw_floor_and_ceil(game, &game->pack.ceil, r->ray, r->ray_angle, 0,
 			(int)r->draw_begin, r->middle, false);
 		draw_floor_and_ceil(game, &game->pack.floor, r->ray, r->ray_angle,

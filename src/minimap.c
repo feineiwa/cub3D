@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 08:23:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 23:34:32 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 16:14:22 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,52 +27,55 @@ t_vect	clamp(t_vect point, t_player player)
 
 void	draw_grid(t_game *game, t_vector c, t_vect s1, t_vect s2)
 {
-	int			i;
-	double		angle;
-	t_vector	rotated;
-	t_vector	relative;
-	t_vect		draw;
+	int		i;
+	t_squ	squ;
 
-	angle = normalize_angle(game->player.angle + (0.5 * PI));
+	squ.angle = normalize_angle(game->player.angle + (0.5 * PI));
+	squ.c = c;
 	while (s1.y < s2.y)
 	{
 		i = s1.x;
 		while (i < s2.x)
 		{
-			relative = (t_vector){(i - game->player.pos.x), (s1.y - game->player.pos.y)};
-			rotated = (t_vector){relative.x * cos(angle) + relative.y * sin(angle), -relative.x * sin(angle) + relative.y * cos(angle)};
-			draw = (t_vect){(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
+			squ.relative = (t_vector){(i - game->player.pos.x), (s1.y
+					- game->player.pos.y)};
+			squ.rotated = (t_vector){squ.relative.x * cos(squ.angle)
+				+ squ.relative.y * sin(squ.angle), -squ.relative.x
+				* sin(squ.angle) + squ.relative.y * cos(squ.angle)};
+			squ.draw = (t_vect){(int)(c.x + (squ.rotated.x * MINI_SIZE)),
+				(int)(c.y + (squ.rotated.y * MINI_SIZE))};
 			if (game->map[s1.y][i] == wall)
-				draw_rotated_square(&game->img, draw, c, MINI_SIZE - 1, angle, 0xE0E0E0);
+				draw_rotated_square(&game->img, squ, MINI_SIZE - 1, 0xE0E0E0);
 			else if (game->map[s1.y][i] == door_c)
-				draw_rotated_square(&game->img, draw, c, MINI_SIZE - 1, angle, 0x00FFFF);
+				draw_rotated_square(&game->img, squ, MINI_SIZE - 1, 0x00FFFF);
 			else if (game->map[s1.y][i] == door_o)
-				draw_rotated_square(&game->img, draw, c, MINI_SIZE - 1, angle, 0x007070);
+				draw_rotated_square(&game->img, squ, MINI_SIZE - 1, 0x007070);
 			i++;
 		}
 		s1.y++;
 	}
 }
 
-void	draw_door_grid(t_game *game, t_image *img, t_vector c, t_player player)
+void	draw_enemy_rotated(t_game *game, t_image *img, t_vector c, t_player player)
 {
 	int			sp_c;
-	double		angle;
-	t_vector	relative;
-	t_vector	rotated;
-	t_vect		draw;
+	t_squ		squ;
 
 	sp_c = 0;
-	angle = normalize_angle(player.angle + (0.5 * PI));
+	squ.angle = normalize_angle(player.angle + (0.5 * PI));
+	squ.c = c;
 	while (sp_c < g_global()->sp_count)
 	{
-		relative = (t_vector){(game->sp[sp_c].pos.x - player.pos.x), (game->sp[sp_c].pos.y - player.pos.y)};
-		rotated = (t_vector){relative.x * cos(angle) + relative.y * sin(angle), -relative.x * sin(angle) + relative.y * cos(angle)};
-		draw = (t_vect){(int)(c.x + (rotated.x * MINI_SIZE)), (int)(c.y + (rotated.y * MINI_SIZE))};
+		squ.relative = (t_vector){(game->sp[sp_c].pos.x - player.pos.x),
+			(game->sp[sp_c].pos.y - player.pos.y)};
+		squ.rotated = (t_vector){squ.relative.x * cos(squ.angle) + squ.relative.y * sin(squ.angle),
+			- squ.relative.x * sin(squ.angle) + squ.relative.y * cos(squ.angle)};
+		squ.draw = (t_vect){(int)(c.x + (squ.rotated.x * MINI_SIZE)), (int)(c.y
+				+ (squ.rotated.y * MINI_SIZE))};
 		if (game->sp[sp_c].is_died == false)
-			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0xFF0000, c);
+			draw_circle_enemy(img, squ, 3, 0xFF0000);
 		else
-			draw_circle_enemy(img, (t_vector){draw.x, draw.y}, 3, 0x4D1F1F, c);
+			draw_circle_enemy(img, squ, 3, 0x4D1F1F);
 		sp_c++;
 	}
 }
@@ -98,7 +101,7 @@ void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
 	draw_circle(img, c, MINI_WIDTH / 2 + 2, 0x777777);
 	draw_circle(img, c, MINI_WIDTH / 2 + 3, 0x999999);
 	draw_grid(game, c, s1, s2);
-	draw_door_grid(game, img, c, player);
+	draw_enemy_rotated(game, img, c, player);
 	(void)map;
 	// draw_circle(img, c, 1, 0x00FF66);
 	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
