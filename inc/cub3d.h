@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 23:14:06 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 13:29:25 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,6 +257,16 @@ typedef struct s_r
 	double				adjusted_fov;
 }						t_r;
 
+typedef	struct s_d
+{
+	t_vector	door_v;
+	t_vector	door_h;
+	double		door_v_dist;
+	double		door_h_dist;
+	int			door_index;
+}	t_d;
+
+
 typedef struct s_game
 {
 	t_player			player;
@@ -449,7 +459,7 @@ void					render_sprites(t_game *game, t_r r,
 
 // game_loop
 int						game_loop(t_game *game);
-
+t_image	*check_if_hit_door(t_game *game, t_r *r, t_image *img);
 // cast_door
 t_image					*cast_ray_door(t_game *game, t_r *r);
 

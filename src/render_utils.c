@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 08:13:26 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 11:37:04 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void	clear_image(t_image *img, int width, int height, int color)
 int	get_img_color(t_image *img, int x, int y)
 {
 	return (*(int *)(img->addr + ((y * img->size_line) + (x * (img->bpp
-						/ 8)))));
+					/ 8)))));
 }
 
 void	paint_image_to_win_aiming(t_image *img, t_image *img1, t_vect s,

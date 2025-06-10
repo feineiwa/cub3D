@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 11:39:08 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,7 +273,7 @@ void	init_ray(t_game *game, t_r *r)
 	r->a.y = game->player.pos.y * TILE_SIZE;
 	r->adjusted_fov = FOV / g_global()->zoom;
 	g_global()->project_dist = (800 / tan(r->adjusted_fov / 2))
-		- g_global()->narrow_look;
+	- g_global()->narrow_look;
 	r->ray_angle = game->player.angle - (r->adjusted_fov / 2);
 }
 
