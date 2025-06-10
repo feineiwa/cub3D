@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:23:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 12:06:41 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 17:51:33 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,13 +130,13 @@ void	move_player(t_game *game)
 {
 	double	move_speed;
 
-	if (game->player.key.rot_l == true)
-		game->player.angle += game->player.turn_dir * ROT_SPEED;
-	if (game->player.key.rot_r == true)
-		game->player.angle += game->player.turn_dir * ROT_SPEED;
 	move_speed = MOVE_SPEED;
 	if (game->player.key.speed == true)
 		move_speed += MOVE_SPEED;
+	if (game->player.key.rot_l == true)
+		game->player.angle += game->player.turn_dir * move_speed;
+	if (game->player.key.rot_r == true)
+		game->player.angle += game->player.turn_dir * move_speed;
 	move_up_and_down(game, move_speed);
 	move_right_and_left(game, move_speed);
 	look_up_and_down(game);

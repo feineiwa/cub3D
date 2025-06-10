@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 08:23:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 16:14:22 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 18:06:34 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,41 +25,46 @@ t_vect	clamp(t_vect point, t_player player)
 	return (point);
 }
 
+void	get_draw_point(t_squ *squ, t_vector c)
+{
+	squ->rotated = (t_vector){squ->relative.x * cos(squ->angle)
+		+ squ->relative.y * sin(squ->angle), -squ->relative.x * sin(squ->angle)
+		+ squ->relative.y * cos(squ->angle)};
+	squ->draw = (t_vect){(int)(c.x + (squ->rotated.x * MINI_SIZE)), (int)(c.y
+			+ (squ->rotated.y * MINI_SIZE))};
+}
+
 void	draw_grid(t_game *game, t_vector c, t_vect s1, t_vect s2)
 {
 	int		i;
-	t_squ	squ;
+	t_squ	sq;
 
-	squ.angle = normalize_angle(game->player.angle + (0.5 * PI));
-	squ.c = c;
+	sq.angle = normalize_angle(game->player.angle + (0.5 * PI));
+	sq.c = c;
 	while (s1.y < s2.y)
 	{
-		i = s1.x;
-		while (i < s2.x)
+		i = s1.x - 1;
+		while (++i < s2.x)
 		{
-			squ.relative = (t_vector){(i - game->player.pos.x), (s1.y
+			sq.relative = (t_vector){(i - game->player.pos.x), (s1.y
 					- game->player.pos.y)};
-			squ.rotated = (t_vector){squ.relative.x * cos(squ.angle)
-				+ squ.relative.y * sin(squ.angle), -squ.relative.x
-				* sin(squ.angle) + squ.relative.y * cos(squ.angle)};
-			squ.draw = (t_vect){(int)(c.x + (squ.rotated.x * MINI_SIZE)),
-				(int)(c.y + (squ.rotated.y * MINI_SIZE))};
+			get_draw_point(&sq, c);
 			if (game->map[s1.y][i] == wall)
-				draw_rotated_square(&game->img, squ, MINI_SIZE - 1, 0xE0E0E0);
+				draw_rotated_square(&game->img, sq, MINI_SIZE - 1, 0xE0E0E0);
 			else if (game->map[s1.y][i] == door_c)
-				draw_rotated_square(&game->img, squ, MINI_SIZE - 1, 0x00FFFF);
+				draw_rotated_square(&game->img, sq, MINI_SIZE - 1, 0x00FFFF);
 			else if (game->map[s1.y][i] == door_o)
-				draw_rotated_square(&game->img, squ, MINI_SIZE - 1, 0x007070);
-			i++;
+				draw_rotated_square(&game->img, sq, MINI_SIZE - 1, 0x007070);
 		}
 		s1.y++;
 	}
 }
 
-void	draw_enemy_rotated(t_game *game, t_image *img, t_vector c, t_player player)
+void	draw_enemy_rotated(t_game *game, t_image *img, t_vector c,
+		t_player player)
 {
-	int			sp_c;
-	t_squ		squ;
+	int		sp_c;
+	t_squ	squ;
 
 	sp_c = 0;
 	squ.angle = normalize_angle(player.angle + (0.5 * PI));
@@ -68,10 +73,7 @@ void	draw_enemy_rotated(t_game *game, t_image *img, t_vector c, t_player player)
 	{
 		squ.relative = (t_vector){(game->sp[sp_c].pos.x - player.pos.x),
 			(game->sp[sp_c].pos.y - player.pos.y)};
-		squ.rotated = (t_vector){squ.relative.x * cos(squ.angle) + squ.relative.y * sin(squ.angle),
-			- squ.relative.x * sin(squ.angle) + squ.relative.y * cos(squ.angle)};
-		squ.draw = (t_vect){(int)(c.x + (squ.rotated.x * MINI_SIZE)), (int)(c.y
-				+ (squ.rotated.y * MINI_SIZE))};
+		get_draw_point(&squ, c);
 		if (game->sp[sp_c].is_died == false)
 			draw_circle_enemy(img, squ, 3, 0xFF0000);
 		else
