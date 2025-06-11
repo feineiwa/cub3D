@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 08:23:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 18:06:34 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 21:49:49 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void	draw_enemy_rotated(t_game *game, t_image *img, t_vector c,
 	}
 }
 
-void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
+void	draw_minimap(t_image *img, t_player player, t_game *game)
 {
 	int			side;
 	t_vect		s1;
@@ -104,7 +104,6 @@ void	draw_minimap(t_image *img, char **map, t_player player, t_game *game)
 	draw_circle(img, c, MINI_WIDTH / 2 + 3, 0x999999);
 	draw_grid(game, c, s1, s2);
 	draw_enemy_rotated(game, img, c, player);
-	(void)map;
 	// draw_circle(img, c, 1, 0x00FF66);
 	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
 }

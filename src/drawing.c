@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:55:52 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 17:05:28 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/11 09:39:47 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,157 +213,134 @@ void	draw_texture(t_image *img, t_image *txt, t_r *r)
 {
 	int		i;
 	int		color;
-	double	scale;
-	int		texture_y;
 	double	tex_pos;
-	t_vect	a;
-	t_vect	b;
+	t_squ	s;
 
 	tex_pos = 0;
-	a = (t_vect){(int)r->ray * RES, (int)r->draw_begin};
-	b = (t_vect){(int)RES, (int)r->draw_end};
-	scale = (double)txt->h / (double)(b.y - a.y);
-	while (a.y <= b.y)
+	s.start = (t_vect){(int)r->ray * RES, (int)r->draw_begin};
+	s.end = (t_vect){(int)RES, (int)r->draw_end};
+	s.scale = (double)txt->h / (double)(s.end.y - s.start.y);
+	while (s.start.y <= s.end.y)
 	{
 		i = -1;
-		texture_y = (int)tex_pos;
-		if (texture_y >= txt->h)
-			texture_y = txt->h - 1;
-		while (++i < b.x)
+		s.tex.y = (int)tex_pos;
+		if (s.tex.y >= txt->h)
+			s.tex.y = txt->h - 1;
+		while (++i < s.end.x)
 		{
-			color = get_img_color(txt, r->offset, texture_y);
+			color = get_img_color(txt, r->offset, s.tex.y);
 			if (color >= 0)
-				put_pixel(img, a.x, a.y, color_by_distance(color,
+				put_pixel(img, s.start.x, s.start.y, color_by_distance(color,
 						r->dist_wall, 60));
 		}
-		tex_pos += scale;
-		a.y++;
+		tex_pos += s.scale;
+		s.start.y++;
 	}
 }
 
-void	draw_floor_and_ceil(t_game *game, t_image *texture, int ray,
-		double ray_angle, int start, int end, double middle, bool fl)
+void	set_data_f(t_game *game, t_r *r, t_floor *f, bool fl)
 {
-	t_vector	p;
-	int			color;
-	double		cos_ray;
-	double		sin_ray;
-	double		distance;
-	double		r;
-	double		s;
-	int			tex_x;
-	int			tex_y;
-	double		tile_size_inv;
-	double		beta;
-	t_vector	f;
+	f->tile_size_inv = 1.0 / TILE_SIZE;
+	f->cos_ray = cos(r->ray_angle);
+	f->sin_ray = sin(r->ray_angle);
+	f->beta = normalize_angle(r->ray_angle - game->player.angle);
+	if (fl)
+	{
+		f->start = r->draw_end + 1;
+		f->end = HEIGHT;
+	}
+	else
+	{
+		f->start = 0;
+		f->end = r->draw_begin;
+	}
+}
 
-	p.x = (double)game->player.pos.x * TILE_SIZE;
-	p.y = (double)game->player.pos.y * TILE_SIZE;
-	tile_size_inv = 1.0 / TILE_SIZE;
-	cos_ray = cos(ray_angle);
-	sin_ray = sin(ray_angle);
-	beta = normalize_angle(ray_angle - game->player.angle);
-	while (start < end)
+void	draw_floor_and_ceil(t_game *game, t_image *texture, t_r *r, bool fl)
+{
+	t_floor	f;
+
+	set_data_f(game, r, &f, fl);
+	while (f.start < f.end)
 	{
 		if (fl)
-			r = start - middle;
+			f.diff = f.start - r->middle;
 		else
-			r = middle - start;
-		s = (TILE_SIZE * g_global()->project_dist) / r;
-		distance = s / fabs(cos(beta) + 1.0);
-		f.x = p.x + cos_ray * distance;
-		f.y = p.y + sin_ray * distance;
-		tex_x = (int)((fmod(f.x, TILE_SIZE) * tile_size_inv) * texture->w);
-		tex_y = (int)((fmod(f.y, TILE_SIZE) * tile_size_inv) * texture->h);
-		tex_x = abs(tex_x);
-		tex_y = abs(tex_y);
-		color = get_img_color(texture, tex_x, tex_y);
-		put_pixel(&game->img, ray, start, color_by_distance(color, distance,
-				60));
-		start++;
+			f.diff = r->middle - f.start;
+		f.s = (TILE_SIZE * g_global()->project_dist) / f.diff;
+		f.distance = f.s / fabs(cos(f.beta) + 1.0);
+		f.f.x = r->a.x + f.cos_ray * f.distance;
+		f.f.y = r->a.y + f.sin_ray * f.distance;
+		f.tex_x = abs((int)((fmod(f.f.x, TILE_SIZE) * \
+			f.tile_size_inv) * texture->w));
+		f.tex_y = abs((int)((fmod(f.f.y, TILE_SIZE) * \
+			f.tile_size_inv) * texture->h));
+		f.color = get_img_color(texture, f.tex_x, f.tex_y);
+		put_pixel(&game->img, r->ray, f.start, color_by_distance(f.color,
+				f.distance, 60));
+		f.start++;
 	}
 }
 
-void	draw_rotated_texture(t_image *dest, t_image *src, t_vector center,
-		double angle, int s_x, int s_y)
+void	draw_rotated_texture(t_image *dest, t_image *src, t_squ s, t_vect size)
 {
 	int			y;
 	int			x;
 	int			color;
-	double		cos_a;
-	double		sin_a;
-	t_vect		d;
-	t_vector	r;
-	int			src_x;
-	int			src_y;
 
-	cos_a = cos(angle + (0.5 * PI));
-	sin_a = sin(angle + (0.5 * PI));
-	y = 0;
-	while (y < s_y)
+	s.cos_a = cos(s.angle + (0.5 * PI));
+	s.sin_a = sin(s.angle + (0.5 * PI));
+	y = -1;
+	while (++y < size.y)
 	{
-		x = 0;
-		while (x < s_y)
+		x = -1;
+		while (++x < size.y)
 		{
-			src_x = (int)(double)x * ((double)src->w / (double)s_x);
-			src_y = (int)(double)y * ((double)src->h / (double)s_y);
-			color = get_img_color(src, src_x, src_y);
+			s.tex.x = (int)(double)x * ((double)src->w / (double)size.x);
+			s.tex.y = (int)(double)y * ((double)src->h / (double)size.y);
+			color = get_img_color(src, s.tex.x, s.tex.y);
 			if (color >= 0)
 			{
-				d = (t_vect){x - (s_x / 2), y - (s_y / 2)};
-				r = (t_vector){cos_a * d.x - sin_a * d.y, sin_a * d.x + cos_a
-					* d.y};
-				put_pixel(dest, (int)((center.x + r.x)), (int)(center.y + r.y),
+				s.d = (t_vect){x - (size.x / 2), y - (size.y / 2)};
+				s.r.x = s.cos_a * s.d.x - s.sin_a * s.d.y;
+				s.r.y = s.sin_a * s.d.x + s.cos_a * s.d.y;
+				put_pixel(dest, (int)((s.c.x + s.r.x)), (int)(s.c.y + s.r.y),
 					color);
 			}
-			x++;
 		}
-		y++;
 	}
 }
 
-void	draw_sprite(t_game *game, t_vector sp_screen, double proj_sp_height,
-		t_image *img, double ray_dist[WIDTH], double dist)
+void	adjusted_sprite(t_sprit sp, t_squ *s, float n)
 {
-	int	sprite_height;
-	int	sprite_width;
-	int	start_y;
-	int	end_y;
-	int	start_x;
-	int	end_x;
-	int	x;
-	int	y;
-	int	tex_x;
-	int	tex_y;
-	int	color;
+	s->start.y = (int)(sp.sp_screen.y - ((int)sp.proj_sp_height / 2) * n);
+	s->end.y = s->start.y + (int)sp.proj_sp_height;
+	s->start.x = (int)(sp.sp_screen.x - (int)sp.proj_sp_height / 2);
+	s->end.x = s->start.x + (int)sp.proj_sp_height;
+}
 
-	sprite_height = (int)proj_sp_height;
-	sprite_width = sprite_height;
-	start_y = (int)(sp_screen.y - (sprite_height / 2) * 0.4);
-	end_y = start_y + sprite_height;
-	start_x = (int)(sp_screen.x - sprite_width / 2);
-	end_x = start_x + sprite_width;
-	x = start_x;
-	y = start_y;
-	while (x < end_x)
+void	draw_sprite(t_game *game, t_image *img, t_r r, t_sprit sp)
+{
+	t_squ	s;
+	t_vect	i;
+	int		color;
+
+	adjusted_sprite(sp, &s, 0.4);
+	i.x = s.start.x - 1;
+	while (++i.x < s.end.x)
 	{
-		if (x >= 0 && x < WIDTH && dist < ray_dist[x])
+		if (i.x >= 0 && i.x < WIDTH && sp.dist < r.ray_dist[i.x])
 		{
-			tex_x = (x - start_x) * img->w / sprite_width;
-			y = start_y;
-			while (y < end_y)
+			s.tex.x = (i.x - s.start.x) * img->w / (int)sp.proj_sp_height;
+			i.y = s.start.y - 1;
+			while (++i.y < s.end.y && i.y >= 0 && i.y < HEIGHT)
 			{
-				if (y >= 0 && y < HEIGHT)
-				{
-					tex_y = (y - start_y) * img->h / sprite_height;
-					color = get_img_color(img, tex_x, tex_y);
-					if (color >= 0)
-						put_pixel(&game->img, x, y, color_by_distance(color,
-								dist, 60));
-				}
-				y++;
+				s.tex.y = (i.y - s.start.y) * img->h / (int)sp.proj_sp_height;
+				color = get_img_color(img, s.tex.x, s.tex.y);
+				if (color >= 0)
+					put_pixel(&game->img, i.x, i.y, color_by_distance(color,
+							sp.dist, 60));
 			}
 		}
-		x++;
 	}
 }

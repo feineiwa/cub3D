@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 16:48:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/11 08:20:16 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,6 +219,8 @@ double	set_hit_and_dist_wall(t_r *r)
 
 void	extra_for_bonus(t_game *game, t_r *r, double adjusted_fov)
 {
+	t_squ	squ;
+	
 	render_sprites(game, *r, adjusted_fov);
 	draw_rectangle(&game->img, (t_vect){WIDTH - 301, HEIGHT - 61},
 		(t_vect){WIDTH - 99, HEIGHT - 39}, 0x1E1E1E);
@@ -236,9 +238,10 @@ void	extra_for_bonus(t_game *game, t_r *r, double adjusted_fov)
 			30}, (t_vect){(int)(HALF_WIDTH), (int)(HALF_HEIGHT)});
 	paint_image_to_win(&game->img, &game->pack.compass, (t_vect){150, 150},
 		(t_vect){WIDTH - 200, 22});
-	draw_rotated_texture(&game->img, &game->pack.needle, (t_vector){WIDTH - 121,
-		95}, game->player.angle, 100, 100);
-	draw_minimap(&game->img, game->map, game->player, game);
+	squ.angle = game->player.angle;
+	squ.c = (t_vector){WIDTH - 121, 95};
+	draw_rotated_texture(&game->img, &game->pack.needle, squ, (t_vect){100,100});
+	draw_minimap(&game->img, game->player, game);
 	paint_image_to_win_arrow(&game->img, &game->pack.arrow, (t_vect){12, 12},
 		(t_vect){100 - 7, HEIGHT - 100 - 7});
 	render_gun(game, r);
@@ -307,10 +310,8 @@ void	ray_cast_loop(t_game *game, t_r *r)
 		correct_dist(game, r);
 		calcul_draw_begin_end_middle_line_heigt(game, r);
 		draw_texture(&game->img, img, r);
-		draw_floor_and_ceil(game, &game->pack.ceil, r->ray, r->ray_angle, 0,
-			(int)r->draw_begin, r->middle, false);
-		draw_floor_and_ceil(game, &game->pack.floor, r->ray, r->ray_angle,
-			(int)r->draw_end + 1, HEIGHT, r->middle, true);
+		draw_floor_and_ceil(game, &game->pack.ceil, r, false);
+		draw_floor_and_ceil(game, &game->pack.floor, r, true);
 		// draw_rectangle_rgb_gradient(&game->img, r->ray * RES, RES, 0,
 		// (int)r->draw_begin, game->txt.c);
 		// draw_rectangle_rgb_rgradient(&game->img, r->ray * RES, RES,

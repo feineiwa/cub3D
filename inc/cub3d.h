@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 17:53:27 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/11 09:01:53 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,7 +273,33 @@ typedef struct s_squ
 	t_vector			relative;
 	t_vect				draw;
 	t_vector			c;
+	t_vect				start;
+	t_vect				end;
+	t_vect				tex;
+	double				cos_a;
+	double				sin_a;
+	t_vect				d;
+	t_vector			r;
+	double				scale;
 }						t_squ;
+
+typedef	struct s_floor
+{
+	int			color;
+	double		cos_ray;
+	double		sin_ray;
+	double		distance;
+	double		diff;
+	double		s;
+	int			tex_x;
+	int			tex_y;
+	double		tile_size_inv;
+	double		beta;
+	t_vector	f;
+	int			start;
+	int			end;
+}		t_floor;
+
 
 typedef struct s_game
 {
@@ -404,14 +430,9 @@ void					draw_rotated_square(t_image *img, t_squ squ, int size,
 							int color);
 void					draw_circle_enemy(t_image *img, t_squ squ, int radius,
 							int color);
-void					draw_sprite(t_game *game, t_vector sp_screen,
-							double proj_sp_height, t_image *img,
-							double ray_dist[WIDTH], double dist);
-void					draw_rotated_texture(t_image *dest, t_image *src,
-							t_vector center, double angle, int s_x, int s_y);
-void					draw_floor_and_ceil(t_game *game, t_image *texture,
-							int ray, double ray_angle, int start, int end,
-							double middle, bool fl);
+void					draw_sprite(t_game *game, t_image *img, t_r r, t_sprit sp);
+void	draw_rotated_texture(t_image *dest, t_image *src, t_squ squ, t_vect size);
+void	draw_floor_and_ceil(t_game *game, t_image *texture, t_r *r, bool fl);
 void					draw_texture(t_image *img, t_image *txt, t_r *r);
 
 // render utils
@@ -440,8 +461,7 @@ double					distance_between_points(t_vector a, t_vector b);
 double					normalize_angle(double angle);
 
 // minimap.c
-void					draw_minimap(t_image *img, char **map, t_player player,
-							t_game *game);
+void					draw_minimap(t_image *img, t_player player, t_game *game);
 
 // init
 int						init_window(t_game *game);

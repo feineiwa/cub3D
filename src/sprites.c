@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:30:31 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 11:33:41 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/10 22:08:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,8 +123,7 @@ void	check_sprites_fired(t_game *game, int *shoot_ind, size_t *shoot_time)
 
 void	render_sprite_pain(t_game *game, t_r r, int sp_c)
 {
-	draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height,
-		&game->pack.pain, r.ray_dist, game->sp[sp_c].dist);
+	draw_sprite(game, &game->pack.pain, r, game->sp[sp_c]);
 	if (game->sp[sp_c].was_shot == false)
 	{
 		game->sp[sp_c].health--;
@@ -142,10 +141,8 @@ void	render_sprite_died(t_game *game, t_r r, int sp_c)
 {
 	if (game->sp[sp_c].d_frm <= 6 && get_current_time()
 		- game->sp[sp_c].d_fps <= 10000)
-		draw_sprite(game, game->sp[sp_c].sp_screen,
-			game->sp[sp_c].proj_sp_height,
-			&game->pack.death[game->sp[sp_c].d_frm], r.ray_dist,
-			game->sp[sp_c].dist);
+		draw_sprite(game, &game->pack.death[game->sp[sp_c].d_frm], r,
+			game->sp[sp_c]);
 	if (get_current_time() - game->sp[sp_c].d_fps >= 100)
 	{
 		if (game->sp[sp_c].d_frm < 6)
@@ -159,9 +156,7 @@ void	render_sprite_died(t_game *game, t_r r, int sp_c)
 
 void	render_sprite_walk(t_game *game, t_r r, int sp_c)
 {
-	draw_sprite(game, game->sp[sp_c].sp_screen, game->sp[sp_c].proj_sp_height,
-		&game->pack.walk[game->sp[sp_c].w_frm], r.ray_dist,
-		game->sp[sp_c].dist);
+	draw_sprite(game, &game->pack.walk[game->sp[sp_c].w_frm], r, game->sp[sp_c]);
 	if (get_current_time() - game->sp[sp_c].w_fps >= 300)
 	{
 		game->sp[sp_c].w_frm++;
