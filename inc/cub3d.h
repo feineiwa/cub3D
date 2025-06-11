@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/11 09:01:53 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 00:13:51 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,6 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
-
-# ifndef BONUS
-#  define BONUS 0
-# endif
 
 # define PI 3.14159265359
 # define MOVE_SPEED 0.04
@@ -312,6 +308,7 @@ typedef struct s_game
 	t_sprit				*sp;
 	t_door				*doors;
 	t_intro				intro;
+	bool				bonus;
 }						t_game;
 
 typedef struct s_g

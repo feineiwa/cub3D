@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 09:26:15 by frahenin          #+#    #+#             */
-/*   Updated: 2025/05/16 13:53:23 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 00:15:36 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -371,15 +371,12 @@ t_text	ft_parsing(char *path_map, char ***game_map)
 		if (txt.error == 1)
 			break ;
 	}
-	if (BONUS == 0)
-	{
 		if (txt.ceiling)
 			txt.c = format_color_value(txt.ceiling, &txt.error);
 		if (txt.floor)
 			txt.f = format_color_value(txt.floor, &txt.error);
 		txt.floor = ft_free(txt.floor);
 		txt.ceiling = ft_free(txt.ceiling);
-	}
 	if (txt.error == 1)
 	{
 		while (1)

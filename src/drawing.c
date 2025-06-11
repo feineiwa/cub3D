@@ -6,53 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:55:52 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/11 09:39:47 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 00:09:40 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
-
-// void	draw_line(t_image *img, t_vector a, t_vector b, int color)
-// {
-// 	double	dx;
-// 	double	dy;
-// 	double	steps;
-// 	double	xinc;
-// 	double	yinc;
-// 	int		i;
-
-// 	dx = (b.x - a.x);
-// 	dy = (b.y - a.y);
-// 	steps = fmax(fabs(dx), fabs(dy));
-// 	xinc = dx / steps;
-// 	yinc = dy / steps;
-// 	i = 0;
-// 	while (i <= steps)
-// 	{
-// 		a.x += xinc;
-// 		a.y += yinc;
-// 		put_pixel(img, a.x, a.y, color);
-// 		i++;
-// 	}
-// }
-
-// void	draw_square(t_image *img, int x, int y, int size, int color)
-// {
-// 	int	j;
-// 	int	i;
-
-// 	j = 0;
-// 	while (j < size)
-// 	{
-// 		i = 0;
-// 		while (i < size)
-// 		{
-// 			put_pixel(img, i + x, j + y, color);
-// 			i++;
-// 		}
-// 		j++;
-// 	}
-// }
 
 void	draw_circle(t_image *img, t_vector p, int radius, int color)
 {
@@ -82,10 +40,10 @@ void	draw_rectangle(t_image *image, t_vect a, t_vect b, int color)
 
 	while (a.y < b.y)
 	{
-		i = a.x;
-		while (i < b.x)
+		i = 0;
+		while (i < b.x - a.x)
 		{
-			put_pixel(image, i, a.y, color);
+			put_pixel(image, i + a.x, a.y, color);
 			i++;
 		}
 		a.y++;
@@ -112,32 +70,6 @@ void	draw_circle_full(t_image *img, t_vector p, int radius, int color)
 		j++;
 	}
 }
-
-// void	draw_square_at_edge(t_image *img, int x, int y, int size, t_vector c,
-// 		int color)
-// {
-// 	int		j;
-// 	int		i;
-// 	int		px;
-// 	int		py;
-// 	double	dist;
-
-// 	j = 0;
-// 	while (j < size)
-// 	{
-// 		i = 0;
-// 		while (i < size)
-// 		{
-// 			px = i + x;
-// 			py = j + y;
-// 			dist = (px - c.x) * (px - c.x) + (py - c.y) * (py - c.y);
-// 			if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
-// 				put_pixel(img, px, py, color);
-// 			i++;
-// 		}
-// 		j++;
-// 	}
-// }
 
 void	draw_rotated_square(t_image *img, t_squ squ, int size, int color)
 {

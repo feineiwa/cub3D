@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/11 09:47:22 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 00:07:43 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,10 @@ void	correct_dist(t_game *game, t_r *r)
 
 void	calcul_draw_begin_end_middle_line_heigt(t_game *game, t_r *r)
 {
-	r->waves = 5 + (cos(20 * (game->player.pos.x + game->player.pos.y)));
+	if (game->bonus)
+		r->waves = 5 + (cos(20 * (game->player.pos.x + game->player.pos.y)));
+	else
+		r->waves = 0;
 	r->line_height = (TILE_SIZE / r->dist_wall) * (g_global()->project_dist);
 	r->middle = (0.5 + g_global()->look) * HEIGHT + g_global()->j_croutch
 		+ r->waves;
@@ -311,16 +314,21 @@ void	ray_cast_loop(t_game *game, t_r *r)
 		r->o = set_hit_and_dist_wall(r);
 		img = NULL;
 		img = get_image_by_side(game, r, img);
-		img = check_if_hit_door(game, r, img);
+		if (game->bonus)
+			img = check_if_hit_door(game, r, img);
 		correct_dist(game, r);
 		calcul_draw_begin_end_middle_line_heigt(game, r);
 		draw_texture(&game->img, img, r);
-		draw_floor_and_ceil(game, &game->pack.ceil, r, false);
-		draw_floor_and_ceil(game, &game->pack.floor, r, true);
-		// draw_rectangle_rgb_gradient(&game->img, r->ray * RES, RES, 0,
-		// (int)r->draw_begin, game->txt.c);
-		// draw_rectangle_rgb_rgradient(&game->img, r->ray * RES, RES,
-		// (int)r->draw_end, HEIGHT, game->txt.f);
+		if (game->bonus)
+		{
+			draw_floor_and_ceil(game, &game->pack.ceil, r, false);
+			draw_floor_and_ceil(game, &game->pack.floor, r, true);
+		}
+		else
+		{
+			draw_rectangle(&game->img, (t_vect){r->ray, 0}, (t_vect){r->ray + RES, (int)r->draw_begin}, set_color_rgb(game->txt.c.r, game->txt.c.g, game->txt.c.b));
+			draw_rectangle(&game->img, (t_vect){r->ray, (int)r->draw_end}, (t_vect){r->ray + RES, HEIGHT}, set_color_rgb(game->txt.f.r, game->txt.f.g, game->txt.f.b));
+		}
 		r->ray_angle += r->adjusted_fov / R_NB;
 		r->ray++;
 	}
@@ -330,20 +338,21 @@ int	game_loop(t_game *game)
 {
 	t_r	r;
 
-	// if (g_global()->updated == false && g_global()->first == false)
-	// 	return (1);
-	if (!start_render(game))
+	if (game->bonus && !start_render(game))
 		return (0);
 	mlx_clear_window(game->var.mlx, game->var.win);
 	clear_image(&game->img, WIDTH, HEIGHT, 0);
-	check_door_close(game);
+	if (game->bonus)
+		check_door_close(game);
 	move_player(game);
 	init_ray(game, &r);
 	ray_cast_loop(game, &r);
-	extra_for_bonus(game, &r, r.adjusted_fov);
+	if (game->bonus)
+		extra_for_bonus(game, &r, r.adjusted_fov);
 	mlx_put_image_to_window(game->var.mlx, game->var.win, game->img.img_ptr, 0,
 		0);
-	print_notice(game);
+	if (game->bonus)
+		print_notice(game);
 	g_global()->first = false;
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 11:27:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 10:42:40 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/11 23:21:35 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,10 +83,13 @@ void	load_all_images(t_game *game)
 	load_image(game, &game->pack.so_img, game->txt.so_path);
 	load_image(game, &game->pack.ea_img, game->txt.ea_path);
 	load_image(game, &game->pack.we_img, game->txt.we_path);
-	load_image(game, &game->pack.load, "images/loading.xpm");
-	mlx_put_image_to_window(game->var.mlx, game->var.win,
-		game->pack.load.img_ptr, 0, 0);
-	load_pack(game);
-	load_gun_sp(game);
-	load_video(game);
+	if (game->bonus)
+	{
+		load_image(game, &game->pack.load, "images/loading.xpm");
+		mlx_put_image_to_window(game->var.mlx, game->var.win,
+			game->pack.load.img_ptr, 0, 0);
+		load_pack(game);
+		load_gun_sp(game);
+		load_video(game);
+	}
 }
