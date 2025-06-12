@@ -6,133 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 00:02:41 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
-
-int	count_door(char **map)
-{
-	int	j;
-	int	i;
-	int	count;
-
-	j = 0;
-	count = 0;
-	while (map[j])
-	{
-		i = 0;
-		while (map[j][i])
-		{
-			if (map[j][i] == door_c || map[j][i] == door_o)
-				count++;
-			i++;
-		}
-		j++;
-	}
-	return (count);
-}
-
-void	init_door(t_door *door, t_cell cell, int pos_x, int pos_y)
-{
-	if (cell == door_c)
-	{
-		door->pos.x = pos_x;
-		door->pos.y = pos_y;
-		door->door_prog = 0.0;
-	}
-	else if (cell == door_o)
-	{
-		door->pos.x = pos_x;
-		door->pos.y = pos_y;
-		door->door_prog = 0.8;
-	}
-}
-
-int	find_door(t_door *doors, int x, int y)
-{
-	int	i;
-
-	i = 0;
-	while (i < g_global()->door_count)
-	{
-		if (doors[i].pos.x == x && doors[i].pos.y == y)
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-t_door	*handle_door(char **map)
-{
-	int		j;
-	int		i;
-	int		k;
-	t_door	*doors;
-
-	g_global()->door_count = count_door(map);
-	doors = malloc(sizeof(t_door) * g_global()->door_count);
-	if (doors == NULL)
-		return (NULL);
-	j = -1;
-	k = 0;
-	while (map[++j])
-	{
-		i = 0;
-		while (map[j][i])
-		{
-			if (map[j][i] == door_c)
-				init_door(&doors[k++], door_c, i, j);
-			else if (map[j][i] == door_o)
-				init_door(&doors[k++], door_o, i, j);
-			i++;
-		}
-	}
-	return (doors);
-}
-
-bool	is_hit_door(int x, int y, char **map, t_player player)
-{
-	int	x1;
-	int	y1;
-
-	x1 = x / TILE_SIZE;
-	y1 = y / TILE_SIZE;
-	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
-		return (false);
-	if (map[y1][x1] == door_c || map[y1][x1] == door_o)
-		return (true);
-	return (false);
-}
-
-bool	is_hit_door_close(int x, int y, char **map, t_player player)
-{
-	int	x1;
-	int	y1;
-
-	x1 = x / TILE_SIZE;
-	y1 = y / TILE_SIZE;
-	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
-		return (false);
-	if (map[y1][x1] == door_c)
-		return (true);
-	return (false);
-}
-
-bool	is_hit_door_open(int x, int y, char **map, t_player player)
-{
-	int	x1;
-	int	y1;
-
-	x1 = x / TILE_SIZE;
-	y1 = y / TILE_SIZE;
-	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
-		return (false);
-	if (map[y1][x1] == door_o)
-		return (true);
-	return (false);
-}
 
 void	close_door(t_game *game, t_vector door_hit, t_vector *prev_door,
 		int door_index)
@@ -187,7 +65,7 @@ void	close_automatic(t_game *game, t_vector prev_door)
 	}
 }
 
-void	cast_one_ray(t_game *game, t_r *r)
+static void	cast_one_ray(t_game *game, t_r *r)
 {
 	r->ray_angle = normalize_angle(game->player.angle);
 	compute_ray_orientation(r->ray_angle, r);

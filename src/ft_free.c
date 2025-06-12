@@ -6,17 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 08:24:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/11 23:20:07 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 23:42:09 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
-
-void	ft_free_image(t_game *game, t_image image)
-{
-	if (image.img_ptr != NULL)
-		mlx_destroy_image(game->var.mlx, image.img_ptr);
-}
 
 void	ft_free_img_loop(t_game *game, t_image *img, int nb)
 {

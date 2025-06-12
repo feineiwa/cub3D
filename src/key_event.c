@@ -6,13 +6,13 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:16:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/11 23:53:50 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 23:44:54 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-void	key_of_move(int keysym, t_game *game)
+static void	key_of_move(int keysym, t_game *game)
 {
 	if (keysym == XK_w)
 	{
@@ -38,7 +38,7 @@ void	key_of_move(int keysym, t_game *game)
 		game->player.key.speed = true;
 }
 
-void	key_of_look(int keysym, t_game *game)
+static void	key_of_look(int keysym, t_game *game)
 {
 	if (keysym == XK_Left)
 	{
@@ -56,7 +56,7 @@ void	key_of_look(int keysym, t_game *game)
 		game->player.key.look_down = true;
 }
 
-void	key_for_extra(int keysym, t_game *game)
+static void	key_for_extra(int keysym, t_game *game)
 {
 	if (keysym == XK_Alt_L)
 	{
@@ -80,8 +80,8 @@ void	key_for_extra(int keysym, t_game *game)
 	if (keysym == XK_f && game->player.key.door_check == false)
 	{
 		game->player.key.door_check = true;
-		// if (!is_music_playing())
-		// 	launch_music("./sounds/sliding.mp3", "0.5");
+		if (!is_music_playing())
+			launch_music("./sounds/sliding.mp3", "0.5");
 	}
 }
 

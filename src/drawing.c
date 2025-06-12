@@ -6,171 +6,13 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:55:52 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 00:09:40 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 01:10:57 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-void	draw_circle(t_image *img, t_vector p, int radius, int color)
-{
-	int	i;
-	int	j;
-	int	dist_squared;
-
-	j = -radius;
-	while (j <= radius)
-	{
-		i = -radius;
-		while (i <= radius)
-		{
-			dist_squared = (i * i) + (j * j);
-			if ((dist_squared >= ((radius * radius) - radius))
-				&& (dist_squared <= ((radius * radius) + radius)))
-				put_pixel(img, p.x + i, p.y + j, color);
-			i++;
-		}
-		j++;
-	}
-}
-
-void	draw_rectangle(t_image *image, t_vect a, t_vect b, int color)
-{
-	int	i;
-
-	while (a.y < b.y)
-	{
-		i = 0;
-		while (i < b.x - a.x)
-		{
-			put_pixel(image, i + a.x, a.y, color);
-			i++;
-		}
-		a.y++;
-	}
-}
-
-void	draw_circle_full(t_image *img, t_vector p, int radius, int color)
-{
-	int	i;
-	int	j;
-	int	dist_squared;
-
-	j = -radius;
-	while (j <= radius)
-	{
-		i = -radius;
-		while (i <= radius)
-		{
-			dist_squared = (i * i) + (j * j);
-			if (dist_squared <= (radius * radius))
-				put_pixel(img, p.x + i, p.y + j, color);
-			i++;
-		}
-		j++;
-	}
-}
-
-void	draw_rotated_square(t_image *img, t_squ squ, int size, int color)
-{
-	int			x;
-	int			y;
-	t_vect		draw;
-	t_vector	rot;
-	double		dist;
-
-	y = 0;
-	while (y < size)
-	{
-		x = 0;
-		while (x < size)
-		{
-			rot.x = x * cos(squ.angle) + y * sin(squ.angle);
-			rot.y = -x * sin(squ.angle) + y * cos(squ.angle);
-			draw.x = (int)(squ.draw.x + rot.x);
-			draw.y = (int)(squ.draw.y + rot.y);
-			dist = (draw.x - squ.c.x) * (draw.x - squ.c.x) + (draw.y - squ.c.y)
-				* (draw.y - squ.c.y);
-			if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
-				put_pixel(img, draw.x, draw.y, color);
-			x++;
-		}
-		y++;
-	}
-}
-
-void	draw_circle_enemy(t_image *img, t_squ squ, int radius, int color)
-{
-	int		i;
-	int		j;
-	int		dist_squared;
-	double	dist;
-
-	j = -radius;
-	while (j <= radius)
-	{
-		i = -radius;
-		while (i <= radius)
-		{
-			dist_squared = (i * i) + (j * j);
-			if (dist_squared <= (radius * radius))
-			{
-				dist = (squ.draw.x + i - squ.c.x) * (squ.draw.x + i - squ.c.x)
-					+ (squ.draw.y + j - squ.c.y) * (squ.draw.y + j - squ.c.y);
-				if (dist <= (MINI_WIDTH / 2) * (MINI_WIDTH / 2))
-					put_pixel(img, squ.draw.x + i, squ.draw.y + j, color);
-			}
-			i++;
-		}
-		j++;
-	}
-}
-
-int	color_by_distance(int color, double distance, int light_level)
-{
-	t_rgb	col;
-	double	light;
-
-	light = light_level / distance;
-	col.r = (color >> 16) & 0xFF;
-	col.g = (color >> 8) & 0xFF;
-	col.b = color & 0xFF;
-	col.r = fmin(fmax(col.r * light, 0), col.r);
-	col.g = fmin(fmax(col.g * light, 0), col.g);
-	col.b = fmin(fmax(col.b * light, 0), col.b);
-	return (set_color_rgb(col.r, col.g, col.b));
-}
-
-void	draw_texture(t_image *img, t_image *txt, t_r *r)
-{
-	int		i;
-	int		color;
-	double	tex_pos;
-	t_squ	s;
-
-	tex_pos = 0;
-	s.start = (t_vect){(int)r->ray * RES, (int)r->draw_begin};
-	s.end = (t_vect){(int)RES, (int)r->draw_end};
-	s.scale = (double)txt->h / (double)(s.end.y - s.start.y);
-	while (s.start.y <= s.end.y)
-	{
-		i = -1;
-		s.tex.y = (int)tex_pos;
-		if (s.tex.y >= txt->h)
-			s.tex.y = txt->h - 1;
-		while (++i < s.end.x)
-		{
-			color = get_img_color(txt, r->offset, s.tex.y);
-			if (color >= 0)
-				put_pixel(img, s.start.x, s.start.y, color_by_distance(color,
-						r->dist_wall, 60));
-		}
-		tex_pos += s.scale;
-		s.start.y++;
-	}
-}
-
-void	set_data_f(t_game *game, t_r *r, t_floor *f, bool fl)
+static void	set_data_f(t_game *game, t_r *r, t_floor *f, bool fl)
 {
 	f->tile_size_inv = 1.0 / TILE_SIZE;
 	f->cos_ray = cos(r->ray_angle);
@@ -243,7 +85,7 @@ void	draw_rotated_texture(t_image *dest, t_image *src, t_squ s, t_vect size)
 	}
 }
 
-void	adjusted_sprite(t_sprit sp, t_squ *s, float n)
+static void	adjusted_sprite(t_sprit sp, t_squ *s, float n)
 {
 	s->start.y = (int)(sp.sp_screen.y - ((int)sp.proj_sp_height / 2) * n);
 	s->end.y = s->start.y + (int)sp.proj_sp_height;

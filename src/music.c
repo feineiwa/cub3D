@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 08:38:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 00:44:49 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,27 +45,14 @@ void	launch_music(char const *file, char *vol)
 {
 	pid_t	pid;
 
-	// char *sound;
-	// char back[2];
-	// char	*last;
-	// sound = ft_strjoin("cvlc ", file);
-	// back[0] = ' ';
-	// back[1] = '&';
-	// last = ft_strjoin(sound, back);
 	pid = fork();
 	if (pid == -1)
 		return ;
 	else if (pid == 0)
-	{
 		execlp("cvlc", "cvlc", "--gain", vol, file, (char *) NULL);
-		// execlp("cvlc", "cvlc", "--volume", "5", file, (char *)NULL);
-		// execlp("ffplay", "ffplay", "-volume", "50", "-nodisp", "-autoexit",
-		// file, (char *)NULL);
-		// execlp("mpv", "mpv", "--volume=50", "--no-video", file,
-		// (char *)NULL);
-	}
 	else
 		g_global()->music_pid = pid;
+	(void)vol;
 }
 
 void	stop_music(void)
@@ -75,14 +62,6 @@ void	stop_music(void)
 		kill(g_global()->music_pid, SIGTERM);
 		g_global()->music_pid = -1;
 	}
-}
-
-t_g	*g_global(void)
-{
-	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875, false, 0, 0, false,
-		false, 0, 0.f, 100, true, 0, -1};
-
-	return (&value);
 }
 
 size_t	get_current_time(void)

@@ -6,331 +6,36 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 00:13:51 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 01:12:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CUB3D_H
 # define CUB3D_H
 
-# include "../gnl/get_next_line.h"
-# include "../libft/libft.h"
-# include "../mlx/mlx.h"
-# include <X11/X.h>
-# include <X11/keysym.h>
-# include <math.h>
-# include <signal.h>
-# include <stdbool.h>
-# include <stdlib.h>
-# include <sys/time.h>
-# include <sys/types.h>
-# include <sys/wait.h>
-# include <unistd.h>
+#include "type.h"
 
-# define PI 3.14159265359
-# define MOVE_SPEED 0.04
-# define ROT_SPEED 0.05
-# define MOUSE_SPEED 0.0005
-# define RES 1
-# define TILE_SIZE 32
-# define WIDTH 1600
-# define HEIGHT 960
-# define HALF_HEIGHT 480
-# define HALF_WIDTH 800
-# define FOV 1.0471975512
-# define HALF_FOV 0.523598776
-# define R_NB 1600
-# define MINI_SIZE 20
-# define MINI_WIDTH 180
-
-# define FPS 80
-
-typedef struct s_text	t_text;
-typedef struct s_vector	t_vector;
-typedef struct s_rgb	t_rgb;
-typedef struct s_image	t_image;
-typedef struct s_var	t_var;
-typedef struct s_player	t_player;
-typedef struct s_win	t_win;
-typedef struct s_vect	t_vect;
-typedef struct s_key	t_key;
-
-enum					e_key
-{
-	UP = XK_w,
-	DOWN = XK_s,
-	LEFT = XK_a,
-	RIGHT = XK_d,
-	ROT_L = XK_Left,
-	ROT_R = XK_Right,
-	LOOK_U = XK_Up,
-	LOOK_D = XK_Down
-};
-
-typedef enum e_cell
-{
-	wall = '1',
-	space = ' ',
-	ground = '0',
-	p_n = 'N',
-	p_s = 'S',
-	p_e = 'E',
-	p_w = 'W',
-	door_c = 'D',
-	door_o = 'd',
-	sprite = 's'
-}						t_cell;
-
-struct					s_vect
-{
-	int					x;
-	int					y;
-};
-
-struct					s_vector
-{
-	double				x;
-	double				y;
-};
-
-struct					s_rgb
-{
-	int					r;
-	int					g;
-	int					b;
-};
-
-struct					s_text
-{
-	char				*no_path;
-	char				*so_path;
-	char				*we_path;
-	char				*ea_path;
-	t_rgb				c;
-	t_rgb				f;
-	char				*ceiling;
-	char				*floor;
-	t_cell				p;
-	bool				error;
-};
-
-struct					s_image
-{
-	void				*img_ptr;
-	char				*addr;
-	int					bpp;
-	int					size_line;
-	int					endian;
-	int					w;
-	int					h;
-};
-
-struct					s_key
-{
-	bool				key_up;
-	bool				key_down;
-	bool				key_left;
-	bool				key_right;
-	bool				rot_l;
-	bool				rot_r;
-	bool				look_up;
-	bool				look_down;
-	bool				speed;
-	bool				recharge;
-	bool				hide_mouse;
-	bool				key_croutch;
-	bool				key_jump;
-	bool				scope;
-	bool				door_check;
-	bool				shoot;
-};
-
-struct					s_player
-{
-	t_vector			pos;
-	t_vector			plan;
-	t_key				key;
-	double				angle;
-	int					turn_dir;
-	int					walk_dir;
-	int					walk_dir_side;
-	int					w;
-	int					h;
-	int					health;
-};
-
-struct					s_var
-{
-	void				*mlx;
-	void				*win;
-};
-
-typedef struct s_pack
-{
-	t_image				arrow;
-	t_image				aiming;
-	t_image				gun_sp[15];
-	t_image				no_img;
-	t_image				so_img;
-	t_image				ea_img;
-	t_image				we_img;
-	t_image				floor;
-	t_image				ceil;
-	t_image				compass;
-	t_image				needle;
-	t_image				scope;
-	t_image				door[2];
-	t_image				blood;
-	t_image				gov;
-	t_image				notice;
-	t_image				help;
-	t_image				walk[4];
-	t_image				death[7];
-	t_image				pain;
-	t_image				load;
-
-}						t_pack;
-
-typedef struct s_sprit
-{
-	t_vector			pos;
-
-	t_vector			d;
-	double				p;
-	double				q;
-	t_vector			sp;
-	t_vector			sp_screen;
-	double				dist;
-	double				proj_sp_height;
-	bool				was_shot;
-	bool				is_died;
-	int					w_frm;
-	int					d_frm;
-	size_t				d_fps;
-	size_t				w_fps;
-	int					health;
-}						t_sprit;
-
-typedef struct s_door
-{
-	t_vect				pos;
-	double				door_prog;
-}						t_door;
-
-typedef struct s_intro
-{
-	t_image				img[384];
-	int					frm;
-	size_t				last_time;
-}						t_intro;
-
-typedef struct s_r
-{
-	t_vector			a;
-	t_vector			s;
-	t_vector			horiz_p;
-	t_vector			vert_p;
-	t_vector			wall_hit;
-	bool				is_facing_down;
-	bool				is_facing_left;
-	bool				is_facing_right;
-	bool				is_facing_up;
-	bool				found_horizontal;
-	bool				found_vertical;
-	double				ray_angle;
-	int					ray;
-	double				middle;
-	double				ray_dist[R_NB];
-	double				waves;
-	double				horizontal_dist;
-	double				vertical_dist;
-	double				dist_wall;
-	double				o;
-	int					offset;
-	double				line_height;
-	double				draw_begin;
-	double				draw_end;
-	double				adjusted_fov;
-}						t_r;
-
-typedef struct s_d
-{
-	t_vector			door_v;
-	t_vector			door_h;
-	double				door_v_dist;
-	double				door_h_dist;
-	int					door_index;
-}						t_d;
-
-typedef struct s_squ
-{
-	double				angle;
-	t_vector			rotated;
-	t_vector			relative;
-	t_vect				draw;
-	t_vector			c;
-	t_vect				start;
-	t_vect				end;
-	t_vect				tex;
-	double				cos_a;
-	double				sin_a;
-	t_vect				d;
-	t_vector			r;
-	double				scale;
-}						t_squ;
-
-typedef	struct s_floor
-{
-	int			color;
-	double		cos_ray;
-	double		sin_ray;
-	double		distance;
-	double		diff;
-	double		s;
-	int			tex_x;
-	int			tex_y;
-	double		tile_size_inv;
-	double		beta;
-	t_vector	f;
-	int			start;
-	int			end;
-}		t_floor;
+// init
+void					init_game(t_game *game);
+int						init_window(t_game *game);
+void					init_img_loop(t_image *img, int nb);
+void					init_all_images(t_game *game);
+int						init_image_win(t_game *game, t_image *image, int w,
+							int h);
+t_g						*g_global(void);
 
 
-typedef struct s_game
-{
-	t_player			player;
-	t_text				txt;
-	char				**map;
-	t_var				var;
-	t_image				img;
-	t_pack				pack;
-	t_sprit				*sp;
-	t_door				*doors;
-	t_intro				intro;
-	bool				bonus;
-}						t_game;
+// load_images
+void					load_image(t_game *game, t_image *img, char *path);
+void					load_pack(t_game *game);
+void					load_gun_sp(t_game *game);
+void					load_all_images(t_game *game);
 
-typedef struct s_g
-{
-	pid_t				music_pid;
-	bool				one_shoot_music;
-	int					j_croutch;
-	double				project_dist;
-	float				zoom;
-	int					narrow_look;
-	bool				updated;
-	int					door_count;
-	int					sp_count;
-	bool				game_over;
-	bool				help;
-	int					gun_frm;
-	float				look;
-	int					jump;
-	bool				first;
-	size_t				door_time;
-	int					prev_index;
-}						t_g;
+
+//video
+void					load_video(t_game *game);
+int	video_running(t_game *game);
+
 
 // PARSE
 t_text					ft_parsing(char *path_map, char ***game_map);
@@ -349,6 +54,7 @@ void					init_player(t_game *game);
 // KEY_EVENTS
 int						ft_key_press(int keysym, t_game *game);
 int						ft_key_release(int keysym, t_game *game);
+
 // mouse events
 int						ft_mouse_pressed(int button, int x, int y,
 							t_game *game);
@@ -356,8 +62,46 @@ int						ft_mouse_release(int button, int x, int y,
 							t_game *game);
 int						ft_mouse_move(int x, int y, t_game *game);
 
+// game_loop
+int						game_loop(t_game *game);
+
+//ray_cast_images
+t_image	*get_image_by_side(t_game *game, t_r *r, t_image *img);
+
+
+// door
+void					check_door_close(t_game *game);
+void	close_automatic(t_game *game, t_vector prev_door);
+void	open_door(t_game *game, t_vector door_hit, int door_index);
+void	close_door(t_game *game, t_vector door_hit, t_vector *prev_door,
+	int door_index);
+	
+	//door_utils
+void					init_door(t_door *door, t_cell cell, int pos_x,
+	int pos_y);
+	t_door					*handle_door(char **map);
+	int						count_door(char **map);
+int						find_door(t_door *doors, int x, int y);
+bool					is_hit_door(int x, int y, char **map, t_player player);
+bool					is_hit_door_close(int x, int y, char **map,
+	t_player player);
+bool					is_hit_door_open(int x, int y, char **map,
+		t_player player);
+double					set_hit_and_dist_wall(t_r *r);
+t_image					*check_if_hit_door(t_game *game, t_r *r, t_image *img);
+
+// cast_door
+t_image					*cast_ray_door(t_game *game, t_r *r);
+void	set_door_in_middle(t_r *r, t_d *d);
+t_image	*get_door_image_east_and_west(t_game *game, t_r *r, t_d *d,
+	t_image *img);
+t_image	*get_door_image_north_and_south(t_game *game, t_r *r, t_d *d,
+		t_image *img);
+void	slide_door_east_and_west(t_r *r, t_d *d);
+void	slide_door_north_and_south(t_r *r, t_d *d);
+
+
 // music
-t_g						*g_global(void);
 void					stop_music(void);
 void					launch_music(char const *file, char *vol);
 void					wait_music(void);
@@ -369,75 +113,57 @@ bool					is_wall_door(int x, int y, char **map, t_player player);
 double					normalize_angle(double angle);
 double					distance_between_points(t_vector a, t_vector b);
 
-// door
-
-t_door					*handle_door(char **map);
-void					init_door(t_door *door, t_cell cell, int pos_x,
-							int pos_y);
-int						count_door(char **map);
-int						find_door(t_door *doors, int x, int y);
-void					check_door_close(t_game *game);
-bool					is_hit_door(int x, int y, char **map, t_player player);
-bool					is_hit_door_close(int x, int y, char **map,
-							t_player player);
-bool					is_hit_door_open(int x, int y, char **map,
-							t_player player);
 // ray_cast
 void					compute_ray_orientation(double angle, t_r *r);
 t_vector				ray_cast_horizontal(t_game *game, t_r *r);
 t_vector				ray_cast_vertical(t_game *game, t_r *r);
 
+//ray_cast_utils
+void					init_ray(t_game *game, t_r *r);
+void	calcul_draw_begin_end_middle_line_heigt(t_game *game, t_r *r);
+void	correct_dist(t_game *game, t_r *r);
+double	set_dist(bool flag, t_vector a, t_vector b);
+
 bool					is_hit_door_open(int x, int y, char **map,
 							t_player player);
 bool					is_hit_door_close(int x, int y, char **map,
 							t_player player);
 bool					is_hit_door(int x, int y, char **map, t_player player);
 
-// load_images
-void					load_image(t_game *game, t_image *img, char *path);
-void					load_video(t_game *game);
-void					load_pack(t_game *game);
-void					load_pack(t_game *game);
-void					load_gun_sp(t_game *game);
-void					load_all_images(t_game *game);
-
-// free
-void					free_all(t_game *game);
-void					free_game_var(t_game *game);
-int						leave_windows(t_game *game);
-
 // drawing
-// void					draw_line(t_image *img, t_vector a, t_vector b,
-// 							int color);
-// void					draw_square(t_image *img, int x, int y, int size,
-// 							int color);
-void					draw_circle(t_image *img, t_vector p, int radius,
-							int color);
-// void					draw_rectangle_rgb_gradient(t_image *image, int x0,
-// 							int x1, int y0, int y1, t_rgb rgb);
-// void					draw_rectangle_rgb_rgradient(t_image *image, int x0,
-// 							int x1, int y0, int y1, t_rgb rgb);
-void					draw_rectangle(t_image *image, t_vect a, t_vect b,
-							int color);
-void					draw_circle_full(t_image *img, t_vector p, int radius,
-							int color);
-// void					draw_square_at_edge(t_image *img, int x, int y,
-// 							int size, t_vector c, int color);
-void					draw_rotated_square(t_image *img, t_squ squ, int size,
-							int color);
-void					draw_circle_enemy(t_image *img, t_squ squ, int radius,
-							int color);
 void					draw_sprite(t_game *game, t_image *img, t_r r, t_sprit sp);
 void	draw_rotated_texture(t_image *dest, t_image *src, t_squ squ, t_vect size);
 void	draw_floor_and_ceil(t_game *game, t_image *texture, t_r *r, bool fl);
+
+//drawing_utils
+int	color_by_distance(int color, double distance, int light_level);
+void					draw_circle(t_image *img, t_vector p, int radius,
+	int color);
+void					draw_rectangle(t_image *image, t_vect a, t_vect b,
+	int color);
+void					draw_circle_full(t_image *img, t_vector p, int radius,
+	int color);
+void					draw_rotated_square(t_image *img, t_squ squ, int size,
+	int color);
+
 void					draw_texture(t_image *img, t_image *txt, t_r *r);
+void					draw_circle_enemy(t_image *img, t_squ squ, int radius,
+	int color);
+
+//render
+void	render_ceil_and_floor(t_game *game, t_r *r);
+void	draw_compass(t_game *game);
+void	render_gun(t_game *game, t_r *r);
+void	render_gun_by_frame(t_game *game, size_t *last_update, t_vect g);
+int	game_over(t_game *game);
+
 
 // render utils
 void					put_pixel(t_image *img, int x, int y, int color);
 int						set_color_rgb(int r, int g, int b);
+int						get_img_color(t_image *img, int x, int y);
 void					clear_image(t_image *img, int width, int height,
 							int color);
-int						get_img_color(t_image *img, int x, int y);
 void					paint_image_to_win(t_image *img, t_image *img1,
 							t_vect s, t_vect p);
 void					paint_image_to_win_arrow(t_image *img, t_image *img1,
@@ -460,36 +186,39 @@ double					normalize_angle(double angle);
 // minimap.c
 void					draw_minimap(t_image *img, t_player player, t_game *game);
 
-// init
-int						init_window(t_game *game);
-t_sprit					init_sprite_data(int x, int y);
-t_sprit					*init_sprite(char **map);
-void					init_game(t_game *game);
-void					init_img_loop(t_image *img, int nb);
-void					init_all_images(t_game *game);
-int						init_image_win(t_game *game, t_image *image, int w,
-							int h);
 
 // move
 void					move_player(t_game *game);
+void	look_up_and_down(t_game *game);
+void	move_right_and_left(t_game *game, double move_speed);
+void	move_up_and_down(t_game *game, double move_speed);
+
+//move_extra
+void	jump_player(t_game *game);
+void	crouch_player(t_game *game);
 
 // sprites
-void					sort_sprites_by_distance(t_sprit *sp);
+t_sprit					*init_sprite(char **map);
 int						count_sprite(char **map);
 void					render_sprites(t_game *game, t_r r,
 							double adjusted_fov);
 
-// game_loop
-int						game_loop(t_game *game);
-t_image					*check_if_hit_door(t_game *game, t_r *r, t_image *img);
-// cast_door
-t_image					*cast_ray_door(t_game *game, t_r *r);
+//sprites_utils
+t_sprit	*init_sprite(char **map);
+int	count_sprite(char **map);
+void	move_sprite(t_game *game, int sp_c);
+void	attack_to_player(t_game *game, int sp_c);
+void	render_sprite_walk(t_game *game, t_r r, int sp_c);
+void	render_sprite_died(t_game *game, t_r r, int sp_c);
+void	render_sprite_pain(t_game *game, t_r r, int sp_c);
 
-//
-double					set_dist(bool flag, t_vector a, t_vector b);
-// game_loop
 
-void					init_ray(t_game *game, t_r *r);
-double					set_hit_and_dist_wall(t_r *r);
+// free
+int						leave_windows(t_game *game);
+void					free_all(t_game *game);
+void					free_game_var(t_game *game);
+void	ft_free_img_packs(t_game *game, t_pack packs);
+void	ft_free_img_loop(t_game *game, t_image *img, int nb);
+void	ft_free_image(t_game *game, t_image image);
 
 #endif

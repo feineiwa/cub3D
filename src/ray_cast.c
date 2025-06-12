@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 08:19:34 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 17:31:15 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 23:56:22 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	compute_ray_orientation(double angle, t_r *r)
 		r->is_facing_down = true;
 	else
 		r->is_facing_up = true;
-	if (angle < 1.57079632679 || angle > 4.71238898038) // 0.5 * PI || 1.5 * PI
+	if (angle < 1.57079632679 || angle > 4.71238898038)
 		r->is_facing_right = true;
 	else
 		r->is_facing_left = true;
@@ -30,7 +30,7 @@ void	compute_ray_orientation(double angle, t_r *r)
 	r->found_vertical = false;
 }
 
-t_vector	cast_ray_horizontal(t_game *game, t_r *r, t_vector next_horiz)
+static t_vector	cast_ray_horizontal(t_game *game, t_r *r, t_vector next_horiz)
 {
 	t_vector	horiz_p;
 
@@ -73,7 +73,7 @@ t_vector	ray_cast_horizontal(t_game *game, t_r *r)
 	return (cast_ray_horizontal(game, r, next_horiz));
 }
 
-t_vector	cast_ray_vertical(t_game *game, t_r *r, t_vector next_vert)
+static t_vector	cast_ray_vertical(t_game *game, t_r *r, t_vector next_vert)
 {
 	t_vector	vert_p;
 

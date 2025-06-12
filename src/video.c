@@ -6,13 +6,13 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 09:55:57 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 14:20:18 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 00:35:17 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-void	set_filename(char *filename, int j)
+static void	set_filename(char *filename, int j)
 {
 	if (j >= 10 && j <= 99)
 	{
@@ -53,4 +53,21 @@ void	load_video(t_game *game)
 					&game->intro.img[i].endian);
 		i++;
 	}
+}
+
+int	video_running(t_game *game)
+{
+	if (g_global()->first == true && game->intro.img[game->intro.frm].img_ptr)
+	{
+		mlx_put_image_to_window(game->var.mlx, game->var.win,
+			game->intro.img[game->intro.frm].img_ptr, 0, 0);
+		if (get_current_time() - game->intro.last_time >= 90
+			&& game->intro.frm < 383)
+		{
+			game->intro.frm++;
+			game->intro.last_time = get_current_time();
+		}
+		return (0);
+	}
+	return (1);
 }

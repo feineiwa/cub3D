@@ -6,26 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:15:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/11 23:17:40 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 23:02:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
-
-int	init_window(t_game *game)
-{
-	game->var.mlx = mlx_init();
-	if (!game->var.mlx)
-		return (0);
-	game->var.win = mlx_new_window(game->var.mlx, WIDTH, HEIGHT, "Cub3d");
-	if (!game->var.win)
-	{
-		mlx_destroy_display(game->var.mlx);
-		ft_free(game->var.mlx);
-		return (0);
-	}
-	return (1);
-}
 
 int	init_image_win(t_game *game, t_image *image, int w, int h)
 {
@@ -35,61 +20,6 @@ int	init_image_win(t_game *game, t_image *image, int w, int h)
 	image->addr = mlx_get_data_addr(image->img_ptr, &image->bpp,
 			&image->size_line, &image->endian);
 	return (1);
-}
-
-t_sprit	init_sprite_data(int x, int y)
-{
-	t_sprit	sp;
-
-	sp.pos.x = x + 0.5;
-	sp.pos.y = y + 0.5;
-	sp.w_frm = 0;
-	sp.w_fps = get_current_time();
-	sp.health = 3;
-	sp.d_fps = get_current_time();
-	sp.d_frm = 0;
-	sp.was_shot = false;
-	sp.is_died = false;
-	return (sp);
-}
-
-t_sprit	*init_sprite(char **map)
-{
-	int		x;
-	int		y;
-	t_sprit	*sp;
-	int		k;
-
-	sp = malloc(sizeof(t_sprit) * g_global()->sp_count);
-	if (!sp)
-		return (NULL);
-	y = 0;
-	k = 0;
-	while (map[y])
-	{
-		x = 0;
-		while (map[y][x])
-		{
-			if (map[y][x] == sprite)
-			{
-				sp[k] = init_sprite_data(x, y);
-				k++;
-			}
-			x++;
-		}
-		y++;
-	}
-	return (sp);
-}
-
-void	init_game(t_game *game)
-{
-	game->map = NULL;
-	game->var.mlx = NULL;
-	game->var.win = NULL;
-	game->sp = NULL;
-	game->doors = NULL;
-	game->img.img_ptr = NULL;
 }
 
 void	init_img_loop(t_image *img, int nb)
@@ -131,4 +61,29 @@ void	init_all_images(t_game *game)
 		init_img_loop(game->pack.death, 7);
 		init_img_loop(game->intro.img, 384);
 	}
+}
+
+int	init_window(t_game *game)
+{
+	game->var.mlx = mlx_init();
+	if (!game->var.mlx)
+		return (0);
+	game->var.win = mlx_new_window(game->var.mlx, WIDTH, HEIGHT, "Cub3d");
+	if (!game->var.win)
+	{
+		mlx_destroy_display(game->var.mlx);
+		ft_free(game->var.mlx);
+		return (0);
+	}
+	return (1);
+}
+
+void	init_game(t_game *game)
+{
+	game->map = NULL;
+	game->var.mlx = NULL;
+	game->var.win = NULL;
+	game->sp = NULL;
+	game->doors = NULL;
+	game->img.img_ptr = NULL;
 }

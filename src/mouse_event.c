@@ -6,19 +6,18 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:21:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:30:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 23:46:09 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-void	mouse_key_pressed(int button, t_game *game)
+static void	mouse_key_pressed(int button, t_game *game)
 {
 	if (button == 1)
 	{
-		// if (!is_music_playing())
-		// 	launch_music("sounds/gun1.wav", "0.5");
-		// g_global()->one_shoot_music = true;
+		if (!is_music_playing())
+			launch_music("sounds/gun1.wav", "0.5");
 		game->player.key.recharge = true;
 		game->player.key.shoot = true;
 		g_global()->updated = true;

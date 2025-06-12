@@ -6,13 +6,21 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 13:22:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/11 23:55:39 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 00:51:45 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-void	event_listener(t_game *game)
+t_g	*g_global(void)
+{
+	static t_g	value = {-1, false, 0, 0.f, 1.0f, 875, false, 0, 0, false,
+		false, 0, 0.f, 100, true, 0, -1};
+
+	return (&value);
+}
+
+static void	event_listener(t_game *game)
 {
 	launch_music("./sounds/disaster_war.mp3", "0.5");
 	mlx_hook(game->var.win, DestroyNotify, 0, leave_windows, game);

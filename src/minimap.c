@@ -6,13 +6,13 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 08:23:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 21:49:49 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 00:43:52 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-t_vect	clamp(t_vect point, t_player player)
+static t_vect	clamp(t_vect point, t_player player)
 {
 	if (point.x < 0)
 		point.x = 0;
@@ -25,7 +25,7 @@ t_vect	clamp(t_vect point, t_player player)
 	return (point);
 }
 
-void	get_draw_point(t_squ *squ, t_vector c)
+static void	get_draw_point(t_squ *squ, t_vector c)
 {
 	squ->rotated = (t_vector){squ->relative.x * cos(squ->angle)
 		+ squ->relative.y * sin(squ->angle), -squ->relative.x * sin(squ->angle)
@@ -34,7 +34,7 @@ void	get_draw_point(t_squ *squ, t_vector c)
 			+ (squ->rotated.y * MINI_SIZE))};
 }
 
-void	draw_grid(t_game *game, t_vector c, t_vect s1, t_vect s2)
+static void	draw_grid(t_game *game, t_vector c, t_vect s1, t_vect s2)
 {
 	int		i;
 	t_squ	sq;
@@ -60,7 +60,7 @@ void	draw_grid(t_game *game, t_vector c, t_vect s1, t_vect s2)
 	}
 }
 
-void	draw_enemy_rotated(t_game *game, t_image *img, t_vector c,
+static void	draw_enemy_rotated(t_game *game, t_image *img, t_vector c,
 		t_player player)
 {
 	int		sp_c;
@@ -104,6 +104,4 @@ void	draw_minimap(t_image *img, t_player player, t_game *game)
 	draw_circle(img, c, MINI_WIDTH / 2 + 3, 0x999999);
 	draw_grid(game, c, s1, s2);
 	draw_enemy_rotated(game, img, c, player);
-	// draw_circle(img, c, 1, 0x00FF66);
-	// draw_square(img, (int)c.x, (int)c.y, 5, 0x00FF66);
 }

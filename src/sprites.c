@@ -6,81 +6,13 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:30:31 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 14:24:54 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 23:33:16 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-void	sort_sprites_by_distance(t_sprit *sp)
-{
-	int		i;
-	int		j;
-	t_sprit	temp;
-
-	j = 0;
-	while (j < g_global()->sp_count - 1)
-	{
-		i = 0;
-		while (i < g_global()->sp_count - j - 1)
-		{
-			if (sp[i].dist < sp[i + 1].dist)
-			{
-				temp = sp[i];
-				sp[i] = sp[i + 1];
-				sp[i + 1] = temp;
-			}
-			i++;
-		}
-		j++;
-	}
-}
-
-int	count_sprite(char **map)
-{
-	int	i;
-	int	j;
-	int	count;
-
-	j = 0;
-	count = 0;
-	while (map[j])
-	{
-		i = 0;
-		while (map[j][i])
-		{
-			if (map[j][i] == sprite)
-				count++;
-			i++;
-		}
-		j++;
-	}
-	return (count);
-}
-
-void	update_sprites(t_game *game, t_r r, double adjusted_fov)
-{
-	int	sp_c;
-
-	sp_c = 0;
-	while (sp_c < g_global()->sp_count)
-	{
-		game->sp[sp_c].d.x = game->sp[sp_c].pos.x - game->player.pos.x;
-		game->sp[sp_c].d.y = game->sp[sp_c].pos.y - game->player.pos.y;
-		game->sp[sp_c].p = normalize_angle(atan2(game->sp[sp_c].d.y,
-					game->sp[sp_c].d.x));
-		game->sp[sp_c].q = normalize_angle(game->sp[sp_c].p - game->player.angle
-				+ HALF_FOV);
-		game->sp[sp_c].sp_screen.x = game->sp[sp_c].q * (WIDTH / adjusted_fov);
-		game->sp[sp_c].sp_screen.y = r.middle;
-		game->sp[sp_c].sp.x = game->sp[sp_c].pos.x * TILE_SIZE;
-		game->sp[sp_c].sp.y = game->sp[sp_c].pos.y * TILE_SIZE;
-		game->sp[sp_c].dist = distance_between_points(r.a, game->sp[sp_c].sp);
-		sp_c++;
-	}
-}
-
-bool	check_if_in_crosshair(t_game *game, int sp_c)
+static bool	check_if_in_crosshair(t_game *game, int sp_c)
 {
 	int		sprite_height;
 	t_vect	start;
@@ -96,7 +28,8 @@ bool	check_if_in_crosshair(t_game *game, int sp_c)
 		&& game->sp[sp_c].is_died == false);
 }
 
-void	check_sprites_fired(t_game *game, int *shoot_ind, size_t *shoot_time)
+static void	check_sprites_fired(t_game *game, int *shoot_ind,
+	size_t *shoot_time)
 {
 	int		sp_c;
 	bool	in_crosshair;
@@ -121,92 +54,49 @@ void	check_sprites_fired(t_game *game, int *shoot_ind, size_t *shoot_time)
 	}
 }
 
-void	render_sprite_pain(t_game *game, t_r r, int sp_c)
+static void	sort_sprites_by_distance(t_sprit *sp)
 {
-	draw_sprite(game, &game->pack.pain, r, game->sp[sp_c]);
-	if (game->sp[sp_c].was_shot == false)
+	int		i;
+	int		j;
+	t_sprit	temp;
+
+	j = 0;
+	while (j < g_global()->sp_count - 1)
 	{
-		game->sp[sp_c].health--;
-		game->sp[sp_c].was_shot = true;
-		if (game->sp[sp_c].health <= 0 && game->sp[sp_c].was_shot)
+		i = 0;
+		while (i < g_global()->sp_count - j - 1)
 		{
-			game->sp[sp_c].is_died = true;
-			game->sp[sp_c].d_fps = get_current_time();
-			game->sp[sp_c].d_frm = 0;
+			if (sp[i].dist < sp[i + 1].dist)
+			{
+				temp = sp[i];
+				sp[i] = sp[i + 1];
+				sp[i + 1] = temp;
+			}
+			i++;
 		}
+		j++;
 	}
 }
 
-void	render_sprite_died(t_game *game, t_r r, int sp_c)
+static void	update_sprites(t_game *game, t_r r, double adjusted_fov)
 {
-	if (game->sp[sp_c].d_frm <= 6 && get_current_time()
-		- game->sp[sp_c].d_fps <= 10000)
-		draw_sprite(game, &game->pack.death[game->sp[sp_c].d_frm], r,
-			game->sp[sp_c]);
-	if (get_current_time() - game->sp[sp_c].d_fps >= 100)
+	int	sp_c;
+
+	sp_c = 0;
+	while (sp_c < g_global()->sp_count)
 	{
-		if (game->sp[sp_c].d_frm < 6)
-		{
-			game->sp[sp_c].d_frm++;
-			game->sp[sp_c].d_fps = get_current_time();
-		}
-	}
-	game->sp[sp_c].was_shot = false;
-}
-
-void	render_sprite_walk(t_game *game, t_r r, int sp_c)
-{
-	draw_sprite(game, &game->pack.walk[game->sp[sp_c].w_frm], r,
-		game->sp[sp_c]);
-	if (get_current_time() - game->sp[sp_c].w_fps >= 300)
-	{
-		game->sp[sp_c].w_frm++;
-		game->sp[sp_c].w_fps = get_current_time();
-	}
-	if (game->sp[sp_c].w_frm > 3)
-		game->sp[sp_c].w_frm = 0;
-	game->sp[sp_c].was_shot = false;
-}
-
-void	attack_to_player(t_game *game, int sp_c)
-{
-	float	dist_for_die;
-
-	dist_for_die = distance_between_points(game->sp[sp_c].pos,
-			game->player.pos);
-	if (dist_for_die < 0.5 && !game->sp[sp_c].is_died)
-	{
-		game->player.health--;
-		paint_image_to_win(&game->img, &game->pack.blood, (t_vect){WIDTH,
-			HEIGHT}, (t_vect){0, 0});
-		if (game->player.health <= 0)
-			g_global()->game_over = true;
-	}
-}
-
-void	move_sprite(t_game *game, int sp_c)
-{
-	t_vector	move;
-
-	if (game->sp[sp_c].is_died == false && game->sp[sp_c].was_shot == false)
-	{
-		move = (t_vector){game->sp[sp_c].pos.x - cos(game->sp[sp_c].p) * 0.02,
-			game->sp[sp_c].pos.y - sin(game->sp[sp_c].p) * 0.02};
-		if (!check_collision(move, game->player, game->map))
-		{
-			game->sp[sp_c].pos.x = move.x;
-			game->sp[sp_c].pos.y = move.y;
-		}
-		else
-		{
-			if (!check_collision((t_vector){move.x, game->sp[sp_c].pos.y},
-				game->player, game->map))
-				game->sp[sp_c].pos.x = move.x;
-			if (!check_collision((t_vector){game->sp[sp_c].pos.x, move.y},
-				game->player, game->map))
-				game->sp[sp_c].pos.y = move.y;
-		}
-		attack_to_player(game, sp_c);
+		game->sp[sp_c].d.x = game->sp[sp_c].pos.x - game->player.pos.x;
+		game->sp[sp_c].d.y = game->sp[sp_c].pos.y - game->player.pos.y;
+		game->sp[sp_c].p = normalize_angle(atan2(game->sp[sp_c].d.y,
+					game->sp[sp_c].d.x));
+		game->sp[sp_c].q = normalize_angle(game->sp[sp_c].p - game->player.angle
+				+ HALF_FOV);
+		game->sp[sp_c].sp_screen.x = game->sp[sp_c].q * (WIDTH / adjusted_fov);
+		game->sp[sp_c].sp_screen.y = r.middle;
+		game->sp[sp_c].sp.x = game->sp[sp_c].pos.x * TILE_SIZE;
+		game->sp[sp_c].sp.y = game->sp[sp_c].pos.y * TILE_SIZE;
+		game->sp[sp_c].dist = distance_between_points(r.a, game->sp[sp_c].sp);
+		sp_c++;
 	}
 }
 
