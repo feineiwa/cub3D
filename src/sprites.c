@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:30:31 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/10 22:08:11 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 14:24:54 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,8 @@ void	render_sprite_died(t_game *game, t_r r, int sp_c)
 
 void	render_sprite_walk(t_game *game, t_r r, int sp_c)
 {
-	draw_sprite(game, &game->pack.walk[game->sp[sp_c].w_frm], r, game->sp[sp_c]);
+	draw_sprite(game, &game->pack.walk[game->sp[sp_c].w_frm], r,
+		game->sp[sp_c]);
 	if (get_current_time() - game->sp[sp_c].w_fps >= 300)
 	{
 		game->sp[sp_c].w_frm++;

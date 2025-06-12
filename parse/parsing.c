@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 09:26:15 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 09:29:20 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 15:19:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,8 @@ int	map_is_valid(char **map, char p, int width, int height)
 				else if (x == width - 1
 					|| y == height - 1)
 					return (0);
-				else if (!check_arround(map, x, y))
-					return (0);
+				// else if (!check_arround(map, x, y))
+				// 	return (0);
 			}
 			x++;
 		}

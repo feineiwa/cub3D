@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 00:07:43 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/12 14:30:49 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	video_running(t_game *game)
 {
-	if (g_global()->first == true)
+	if (g_global()->first == true && game->intro.img[game->intro.frm].img_ptr)
 	{
 		mlx_put_image_to_window(game->var.mlx, game->var.win,
 			game->intro.img[game->intro.frm].img_ptr, 0, 0);
@@ -46,6 +46,8 @@ int	start_render(t_game *game)
 {
 	if (!video_running(game))
 		return (0);
+	else
+		stop_music();
 	if (!game_over(game))
 		return (0);
 	if (g_global()->help == true)
@@ -299,6 +301,24 @@ t_image	*check_if_hit_door(t_game *game, t_r *r, t_image *img)
 	return (img);
 }
 
+void	render_ceil_and_floor(t_game *game, t_r *r)
+{
+	if (game->bonus)
+	{
+		draw_floor_and_ceil(game, &game->pack.ceil, r, false);
+		draw_floor_and_ceil(game, &game->pack.floor, r, true);
+	}
+	else
+	{
+		draw_rectangle(&game->img, (t_vect){r->ray, 0}, (t_vect){r->ray + RES,
+			(int)r->draw_begin}, set_color_rgb(game->txt.c.r, game->txt.c.g,
+				game->txt.c.b));
+		draw_rectangle(&game->img, (t_vect){r->ray, (int)r->draw_end},
+			(t_vect){r->ray + RES, HEIGHT}, set_color_rgb(game->txt.f.r,
+				game->txt.f.g, game->txt.f.b));
+	}
+}
+
 void	ray_cast_loop(t_game *game, t_r *r)
 {
 	t_image	*img;
@@ -319,16 +339,7 @@ void	ray_cast_loop(t_game *game, t_r *r)
 		correct_dist(game, r);
 		calcul_draw_begin_end_middle_line_heigt(game, r);
 		draw_texture(&game->img, img, r);
-		if (game->bonus)
-		{
-			draw_floor_and_ceil(game, &game->pack.ceil, r, false);
-			draw_floor_and_ceil(game, &game->pack.floor, r, true);
-		}
-		else
-		{
-			draw_rectangle(&game->img, (t_vect){r->ray, 0}, (t_vect){r->ray + RES, (int)r->draw_begin}, set_color_rgb(game->txt.c.r, game->txt.c.g, game->txt.c.b));
-			draw_rectangle(&game->img, (t_vect){r->ray, (int)r->draw_end}, (t_vect){r->ray + RES, HEIGHT}, set_color_rgb(game->txt.f.r, game->txt.f.g, game->txt.f.b));
-		}
+		render_ceil_and_floor(game, r);
 		r->ray_angle += r->adjusted_fov / R_NB;
 		r->ray++;
 	}
