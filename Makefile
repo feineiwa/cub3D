@@ -14,19 +14,25 @@ LIBFT = ./libft/
 
 LIBMLX = ./mlx/
 
-SRC = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
-	./src/player.c ./src/music.c ./src/door.c ./src/ray_cast.c ./src/video.c ./src/ft_free.c ./src/load_images.c ./src/key_event.c ./src/mouse_event.c ./src/drawing.c \
-	./src/collision.c ./src/calcul.c ./src/minimap.c ./src/init.c ./src/move.c ./src/sprites.c ./src/game_loop.c ./src/cast_door.c \
-	./src/sprites_utils1.c ./src/sprites_utils2.c ./src/ft_free_utils.c ./src/ray_cast_utils.c ./src/door_utils1.c ./src/door_utils2.c ./src/ray_cast_images.c ./src/render.c \
-	src/move_extra.c ./src/render_utils1.c ./src/render_utils2.c  ./src/cast_door_utils1.c ./src/cast_door_utils2.c ./src/drawing_utils1.c ./src/drawing_utils2.c
+SRCS = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
+	./src/player.c ./src/calcul.c ./src/collision.c ./src/drawing_utils1.c ./src/drawing_utils2.c ./src/ft_free_utils.c \
+	./src/ft_free.c ./src/game_loop.c ./src/init.c ./src/key_event.c ./src/load_images.c ./src/move.c \
+	./src/ray_cast_images.c ./src/ray_cast_utils.c ./src/ray_cast.c ./src/render_utils1.c ./src/render_utils2.c \
+	./src/render.c ./src/cub3d.c
 
-SRCS = $(SRC) ./src/cub3d.c
 
-SRCS_BONUS = $(SRC) ./bonus/cub3d_bonus.c
+BONUS_SRCS = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
+	./bonus/player_bonus.c ./bonus/music_bonus.c ./bonus/door_bonus.c ./bonus/ray_cast_bonus.c ./bonus/video_bonus.c ./bonus/ft_free_bonus.c ./bonus/load_images_bonus.c ./bonus/key_event_bonus.c ./bonus/mouse_event_bonus.c ./bonus/drawing_bonus.c \
+	./bonus/collision_bonus.c ./bonus/calcul_bonus.c ./bonus/minimap_bonus.c ./bonus/init_bonus.c ./bonus/move_bonus.c ./bonus/sprites_bonus.c ./bonus/game_loop_bonus.c ./bonus/cast_door_bonus.c \
+	./bonus/sprites_utils1_bonus.c ./bonus/sprites_utils2_bonus.c ./bonus/ft_free_utils_bonus.c ./bonus/ray_cast_utils_bonus.c ./bonus/door_utils1_bonus.c ./bonus/door_utils2_bonus.c ./bonus/ray_cast_images_bonus.c ./bonus/render_bonus.c \
+	./bonus/move_extra_bonus.c ./bonus/render_utils1_bonus.c ./bonus/render_utils2_bonus.c  ./bonus/cast_door_utils1_bonus.c ./bonus/cast_door_utils2_bonus.c ./bonus/drawing_utils1_bonus.c ./bonus/drawing_utils2_bonus.c \
+	./bonus/cub3d_bonus.c
+
+
 
 OBJS = $(SRCS:.c=.o)
 
-OBJS_BONUS = $(SRCS_BONUS:.c=.o)
+OBJS_BONUS = $(BONUS_SRCS:.c=.o)
 
 RM = rm -rf
 

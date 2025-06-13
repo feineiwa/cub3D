@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/12 22:08:55 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 22:10:57 by frahenin         ###   ########.fr       */
+/*   Created: 2025/06/13 14:11:53 by frahenin          #+#    #+#             */
+/*   Updated: 2025/06/13 15:27:09 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,14 @@
 # include <X11/X.h>
 # include <X11/keysym.h>
 # include <math.h>
-# include <signal.h>
 # include <stdbool.h>
 # include <stdlib.h>
-# include <sys/time.h>
 # include <sys/types.h>
-# include <sys/wait.h>
 # include <unistd.h>
 
 # define PI 3.14159265359
-# define MOVE_SPEED 0.04
-# define ROT_SPEED 0.05
+# define MOVE_SPEED 0.03
+# define ROT_SPEED 0.04
 # define MOUSE_SPEED 0.0005
 # define RES 1
 # define TILE_SIZE 32

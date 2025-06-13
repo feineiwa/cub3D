@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:23:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 00:48:28 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 14:30:50 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,40 +66,17 @@ void	move_right_and_left(t_game *game, double move_speed)
 	}
 }
 
-void	look_up_and_down(t_game *game)
-{
-	if (game->player.key.look_up == true)
-	{
-		g_global()->look += (float)(ROT_SPEED);
-		if (g_global()->look >= 0.3)
-			g_global()->look = 0.3;
-	}
-	if (game->player.key.look_down == true)
-	{
-		g_global()->look -= (float)(ROT_SPEED);
-		if (g_global()->look <= -0.3)
-			g_global()->look = -0.3;
-	}
-}
-
 void	move_player(t_game *game)
 {
 	double	move_speed;
 
 	move_speed = MOVE_SPEED;
-	if (game->player.key.speed == true)
-		move_speed += MOVE_SPEED;
 	if (game->player.key.rot_l == true)
 		game->player.angle += game->player.turn_dir * move_speed;
 	if (game->player.key.rot_r == true)
 		game->player.angle += game->player.turn_dir * move_speed;
 	move_up_and_down(game, move_speed);
 	move_right_and_left(game, move_speed);
-	look_up_and_down(game);
-	crouch_player(game);
-	jump_player(game);
 	game->player.key.rot_l = false;
 	game->player.key.rot_r = false;
-	game->player.key.look_up = false;
-	game->player.key.look_down = false;
 }

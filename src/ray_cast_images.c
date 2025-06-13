@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 00:17:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 00:20:27 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 15:37:49 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,9 @@
 
 static t_image	*facing_up(t_game *game, t_r *r, t_image *img)
 {
-	int	map_x;
-	int	map_y;
-
 	if (img == NULL)
 	{
 		img = &game->pack.no_img;
-		map_x = (int)floor((r->wall_hit.x / TILE_SIZE));
-		map_y = (int)floor(r->wall_hit.y / TILE_SIZE) + 1;
-		if (game->map[map_y][map_x] == door_c
-			|| game->map[map_y][map_x] == door_o)
-			img = &game->pack.door[1];
 		r->offset = (int)(r->o * img->w);
 	}
 	return (img);
@@ -32,17 +24,9 @@ static t_image	*facing_up(t_game *game, t_r *r, t_image *img)
 
 static t_image	*facing_down(t_game *game, t_r *r, t_image *img)
 {
-	int	map_x;
-	int	map_y;
-
 	if (img == NULL)
 	{
 		img = &game->pack.so_img;
-		map_x = (int)floor((r->wall_hit.x / TILE_SIZE));
-		map_y = (int)floor(r->wall_hit.y / TILE_SIZE) - 1;
-		if (game->map[map_y][map_x] == door_c
-			|| game->map[map_y][map_x] == door_o)
-			img = &game->pack.door[1];
 		r->offset = img->w - (int)(r->o * img->w) - 1;
 	}
 	return (img);
@@ -50,17 +34,9 @@ static t_image	*facing_down(t_game *game, t_r *r, t_image *img)
 
 static t_image	*facing_right(t_game *game, t_r *r, t_image *img)
 {
-	int	map_x;
-	int	map_y;
-
 	if (img == NULL)
 	{
 		img = &game->pack.ea_img;
-		map_x = (int)floor((r->wall_hit.x / TILE_SIZE) - 1);
-		map_y = (int)floor(r->wall_hit.y / TILE_SIZE);
-		if (game->map[map_y][map_x] == door_c
-			|| game->map[map_y][map_x] == door_o)
-			img = &game->pack.door[1];
 		r->offset = (int)(r->o * img->w);
 	}
 	return (img);
@@ -68,17 +44,9 @@ static t_image	*facing_right(t_game *game, t_r *r, t_image *img)
 
 static t_image	*facing_left(t_game *game, t_r *r, t_image *img)
 {
-	int	map_x;
-	int	map_y;
-
 	if (img == NULL)
 	{
 		img = &game->pack.we_img;
-		map_x = (int)floor((r->wall_hit.x / TILE_SIZE) + 1);
-		map_y = (int)floor(r->wall_hit.y / TILE_SIZE);
-		if (game->map[map_y][map_x] == door_c
-			|| game->map[map_y][map_x] == door_o)
-			img = &game->pack.door[1];
 		r->offset = img->w - (int)(r->o * img->w) - 1;
 	}
 	return (img);

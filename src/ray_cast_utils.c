@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 23:52:43 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 00:26:54 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 15:39:54 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,15 +35,11 @@ void	correct_dist(t_game *game, t_r *r)
 
 void	calcul_draw_begin_end_middle_line_heigt(t_game *game, t_r *r)
 {
-	if (game->bonus)
-		r->waves = 5 + (cos(20 * (game->player.pos.x + game->player.pos.y)));
-	else
-		r->waves = 0;
 	r->line_height = (TILE_SIZE / r->dist_wall) * (g_global()->project_dist);
-	r->middle = (0.5 + g_global()->look) * HEIGHT + g_global()->j_croutch
-		+ r->waves;
-	r->draw_begin = r->middle - 0.5 * r->line_height + r->waves;
+	r->middle = (0.5 + g_global()->look) * HEIGHT;
+	r->draw_begin = r->middle - 0.5 * r->line_height;
 	r->draw_end = r->draw_begin + r->line_height;
+	(void)game;
 }
 
 double	set_dist(bool flag, t_vector a, t_vector b)

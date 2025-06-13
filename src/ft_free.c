@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 08:24:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 23:42:09 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/13 14:34:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,5 @@ void	free_all(t_game *game)
 int	leave_windows(t_game *game)
 {
 	free_all(game);
-	stop_music();
 	exit(0);
 }
