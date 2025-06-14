@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:11:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 15:27:09 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/14 08:54:29 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <math.h>
 # include <stdbool.h>
 # include <stdlib.h>
+# include <fcntl.h>
 # include <sys/types.h>
 # include <unistd.h>
 

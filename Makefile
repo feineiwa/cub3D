@@ -14,7 +14,8 @@ LIBFT = ./libft/
 
 LIBMLX = ./mlx/
 
-SRCS = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
+SRCS = ./parse/parsing.c ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/validated_input.c ./parse/parse_utils.c ./parse/ft_free_utils.c \
+	./parse/main_parse.c \
 	./src/player.c ./src/calcul.c ./src/collision.c ./src/drawing_utils1.c ./src/drawing_utils2.c ./src/ft_free_utils.c \
 	./src/ft_free.c ./src/game_loop.c ./src/init.c ./src/key_event.c ./src/load_images.c ./src/move.c \
 	./src/ray_cast_images.c ./src/ray_cast_utils.c ./src/ray_cast.c ./src/render_utils1.c ./src/render_utils2.c \

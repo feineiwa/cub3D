@@ -3,86 +3,78 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/15 10:30:51 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/07 13:22:23 by frahenin         ###   ########.fr       */
+/*   Created: 2024/03/22 09:49:48 by eralambo          #+#    #+#             */
+/*   Updated: 2025/05/12 13:57:31 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	push_in_stash(t_gnl **stash, char *buff)
+size_t	ft_strlen(const char *s)
 {
-	t_gnl	*new_list;
-	t_gnl	*last_list;
+	size_t	i;
 
-	new_list = malloc(sizeof(t_gnl));
-	last_list = ft_lstlast_gnl(*stash);
-	if (new_list == NULL)
-		return ;
-	if (*stash == NULL)
-		*stash = new_list;
-	else
-		last_list->next = new_list;
-	new_list->content = buff;
-	new_list->next = NULL;
+	i = 0;
+	while (s[i] != '\0')
+		i++;
+	return (i);
 }
 
-t_gnl	*ft_lstlast_gnl(t_gnl *lst)
+char	*ft_strdup_gnl(char *str)
 {
-	if (!lst)
+	char	*res;
+	size_t	i;
+
+	i = 0;
+	res = malloc(sizeof(char) * (ft_strlen(str) + 1));
+	if (!res)
 		return (NULL);
-	while (lst->next != NULL)
+	while (str[i] != '\0')
 	{
-		lst = lst->next;
+		res[i] = str[i];
+		i++;
 	}
-	return (lst);
+	res[i] = '\0';
+	free(str);
+	return (res);
 }
 
-t_gnl	*ft_lstnew_gnl(void *content)
+char	*ft_strjoin_mod(char *s1, char *s2)
 {
-	t_gnl	*new;
+	size_t	i;
+	size_t	j;
+	size_t	len_s1;
+	size_t	len_s2;
+	char	*res;
 
-	new = (t_gnl *)malloc(sizeof(t_gnl));
-	if (!new)
+	i = 0;
+	j = 0;
+	len_s1 = ft_strlen((char *)s1);
+	len_s2 = ft_strlen((char *)s2);
+	res = (char *)malloc(sizeof(char) * (len_s1 + len_s2 + 1));
+	if (!res)
 		return (NULL);
-	new->content = content;
-	new->next = NULL;
-	return (new);
+	while (s1[i])
+		res[j++] = s1[i++];
+	i = 0;
+	while (s2[i])
+		res[j++] = s2[i++];
+	res[j] = '\0';
+	free(s1);
+	free(s2);
+	return (res);
 }
 
-void	ft_lstclear_gnl(t_gnl **lst)
+size_t	ft_find_newline(char *str)
 {
-	t_gnl	*tmp;
+	size_t	i;
 
-	if (!lst)
-		return ;
-	while (*lst)
-	{
-		tmp = (*lst)->next;
-		free((*lst)->content);
-		free(*lst);
-		*lst = tmp;
-	}
-}
-
-int	found_new_line(t_gnl *stash)
-{
-	int	i;
-
-	if (!stash)
-		return (0);
-	while (stash)
-	{
-		i = 0;
-		while (stash->content[i] != '\0')
-		{
-			if (stash->content[i] == '\n')
-				return (1);
-			i++;
-		}
-		stash = stash->next;
-	}
+	i = 0;
+	while (str[i] && str[i] != '\n')
+		i++;
+	if (str[i] == '\n')
+		return (i + 1);
 	return (0);
 }

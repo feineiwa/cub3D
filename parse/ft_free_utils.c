@@ -6,11 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 17:24:16 by frahenin          #+#    #+#             */
-/*   Updated: 2025/04/01 13:19:51 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/14 09:17:46 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/cub3d.h"
+#include "../inc/parse.h"
 
 void	*ft_free(void *param)
 {

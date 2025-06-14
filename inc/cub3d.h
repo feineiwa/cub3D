@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 15:23:47 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/14 09:27:21 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CUB3D_H
 
 # include "type.h"
+# include "parse.h"
 
 // init
 void		init_game(t_game *game);
@@ -27,13 +28,6 @@ t_g			*g_global(void);
 void		load_image(t_game *game, t_image *img, char *path);
 void		load_all_images(t_game *game);
 
-// PARSE
-t_text		ft_parsing(char *path_map, char ***game_map);
-
-// PARSE UTILS
-int			ft_ispace(char c);
-int			ft_skip_space(char *s);
-int			ft_array_lenght(char **arr);
 
 // FREE_UTILS
 void		*ft_free(void *param);

@@ -3,36 +3,32 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/04 08:56:20 by frahenin          #+#    #+#             */
-/*   Updated: 2025/03/07 13:20:23 by frahenin         ###   ########.fr       */
+/*   Created: 2024/03/22 09:49:10 by eralambo          #+#    #+#             */
+/*   Updated: 2025/05/12 13:58:18 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
+# include <stdlib.h>
+# include <unistd.h>
+
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 5
+#  define BUFFER_SIZE 10
 # endif
 
-# include <unistd.h>
-# include <stdlib.h>
-# include <fcntl.h>
-# include <stdio.h>
-
-typedef struct s_gnl
-{
-	char			*content;
-	struct s_gnl	*next ;
-}	t_gnl;
-
+char	*ft_strjoin_mod(char *s1, char *s2);
+char	*ft_strdup_gnl(char *str);
+char	*ft_rest_str(char *str);
+char	*ft_fgets(char *str);
+char	*ft_read(int fd, char *str);
 char	*get_next_line(int fd);
-void	push_in_stash(t_gnl **stash, char *buff);
-t_gnl	*ft_lstlast_gnl(t_gnl *lst);
-t_gnl	*ft_lstnew_gnl(void *content);
-void	ft_lstclear_gnl(t_gnl **lst);
-int		found_new_line(t_gnl *stash);
+char	*ft_if_else(char *str, char *buff);
+
+size_t	ft_find_newline(char *str);
+size_t	ft_strlen(const char *s);
 
 #endif
