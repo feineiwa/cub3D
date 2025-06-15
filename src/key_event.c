@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:16:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 14:45:57 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/15 19:40:06 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,6 @@ static void	key_of_move(int keysym, t_game *game)
 		game->player.key.key_left = true;
 		game->player.walk_dir_side = -1;
 	}
-	if (keysym == XK_Shift_L && game->bonus)
-		game->player.key.speed = true;
 }
 
 static void	key_of_look(int keysym, t_game *game)
@@ -49,13 +47,6 @@ static void	key_of_look(int keysym, t_game *game)
 	{
 		game->player.key.rot_r = true;
 		game->player.turn_dir = 1;
-	}
-	if (game->bonus)
-	{
-		if (keysym == XK_Up)
-			game->player.key.look_up = true;
-		if (keysym == XK_Down)
-			game->player.key.look_down = true;
 	}
 }
 

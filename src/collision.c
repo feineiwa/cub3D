@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 18:06:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:47:43 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/15 19:39:13 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ bool	is_exceeded(t_vector move, t_player player)
 
 bool	is_hit_wall(int tile_x, int tile_y, char **map)
 {
-	if (map[tile_y][tile_x] == wall || map[tile_y][tile_x] == door_c)
+	if (map[tile_y][tile_x] == wall)
 		return (true);
 	return (false);
 }
@@ -87,7 +87,7 @@ bool	is_wall_door(int x, int y, char **map, t_player player)
 	y1 = y / TILE_SIZE;
 	if (x1 < 0 || x1 > player.w - 1 || y1 < 0 || y1 > player.h - 1)
 		return (false);
-	if (map[y1][x1] == wall || map[y1][x1] == door_c || map[y1][x1] == door_o)
+	if (map[y1][x1] == wall)
 		return (true);
 	return (false);
 }

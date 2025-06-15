@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:27:03 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/09 17:31:27 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/15 19:38:33 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,26 +82,15 @@ void	init_player(t_game *game)
 	game->txt.p = get_player_cell(game->map);
 	get_axis(game->map, game->txt.p, &game->player.pos.x, &game->player.pos.y);
 	game->player.angle = get_player_angle(game->map, game->player);
-	game->player.key.speed = false;
 	game->player.key.key_up = false;
 	game->player.key.key_down = false;
 	game->player.key.key_right = false;
 	game->player.key.key_left = false;
-	game->player.key.look_up = false;
-	game->player.key.look_down = false;
 	game->player.key.rot_l = false;
 	game->player.key.rot_r = false;
-	game->player.key.recharge = false;
-	game->player.key.hide_mouse = false;
 	game->player.turn_dir = 0;
 	game->player.walk_dir = 0;
 	game->player.pos.x += 0.5;
 	game->player.pos.y += 0.5;
-	game->player.key.key_croutch = false;
-	game->player.key.key_jump = false;
-	game->player.key.scope = false;
-	game->player.key.door_check = false;
-	game->player.key.shoot = false;
-	game->player.health = 200;
 	get_w_and_h(game->map, &game->player.w, &game->player.h);
 }

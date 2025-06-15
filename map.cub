@@ -3,8 +3,8 @@ SO ./images/wall_stone1.xpm
 EA ./images/wall_stone2.xpm
 WE ./images/wall_stone3.xpm
 
-C 135,206,235
-F 139,90,43
+C images/floor6.xpm
+F images/ceil0.xpm
 
 11111        1111111111111111111111111
 11111        1000000000110000000000001

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:15:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/12 23:02:58 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/15 19:39:38 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,27 +40,6 @@ void	init_all_images(t_game *game)
 	game->pack.so_img.img_ptr = NULL;
 	game->pack.ea_img.img_ptr = NULL;
 	game->pack.we_img.img_ptr = NULL;
-	if (game->bonus)
-	{
-		game->pack.aiming.img_ptr = NULL;
-		game->pack.arrow.img_ptr = NULL;
-		game->pack.floor.img_ptr = NULL;
-		game->pack.ceil.img_ptr = NULL;
-		game->pack.compass.img_ptr = NULL;
-		game->pack.needle.img_ptr = NULL;
-		game->pack.scope.img_ptr = NULL;
-		game->pack.blood.img_ptr = NULL;
-		game->pack.gov.img_ptr = NULL;
-		game->pack.notice.img_ptr = NULL;
-		game->pack.help.img_ptr = NULL;
-		game->pack.pain.img_ptr = NULL;
-		game->pack.load.img_ptr = NULL;
-		init_img_loop(game->pack.gun_sp, 15);
-		init_img_loop(game->pack.door, 2);
-		init_img_loop(game->pack.walk, 4);
-		init_img_loop(game->pack.death, 7);
-		init_img_loop(game->intro.img, 384);
-	}
 }
 
 int	init_window(t_game *game)
@@ -83,7 +62,5 @@ void	init_game(t_game *game)
 	game->map = NULL;
 	game->var.mlx = NULL;
 	game->var.win = NULL;
-	game->sp = NULL;
-	game->doors = NULL;
 	game->img.img_ptr = NULL;
 }

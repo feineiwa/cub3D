@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:11:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/14 08:54:29 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/15 19:42:50 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,10 +73,7 @@ typedef enum e_cell
 	p_n = 'N',
 	p_s = 'S',
 	p_e = 'E',
-	p_w = 'W',
-	door_c = 'D',
-	door_o = 'd',
-	sprite = 's'
+	p_w = 'W'
 }						t_cell;
 
 struct					s_vect
@@ -131,16 +128,6 @@ struct					s_key
 	bool				key_right;
 	bool				rot_l;
 	bool				rot_r;
-	bool				look_up;
-	bool				look_down;
-	bool				speed;
-	bool				recharge;
-	bool				hide_mouse;
-	bool				key_croutch;
-	bool				key_jump;
-	bool				scope;
-	bool				door_check;
-	bool				shoot;
 };
 
 struct					s_player
@@ -154,7 +141,6 @@ struct					s_player
 	int					walk_dir_side;
 	int					w;
 	int					h;
-	int					health;
 };
 
 struct					s_var
@@ -165,62 +151,12 @@ struct					s_var
 
 typedef struct s_pack
 {
-	t_image				arrow;
-	t_image				aiming;
-	t_image				gun_sp[15];
 	t_image				no_img;
 	t_image				so_img;
 	t_image				ea_img;
 	t_image				we_img;
-	t_image				floor;
-	t_image				ceil;
-	t_image				compass;
-	t_image				needle;
-	t_image				scope;
-	t_image				door[2];
-	t_image				blood;
-	t_image				gov;
-	t_image				notice;
-	t_image				help;
-	t_image				walk[4];
-	t_image				death[7];
-	t_image				pain;
-	t_image				load;
 
 }						t_pack;
-
-typedef struct s_sprit
-{
-	t_vector			pos;
-
-	t_vector			d;
-	double				p;
-	double				q;
-	t_vector			sp;
-	t_vector			sp_screen;
-	double				dist;
-	double				proj_sp_height;
-	bool				was_shot;
-	bool				is_died;
-	int					w_frm;
-	int					d_frm;
-	size_t				d_fps;
-	size_t				w_fps;
-	int					health;
-}						t_sprit;
-
-typedef struct s_door
-{
-	t_vect				pos;
-	double				door_prog;
-}						t_door;
-
-typedef struct s_intro
-{
-	t_image				img[384];
-	int					frm;
-	size_t				last_time;
-}						t_intro;
 
 typedef struct s_r
 {
@@ -251,15 +187,6 @@ typedef struct s_r
 	double				adjusted_fov;
 }						t_r;
 
-typedef struct s_d
-{
-	t_vector			door_v;
-	t_vector			door_h;
-	double				door_v_dist;
-	double				door_h_dist;
-	int					door_index;
-}						t_d;
-
 typedef struct s_squ
 {
 	double				angle;
@@ -277,23 +204,6 @@ typedef struct s_squ
 	double				scale;
 }						t_squ;
 
-typedef	struct s_floor
-{
-	int			color;
-	double		cos_ray;
-	double		sin_ray;
-	double		distance;
-	double		diff;
-	double		s;
-	int			tex_x;
-	int			tex_y;
-	double		tile_size_inv;
-	double		beta;
-	t_vector	f;
-	int			start;
-	int			end;
-}		t_floor;
-
 
 typedef struct s_game
 {
@@ -303,10 +213,6 @@ typedef struct s_game
 	t_var				var;
 	t_image				img;
 	t_pack				pack;
-	t_sprit				*sp;
-	t_door				*doors;
-	t_intro				intro;
-	bool				bonus;
 }						t_game;
 
 typedef struct s_g

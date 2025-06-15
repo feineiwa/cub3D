@@ -6,28 +6,11 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 00:19:34 by eralambo          #+#    #+#             */
-/*   Updated: 2025/06/14 09:18:19 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/15 21:12:25 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/parse.h"
-#include <stdio.h>
-
-void	init_text(t_text *txt)
-{
-	txt->no_path = NULL;
-	txt->so_path = NULL;
-	txt->ea_path = NULL;
-	txt->we_path = NULL;
-	txt->ceiling = NULL;
-	txt->floor = NULL;
-	txt->f.r = 0;
-	txt->f.g = 0;
-	txt->f.b = 0;
-	txt->c.r = 0;
-	txt->c.g = 0;
-	txt->c.b = 0;
-}
 
 char	**append_line(char **lines, int count, char *new_line)
 {
@@ -49,34 +32,7 @@ char	**append_line(char **lines, int count, char *new_line)
 	return (new_tab);
 }
 
-char	**map_to_char(char *path_map)
-{
-	int		fd;
-	char	*line;
-	char	**res;
-	int		count;
-
-	res = NULL;
-	count = 0;
-	fd = open(path_map, O_RDONLY);
-	if (fd < 0)
-	{
-		ft_putendl_fd("Error\nCannot open the file", 2);
-		exit(1);
-	}
-	while (1)
-	{
-		line = get_next_line(fd);
-		if (!line)
-			break ;
-		res = append_line(res, count, line);
-		free(line);
-		count++;
-	}
-	return (close(fd), res);
-}
-
-void	get_path_nsewcf(char *input, t_text *txt, int *count, char *id_path)
+static void	get_path_nsewcf(char *input, t_text *txt, int *count, char *id_path)
 {
 	if (!ft_strncmp("NO", id_path, 2))
 		txt->no_path = get_path(input, "NO");
@@ -93,7 +49,7 @@ void	get_path_nsewcf(char *input, t_text *txt, int *count, char *id_path)
 	(*count)++;
 }
 
-int	get_map_setting(char **input, t_text *txt, int i)
+static int	get_map_setting(char **input, t_text *txt, int i)
 {
 	int	count;
 
@@ -122,7 +78,7 @@ int	get_map_setting(char **input, t_text *txt, int i)
 	return (i);
 }
 
-int	parsing(char **input, t_text *txt, char ***map)
+int	parse_input(char **input, t_text *txt, char ***map)
 {
 	int	i;
 	int	j;
@@ -143,4 +99,33 @@ int	parsing(char **input, t_text *txt, char ***map)
 	if (*map == NULL)
 		return (0);
 	return (1);
+}
+
+int	parsing(char *av, char ***map, t_text *txt)
+{
+	char	**input;
+
+	input = map_to_char(av);
+	if (!input)
+		return (ft_putendl_fd("Error\nEmpty file", 2), 1);
+	if (!parse_input(input, txt, map))
+	{
+		ft_putendl_fd("Error\nPlease check the map", 2);
+		return (ft_free_parse(input, txt), 1);
+	}
+	ft_free_arr((void **)input);
+	if (!is_validated_color(txt))
+		return (ft_free_parse(*map, txt), 1);
+	if (check_blank_line_map(*map))
+	{
+		ft_putendl_fd("Error\ncheck your map", 2);
+		return (ft_free_parse(*map, txt), 1);
+	}
+	padding_space(*map);
+	if (!validated_map(*map))
+	{
+		ft_putendl_fd("Error\ncheck your map", 2);
+		return (ft_free_parse(*map, txt), 1);
+	}
+	return (0);
 }
