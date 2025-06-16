@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 22:08:55 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:51:30 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 14:40:31 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include "../mlx/mlx.h"
 # include <X11/X.h>
 # include <X11/keysym.h>
+# include <fcntl.h>
 # include <math.h>
 # include <signal.h>
 # include <stdbool.h>
@@ -26,10 +27,10 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
-# include <fcntl.h>
 
 # define PI 3.14159265359
 # define MOVE_SPEED 0.04
+# define SPRITE_SPEED 0.01
 # define ROT_SPEED 0.05
 # define MOUSE_SPEED 0.0005
 # define RES 1
@@ -81,6 +82,14 @@ typedef enum e_cell
 	door_o = 'd',
 	sprite = 's'
 }						t_cell;
+
+typedef struct s_mapping
+{
+	int					top;
+	int					bottom;
+	int					left;
+	int					right;
+}						t_mapping;
 
 struct					s_vect
 {
@@ -280,23 +289,22 @@ typedef struct s_squ
 	double				scale;
 }						t_squ;
 
-typedef	struct s_floor
+typedef struct s_floor
 {
-	int			color;
-	double		cos_ray;
-	double		sin_ray;
-	double		distance;
-	double		diff;
-	double		s;
-	int			tex_x;
-	int			tex_y;
-	double		tile_size_inv;
-	double		beta;
-	t_vector	f;
-	int			start;
-	int			end;
-}		t_floor;
-
+	int					color;
+	double				cos_ray;
+	double				sin_ray;
+	double				distance;
+	double				diff;
+	double				s;
+	int					tex_x;
+	int					tex_y;
+	double				tile_size_inv;
+	double				beta;
+	t_vector			f;
+	int					start;
+	int					end;
+}						t_floor;
 
 typedef struct s_game
 {
@@ -332,4 +340,4 @@ typedef struct s_g
 	int					prev_index;
 }						t_g;
 
-# endif
+#endif

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 00:48:42 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 15:47:35 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 17:59:04 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ void	jump_player(t_game *game)
 			{
 				g_global()->j_croutch = 0;
 				g_global()->jump = 100;
-				g_global()->updated = false;
 				game->player.key.key_jump = false;
 			}
 		}

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 11:27:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 14:44:52 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 15:59:05 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	load_image(t_game *game, t_image *img, char *path)
 	{
 		free_all(game);
 		ft_putendl_fd("Error", 2);
-		ft_putstr_fd("Failed to load image. Please ", 2);
+		ft_putstr_fd("Failed while loading image. Please ", 2);
 		ft_putendl_fd("check the file path, format, and permissions.", 2);
 		exit(1);
 	}

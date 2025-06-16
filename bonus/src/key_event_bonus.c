@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:16:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:53:52 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 18:43:43 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,6 @@ int	ft_key_press(int keysym, t_game *game)
 		stop_music();
 		exit(0);
 	}
-	g_global()->updated = true;
 	return (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:34:02 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:55:39 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 18:08:31 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ static void	print_notice(t_game *game)
 	if (game->player.key.hide_mouse == true)
 		mlx_string_put(game->var.mlx, game->var.win, 70, 70, 0xFF0000,
 			"mouse activate");
-	if (game->player.key.door_check == true)
-		g_global()->updated = true;
 	mlx_string_put(game->var.mlx, game->var.win, 70, 50, 0,
 		"Press F1 to display the help menu");
 }

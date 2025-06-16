@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 23:28:42 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 15:47:35 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 14:39:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,9 @@ void	move_sprite(t_game *game, int sp_c)
 
 	if (game->sp[sp_c].is_died == false && game->sp[sp_c].was_shot == false)
 	{
-		move = (t_vector){game->sp[sp_c].pos.x - cos(game->sp[sp_c].p) * 0.02,
-			game->sp[sp_c].pos.y - sin(game->sp[sp_c].p) * 0.02};
+		move = (t_vector){game->sp[sp_c].pos.x - cos(game->sp[sp_c].p)
+			* SPRITE_SPEED, game->sp[sp_c].pos.y - sin(game->sp[sp_c].p)
+			* SPRITE_SPEED};
 		if (!check_collision(move, game->player, game->map))
 		{
 			game->sp[sp_c].pos.x = move.x;

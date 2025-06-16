@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 08:38:45 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 15:20:51 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 18:44:36 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ void	wait_music(void)
 		if (res == g_global()->music_pid)
 			g_global()->music_pid = -1;
 	}
-	g_global()->music_pid = -1;
 }
 
 void	launch_music(char const *file, char *vol)
@@ -49,10 +48,10 @@ void	launch_music(char const *file, char *vol)
 	if (pid == -1)
 		return ;
 	else if (pid == 0)
-		execlp("cvlc", "cvlc", "--gain", vol, file, (char *) NULL);
+		execlp("cvlc", "cvlc", "--gain", vol, "--play-and-exit", file,
+			(char *) NULL);
 	else
 		g_global()->music_pid = pid;
-	(void)vol;
 }
 
 void	stop_music(void)
@@ -60,6 +59,7 @@ void	stop_music(void)
 	if (g_global()->music_pid != -1)
 	{
 		kill(g_global()->music_pid, SIGTERM);
+		waitpid(g_global()->music_pid, NULL, 0);
 		g_global()->music_pid = -1;
 	}
 }

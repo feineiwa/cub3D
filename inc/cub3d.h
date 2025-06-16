@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:56:54 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:37:38 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 11:53:11 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ t_g			*g_global(void);
 // load_images
 void		load_image(t_game *game, t_image *img, char *path);
 void		load_all_images(t_game *game);
-
 
 // FREE_UTILS
 void		*ft_free(void *param);

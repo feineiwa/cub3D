@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 17:35:25 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 20:06:25 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 14:43:59 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,20 @@ char	*ft_pad_space(char *map, int w)
 	replace_new_line_space(s);
 	free(map);
 	return (s);
+}
+
+char	*get_path(const char *str, char *id_path)
+{
+	while (white_space(*str))
+		str++;
+	if (*str != *id_path || *(str + 1) != *(id_path + 1))
+		return (NULL);
+	str += 2;
+	if (!white_space(*str))
+		return (NULL);
+	while (white_space(*str))
+		str++;
+	return (ft_strtrim(str, " \t\n"));
 }
 
 void	padding_space(char **map)

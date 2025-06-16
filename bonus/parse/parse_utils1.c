@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 14:22:43 by eralambo          #+#    #+#             */
-/*   Updated: 2025/06/15 20:06:25 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 13:56:39 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int	white_line(char *str)
 int	around_zero(char c)
 {
 	if (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E' || c == 'W'
-		|| c == 'D')
+		|| c == 'D' || c == 's')
 		return (1);
 	return (0);
 }

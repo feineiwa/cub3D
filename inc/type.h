@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:11:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:42:50 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 17:18:33 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,16 @@
 # include "../mlx/mlx.h"
 # include <X11/X.h>
 # include <X11/keysym.h>
+# include <fcntl.h>
 # include <math.h>
 # include <stdbool.h>
 # include <stdlib.h>
-# include <fcntl.h>
 # include <sys/types.h>
 # include <unistd.h>
 
 # define PI 3.14159265359
 # define MOVE_SPEED 0.03
-# define ROT_SPEED 0.04
-# define MOUSE_SPEED 0.0005
+# define ROT_SPEED 0.01
 # define RES 1
 # define TILE_SIZE 32
 # define WIDTH 1600
@@ -38,10 +37,6 @@
 # define FOV 1.0471975512
 # define HALF_FOV 0.523598776
 # define R_NB 1600
-# define MINI_SIZE 20
-# define MINI_WIDTH 180
-
-# define FPS 80
 
 typedef struct s_text	t_text;
 typedef struct s_vector	t_vector;
@@ -76,6 +71,14 @@ typedef enum e_cell
 	p_w = 'W'
 }						t_cell;
 
+typedef struct s_mapping
+{
+	int					top;
+	int					bottom;
+	int					left;
+	int					right;
+}						t_mapping;
+
 struct					s_vect
 {
 	int					x;
@@ -106,7 +109,6 @@ struct					s_text
 	char				*ceiling;
 	char				*floor;
 	t_cell				p;
-	bool				error;
 };
 
 struct					s_image
@@ -204,7 +206,6 @@ typedef struct s_squ
 	double				scale;
 }						t_squ;
 
-
 typedef struct s_game
 {
 	t_player			player;
@@ -236,4 +237,4 @@ typedef struct s_g
 	int					prev_index;
 }						t_g;
 
-# endif
+#endif

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 00:30:14 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:55:13 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 17:59:36 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ void	render_gun_by_frame(t_game *game, size_t *last_update, t_vect g)
 		game->player.key.recharge = false;
 		g_global()->gun_frm = 0;
 		*last_update = 0;
-		g_global()->updated = true;
 	}
 }
 
@@ -60,17 +59,11 @@ void	render_gun(t_game *game, t_r *r)
 	g.x = 800 - 100;
 	g.y = (int)(HEIGHT - 300 - (g_global()->look * 50) - (r->waves * 10));
 	if (game->player.key.recharge == true)
-	{
-		g_global()->updated = true;
 		render_gun_by_frame(game, &last_update, g);
-	}
 	else if (game->player.key.key_jump == false
 		&& game->player.key.scope == false)
-	{
 		paint_image_to_win(&game->img, &game->pack.gun_sp[0], (t_vect){500,
 			500}, g);
-		g_global()->updated = false;
-	}
 }
 
 void	draw_compass(t_game *game)

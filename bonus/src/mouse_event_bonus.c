@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:21:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 15:47:35 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 18:44:00 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,23 +17,20 @@ static void	mouse_key_pressed(int button, t_game *game)
 	if (button == 1)
 	{
 		if (!is_music_playing())
-			launch_music("sounds/gun1.wav", "0.5");
+			launch_music("./sounds/gun1.wav", "0.5");
 		game->player.key.recharge = true;
 		game->player.key.shoot = true;
-		g_global()->updated = true;
 	}
 	if (button == 4)
 	{
 		game->player.key.scope = true;
 		g_global()->zoom += 0.1;
 		g_global()->narrow_look += 100;
-		g_global()->updated = true;
 	}
 	if (button == 5)
 	{
 		g_global()->zoom -= 0.1;
 		g_global()->narrow_look -= 100;
-		g_global()->updated = true;
 	}
 }
 
@@ -49,7 +46,6 @@ int	ft_mouse_pressed(int button, int x, int y, t_game *game)
 		game->player.key.scope = false;
 		g_global()->zoom = 1.0;
 		g_global()->narrow_look = 875;
-		g_global()->updated = true;
 	}
 	if (g_global()->zoom < 1)
 	{
@@ -93,7 +89,6 @@ int	ft_mouse_move(int x, int y, t_game *game)
 			g_global()->look = -0.3;
 		else if (g_global()->look >= 0.3)
 			g_global()->look = 0.3;
-		g_global()->updated = true;
 		mlx_mouse_move(game->var.mlx, game->var.win, HALF_WIDTH, HALF_HEIGHT);
 	}
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:23:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 14:30:50 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 16:17:43 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,4 @@ void	move_player(t_game *game)
 		game->player.angle += game->player.turn_dir * move_speed;
 	move_up_and_down(game, move_speed);
 	move_right_and_left(game, move_speed);
-	game->player.key.rot_l = false;
-	game->player.key.rot_r = false;
 }

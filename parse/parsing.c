@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 00:19:34 by eralambo          #+#    #+#             */
-/*   Updated: 2025/06/15 21:12:25 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 16:36:33 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,22 +110,18 @@ int	parsing(char *av, char ***map, t_text *txt)
 		return (ft_putendl_fd("Error\nEmpty file", 2), 1);
 	if (!parse_input(input, txt, map))
 	{
-		ft_putendl_fd("Error\nPlease check the map", 2);
+		ft_putendl_fd("Error\nPlease check map settings", 2);
 		return (ft_free_parse(input, txt), 1);
 	}
 	ft_free_arr((void **)input);
 	if (!is_validated_color(txt))
 		return (ft_free_parse(*map, txt), 1);
-	if (check_blank_line_map(*map))
-	{
-		ft_putendl_fd("Error\ncheck your map", 2);
-		return (ft_free_parse(*map, txt), 1);
-	}
 	padding_space(*map);
 	if (!validated_map(*map))
 	{
 		ft_putendl_fd("Error\ncheck your map", 2);
 		return (ft_free_parse(*map, txt), 1);
 	}
+	*map = optimisation(*map);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 07:58:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 15:47:35 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 17:59:56 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ void	close_door(t_game *game, t_vector door_hit, t_vector *prev_door,
 		int door_index)
 {
 	game->doors[door_index].door_prog += 0.1;
-	g_global()->updated = true;
 	game->player.key.door_check = true;
 	if (game->doors[door_index].door_prog >= 1.0f)
 	{
@@ -32,7 +31,6 @@ void	close_door(t_game *game, t_vector door_hit, t_vector *prev_door,
 void	open_door(t_game *game, t_vector door_hit, int door_index)
 {
 	game->doors[door_index].door_prog -= 0.1;
-	g_global()->updated = true;
 	if (game->doors[door_index].door_prog <= 0.0f)
 	{
 		game->doors[door_index].door_prog = 0.0f;
@@ -52,7 +50,6 @@ void	close_automatic(t_game *game, t_vector prev_door)
 		&& get_current_time() - g_global()->door_time >= 2000)
 	{
 		game->doors[g_global()->prev_index].door_prog -= 0.1;
-		g_global()->updated = true;
 		if (game->doors[g_global()->prev_index].door_prog <= 0.0f)
 		{
 			game->doors[g_global()->prev_index].door_prog = 0.0f;

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:23:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/13 15:47:35 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 16:19:58 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,8 +98,4 @@ void	move_player(t_game *game)
 	look_up_and_down(game);
 	crouch_player(game);
 	jump_player(game);
-	game->player.key.rot_l = false;
-	game->player.key.rot_r = false;
-	game->player.key.look_up = false;
-	game->player.key.look_down = false;
 }

@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 11:27:41 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 21:24:10 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 15:59:35 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	load_image(t_game *game, t_image *img, char *path)
 	{
 		free_all(game);
 		ft_putendl_fd("Error", 2);
-		ft_putstr_fd("Failed to load image. Please ", 2);
+		ft_putstr_fd("Failed while loading image. Please ", 2);
 		ft_putendl_fd("check the file path, format, and permissions.", 2);
 		exit(1);
 	}
@@ -31,8 +31,8 @@ void	load_pack(t_game *game)
 {
 	load_image(game, &game->pack.arrow, "images/arrow.xpm");
 	load_image(game, &game->pack.aiming, "images/aiming1.xpm");
-	load_image(game, &game->pack.floor, game->txt.ceiling);
-	load_image(game, &game->pack.ceil, game->txt.floor);
+	load_image(game, &game->pack.floor, game->txt.floor);
+	load_image(game, &game->pack.ceil, game->txt.ceiling);
 	load_image(game, &game->pack.door[0], "images/my_door/door.xpm");
 	load_image(game, &game->pack.door[1], "images/my_door/door_side2.xpm");
 	load_image(game, &game->pack.compass, "images/compass2.xpm");

@@ -6,11 +6,21 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 00:19:24 by eralambo          #+#    #+#             */
-/*   Updated: 2025/06/15 14:52:00 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/16 15:50:07 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/parse.h"
+
+int	check_id_path(const char *str, char *id_path)
+{
+	while (white_space(*str))
+		str++;
+	if (*str != *id_path || *(str + 1) != *(id_path + 1) || !white_space(*(str
+				+ 2)))
+		return (0);
+	return (1);
+}
 
 int	check_arguments(int argc, char **argv)
 {
@@ -38,28 +48,14 @@ int	is_validated_color(t_text *txt)
 	if (!(is_valid_rgb_format(txt->ceiling)) || !get_rgb_value(txt->ceiling,
 			&txt->c.r, &txt->c.g, &txt->c.b))
 	{
-		ft_putendl_fd("Error\ncheck color", 2);
+		ft_putendl_fd("Error\ncheck ceiling color", 2);
 		return (0);
 	}
 	if (!(is_valid_rgb_format(txt->floor))
 		|| !get_rgb_value(txt->floor, &txt->f.r, &txt->f.g, &txt->f.b))
 	{
-		ft_putendl_fd("Error\ncheck color", 2);
+		ft_putendl_fd("Error\ncheck floor color", 2);
 		return (0);
 	}
 	return (1);
-}
-
-int	check_blank_line_map(char **map)
-{
-	int	j;
-
-	j = 0;
-	while (map[j])
-	{
-		if (white_line(map[j]))
-			return (1);
-		j++;
-	}
-	return (0);
 }
