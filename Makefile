@@ -77,11 +77,11 @@ $(BONUS) : $(OBJS_BONUS)
 	@[ -f ./disaster_war.txt ] && cat ./disaster_war.txt || true
 
 cmlx:
-	@if [ ! -d "mlx" ]; then \
+	@if [ ! -f "$(LIBMLX)/libmlx.a" ]; then \
 		echo "$(MAGENTA)Cloning mlx repository...$(DEF_COLOR)"; \
 		git clone https://github.com/feineiwa/mlx_without_leaks.git $(LIBMLX); \
 	else \
-		echo "$(BLUE)mlx already exists, skipping clone. Nothing to be done$(DEF_COLOR)"; \
+		echo "$(BLUE)libmlx.a found, skipping clone. Nothing to be done.$(DEF_COLOR)"; \
 	fi
 
 clean:
