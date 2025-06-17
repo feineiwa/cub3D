@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:21:39 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/16 18:44:00 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/17 09:42:00 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@ static void	mouse_key_pressed(int button, t_game *game)
 {
 	if (button == 1)
 	{
-		if (!is_music_playing())
-			launch_music("./sounds/gun1.wav", "0.5");
 		game->player.key.recharge = true;
 		game->player.key.shoot = true;
 	}

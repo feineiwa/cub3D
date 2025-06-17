@@ -6,7 +6,7 @@
 /*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 17:16:53 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/16 18:43:43 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/17 09:43:33 by frahenin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,11 +78,7 @@ static void	key_for_extra(int keysym, t_game *game)
 	if (keysym == XK_space && game->player.key.key_jump == false)
 		game->player.key.key_jump = true;
 	if (keysym == XK_f && game->player.key.door_check == false)
-	{
 		game->player.key.door_check = true;
-		if (!is_music_playing())
-			launch_music("./sounds/sliding.mp3", "0.5");
-	}
 }
 
 int	ft_key_press(int keysym, t_game *game)

@@ -15,7 +15,6 @@ LIBFT = ./libft/
 LIBMLX = ./mlx/
 
 
-
 SRC_PARSE = ./gnl/get_next_line.c ./gnl/get_next_line_utils.c ./parse/parsing.c ./parse/validated_input.c ./parse/ft_free_parsing.c \
 	./parse/validated_map.c  ./parse/parse_utils1.c  ./parse/parse_utils2.c ./parse/validated_color.c ./parse/optimisation.c 
 SRC_FILES = player calcul collision drawing_utils1 drawing_utils2 ft_free_utils \
