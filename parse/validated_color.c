@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   validated_color.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/15 14:43:49 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 15:18:33 by frahenin         ###   ########.fr       */
+/*   Created: 2025/06/15 14:43:49 by eralambo          #+#    #+#             */
+/*   Updated: 2025/06/17 13:21:17 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

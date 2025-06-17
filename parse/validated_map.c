@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   validated_map.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/15 14:38:00 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:49:18 by frahenin         ###   ########.fr       */
+/*   Created: 2025/06/15 14:38:00 by eralambo          #+#    #+#             */
+/*   Updated: 2025/06/17 13:21:30 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

@@ -11,5 +11,6 @@
 		"cub3d_bonus.h": "c",
 		"parse.h": "c",
 		"keysym.h": "c"
-	}
+	},
+	"C_Cpp.errorSquiggles": "disabled"
 }

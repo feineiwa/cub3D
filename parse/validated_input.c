@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   validated_input.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 00:19:24 by eralambo          #+#    #+#             */
-/*   Updated: 2025/06/16 15:50:07 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/17 13:21:23 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

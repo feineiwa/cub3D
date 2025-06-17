@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_free_parsing.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/13 17:24:16 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 20:06:25 by frahenin         ###   ########.fr       */
+/*   Created: 2025/03/13 17:24:16 by eralambo          #+#    #+#             */
+/*   Updated: 2025/06/17 13:22:08 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

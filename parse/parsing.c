@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 00:19:34 by eralambo          #+#    #+#             */
-/*   Updated: 2025/06/16 16:36:33 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/17 13:21:09 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

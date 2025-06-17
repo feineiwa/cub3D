@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_utils1.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 14:22:43 by eralambo          #+#    #+#             */
-/*   Updated: 2025/06/16 13:56:39 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/17 13:22:23 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

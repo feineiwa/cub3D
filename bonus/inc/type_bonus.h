@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   type_bonus.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 22:08:55 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/16 14:40:31 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/17 14:01:12 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 
 # define PI 3.14159265359
 # define MOVE_SPEED 0.04
-# define SPRITE_SPEED 0.01
+# define SPRITE_SPEED 0.02
 # define ROT_SPEED 0.05
 # define MOUSE_SPEED 0.0005
 # define RES 1

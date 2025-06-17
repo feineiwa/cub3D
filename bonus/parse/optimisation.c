@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   optimisation.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/16 14:44:42 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/16 14:56:21 by frahenin         ###   ########.fr       */
+/*   Created: 2025/06/16 14:44:42 by eralambo          #+#    #+#             */
+/*   Updated: 2025/06/17 13:22:18 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
