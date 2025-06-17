@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frahenin <frahenin@student.42antananari    +#+  +:+       +#+        */
+/*   By: eralambo <eralambo@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 13:15:58 by frahenin          #+#    #+#             */
-/*   Updated: 2025/06/15 19:54:12 by frahenin         ###   ########.fr       */
+/*   Updated: 2025/06/17 14:20:17 by eralambo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	init_window(t_game *game)
 	game->var.mlx = mlx_init();
 	if (!game->var.mlx)
 		return (0);
-	game->var.win = mlx_new_window(game->var.mlx, WIDTH, HEIGHT, "Cub3d");
+	game->var.win = mlx_new_window(game->var.mlx, WIDTH, HEIGHT, "Cub3D");
 	if (!game->var.win)
 	{
 		mlx_destroy_display(game->var.mlx);
