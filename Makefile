@@ -1,10 +1,10 @@
-NAME = cub3d
+NAME = cub3D
 
-BONUS = cub3d_bonus
+BONUS = cub3D_bonus
 
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -Wall -Wextra -Werror
 
 INCS = -I./inc/
 
